@@ -70,19 +70,19 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
                 <Menu.Target>
                   <UnstyledButton>
                     <Group gap="xs">
-                      <Avatar size="sm" radius="xl">
+                      <Avatar size="md" radius="xl">
                         {session.user.username[0].toUpperCase()}
                       </Avatar>
-                      <Text size="sm" fw={500}>
-                        {session.user.displayName ?? session.user.username}
-                      </Text>
                       <ChevronDown size={14} />
                     </Group>
                   </UnstyledButton>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Label>
-                    {session.user.username} ({session.user.role})
+                    {session.user.displayName
+                      ? `${session.user.displayName} (${session.user.username})`
+                      : session.user.username}{" "}
+                    — {session.user.role}
                   </Menu.Label>
                   <Divider />
                   <Menu.Item

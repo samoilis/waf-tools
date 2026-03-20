@@ -8,7 +8,7 @@ export interface MxServer {
   id: string;
   name: string;
   host: string;
-  apiKey: string;
+  username: string;
   createdAt: string;
   updatedAt: string;
   _count: { backupTasks: number };

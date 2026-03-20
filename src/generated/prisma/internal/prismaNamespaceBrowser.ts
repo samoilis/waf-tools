@@ -103,8 +103,8 @@ export const MxCredentialScalarFieldEnum = {
   id: 'id',
   name: 'name',
   host: 'host',
-  apiKey: 'apiKey',
-  encryptedPassword: 'encryptedPassword',
+  username: 'username',
+  authorization: 'authorization',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

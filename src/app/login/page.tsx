@@ -75,11 +75,18 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Center mih="100vh" bg="var(--mantine-color-body)">
+    <Center
+      mih="100vh"
+      style={{
+        background: "linear-gradient(135deg, #0d1b33 0%, #1e3a66 50%, #2d4f82 100%)",
+      }}
+    >
       <Box w={400} mx="auto">
         <Stack align="center" mb="lg">
-          <Shield size={48} />
-          <Title order={2}>Imperva WAF Tools</Title>
+          <Shield size={48} color="#fff" />
+          <Title order={2} c="white">
+            Imperva WAF Tools
+          </Title>
         </Stack>
         <Suspense>
           <LoginForm />

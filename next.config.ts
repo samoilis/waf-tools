@@ -5,6 +5,7 @@ const codespaceUrl = process.env.CODESPACE_NAME
   : undefined;
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   allowedDevOrigins: codespaceUrl ? [codespaceUrl] : [],
 };
 

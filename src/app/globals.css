@@ -9,3 +9,56 @@ body {
 [data-mantine-color-scheme="dark"] .dark-hidden {
   display: none;
 }
+
+/* Navy AppShell header & navbar */
+/* [data-mantine-color-scheme="light"] .mantine-AppShell-header {
+  background-color: #1e3a66;
+  border-bottom-color: #2d4f82;
+  color: #fff;
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar {
+  background-color: #1e3a66;
+  border-right-color: #2d4f82;
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar .mantine-NavLink-root {
+  color: rgba(255, 255, 255, 0.8);
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar .mantine-NavLink-root:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar .mantine-NavLink-root[data-active] {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar .mantine-Divider-root {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+[data-mantine-color-scheme="light"] .mantine-AppShell-navbar .mantine-Divider-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-AppShell-header {
+  background-color: #0d1b33;
+  border-bottom-color: #152a4d;
+}
+[data-mantine-color-scheme="dark"] .mantine-AppShell-navbar {
+  background-color: #0d1b33;
+  border-right-color: #152a4d;
+}
+[data-mantine-color-scheme="dark"] .mantine-AppShell-navbar .mantine-NavLink-root {
+  color: rgba(255, 255, 255, 0.7);
+}
+[data-mantine-color-scheme="dark"] .mantine-AppShell-navbar .mantine-NavLink-root:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+[data-mantine-color-scheme="dark"] .mantine-AppShell-navbar .mantine-NavLink-root[data-active] {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Dark theme: main content area — slightly lighter navy than sidebar
+[data-mantine-color-scheme="dark"] .mantine-AppShell-main {
+  background-color: #182337;
+} */

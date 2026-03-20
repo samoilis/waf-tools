@@ -115,7 +115,7 @@ export function MxServersPageClient() {
             <Table.Tr>
               <Table.Th>Name</Table.Th>
               <Table.Th>Host</Table.Th>
-              <Table.Th>API Key</Table.Th>
+              <Table.Th>Username</Table.Th>
               <Table.Th>Backup Tasks</Table.Th>
               <Table.Th>Created</Table.Th>
               {isAdmin && <Table.Th w={100}>Actions</Table.Th>}
@@ -133,8 +133,8 @@ export function MxServersPageClient() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm" c="dimmed">
-                    {server.apiKey.substring(0, 8)}••••
+                  <Text size="sm">
+                    {server.username}
                   </Text>
                 </Table.Td>
                 <Table.Td>

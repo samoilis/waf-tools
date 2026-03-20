@@ -13,7 +13,7 @@ export async function GET() {
       id: true,
       name: true,
       host: true,
-      apiKey: true,
+      username: true,
       createdAt: true,
       updatedAt: true,
       _count: { select: { backupTasks: true } },
@@ -31,27 +31,31 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { name, host, apiKey, password } = body;
+  const { name, host, username, password } = body;
 
-  if (!name || !host || !apiKey || !password) {
+  if (!name || !host || !username || !password) {
     return NextResponse.json(
-      { error: "Name, host, API key, and password are required" },
+      { error: "Name, host, username, and password are required" },
       { status: 400 },
     );
   }
+
+  const authorization = Buffer.from(`${username}:${password}`).toString(
+    "base64",
+  );
 
   const server = await prisma.mxCredential.create({
     data: {
       name,
       host,
-      apiKey,
-      encryptedPassword: password,
+      username,
+      authorization,
     },
     select: {
       id: true,
       name: true,
       host: true,
-      apiKey: true,
+      username: true,
       createdAt: true,
       updatedAt: true,
     },

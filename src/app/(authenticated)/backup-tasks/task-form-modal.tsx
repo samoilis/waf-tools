@@ -44,7 +44,7 @@ const DAYS_OF_WEEK = [
   { value: "0", label: "Sun" },
 ];
 
-type Frequency = "daily" | "weekly" | "monthly";
+type Frequency = "every_n_hours" | "daily" | "weekly" | "monthly";
 
 // ─── Cron helpers ────────────────────────────────────────
 
@@ -52,20 +52,37 @@ function parseCron(cron: string): {
   frequency: Frequency;
   minute: number;
   hour: number;
+  everyNHours: number;
   daysOfWeek: string[];
   daysOfMonth: number[];
 } {
   const parts = cron.split(/\s+/);
   const minute = parseInt(parts[0]) || 0;
-  const hour = parseInt(parts[1]) || 0;
+  const hourField = parts[1] || "0";
   const dom = parts[2] || "*";
   const dow = parts[4] || "*";
+
+  // Detect every-N-hours pattern: "startHour/interval" e.g. "2/4"
+  if (hourField.includes("/")) {
+    const [start, interval] = hourField.split("/");
+    return {
+      frequency: "every_n_hours",
+      minute,
+      hour: parseInt(start) || 0,
+      everyNHours: parseInt(interval) || 2,
+      daysOfWeek: [],
+      daysOfMonth: [],
+    };
+  }
+
+  const hour = parseInt(hourField) || 0;
 
   if (dom !== "*") {
     return {
       frequency: "monthly",
       minute,
       hour,
+      everyNHours: 2,
       daysOfWeek: [],
       daysOfMonth: dom.split(",").map(Number),
     };
@@ -75,11 +92,12 @@ function parseCron(cron: string): {
       frequency: "weekly",
       minute,
       hour,
+      everyNHours: 2,
       daysOfWeek: dow.split(","),
       daysOfMonth: [],
     };
   }
-  return { frequency: "daily", minute, hour, daysOfWeek: [], daysOfMonth: [] };
+  return { frequency: "daily", minute, hour, everyNHours: 2, daysOfWeek: [], daysOfMonth: [] };
 }
 
 function composeCron(
@@ -88,9 +106,13 @@ function composeCron(
   hour: number,
   daysOfWeek: string[],
   daysOfMonth: number[],
+  everyNHours: number,
 ): string {
   const m = String(minute);
   const h = String(hour);
+  if (frequency === "every_n_hours") {
+    return `${m} ${h}/${everyNHours} * * *`;
+  }
   if (frequency === "monthly" && daysOfMonth.length > 0) {
     return `${m} ${h} ${daysOfMonth.join(",")} * *`;
   }
@@ -131,6 +153,7 @@ export function TaskFormModal({
   const [frequency, setFrequency] = useState<Frequency>("daily");
   const [hour, setHour] = useState(2);
   const [minute, setMinute] = useState(0);
+  const [everyNHours, setEveryNHours] = useState(2);
   const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
   const [daysOfMonth, setDaysOfMonth] = useState<number[]>([]);
 
@@ -152,6 +175,7 @@ export function TaskFormModal({
         setFrequency(parsed.frequency);
         setHour(parsed.hour);
         setMinute(parsed.minute);
+        setEveryNHours(parsed.everyNHours);
         setDaysOfWeek(parsed.daysOfWeek);
         setDaysOfMonth(parsed.daysOfMonth);
       } else {
@@ -164,6 +188,7 @@ export function TaskFormModal({
         setFrequency("daily");
         setHour(2);
         setMinute(0);
+        setEveryNHours(2);
         setDaysOfWeek([]);
         setDaysOfMonth([]);
       }
@@ -196,6 +221,7 @@ export function TaskFormModal({
       hour,
       daysOfWeek,
       daysOfMonth,
+      everyNHours,
     );
 
     setLoading(true);
@@ -280,9 +306,30 @@ export function TaskFormModal({
 
                 <Divider />
 
-                <Text fw={500} size="sm">
-                  Backup Entities
-                </Text>
+                <Group gap="md">
+                  <Text fw={500} size="sm">
+                    Backup Entities
+                  </Text>
+                  <Checkbox
+                    label="All"
+                    size="xs"
+                    checked={ENTITY_OPTIONS.every((e) => !!scope[e.key])}
+                    indeterminate={
+                      ENTITY_OPTIONS.some((e) => !!scope[e.key]) &&
+                      !ENTITY_OPTIONS.every((e) => !!scope[e.key])
+                    }
+                    onChange={(event) => {
+                      const checked = event.currentTarget.checked;
+                      setScope((prev) => {
+                        const next = { ...prev };
+                        ENTITY_OPTIONS.forEach((e) => {
+                          next[e.key] = checked;
+                        });
+                        return next;
+                      });
+                    }}
+                  />
+                </Group>
 
                 <Grid gutter="xs">
                   {ENTITY_OPTIONS.map((entity) => (
@@ -310,6 +357,7 @@ export function TaskFormModal({
                   value={frequency}
                   onChange={(v) => v && setFrequency(v as Frequency)}
                   data={[
+                    { value: "every_n_hours", label: "Every N Hours" },
                     { value: "daily", label: "Daily" },
                     { value: "weekly", label: "Weekly" },
                     { value: "monthly", label: "Monthly" },
@@ -317,9 +365,20 @@ export function TaskFormModal({
                   required
                 />
 
+                {frequency === "every_n_hours" && (
+                  <NumberInput
+                    label="Every (hours)"
+                    value={everyNHours}
+                    onChange={(v) => setEveryNHours(typeof v === "number" ? v : 2)}
+                    min={1}
+                    max={12}
+                    clampBehavior="strict"
+                  />
+                )}
+
                 <Group grow>
                   <NumberInput
-                    label="Hour"
+                    label={frequency === "every_n_hours" ? "Start Hour" : "Hour"}
                     value={hour}
                     onChange={(v) => setHour(typeof v === "number" ? v : 0)}
                     min={0}

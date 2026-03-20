@@ -28,8 +28,8 @@ export type MxCredentialMinAggregateOutputType = {
   id: string | null
   name: string | null
   host: string | null
-  apiKey: string | null
-  encryptedPassword: string | null
+  username: string | null
+  authorization: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,8 +38,8 @@ export type MxCredentialMaxAggregateOutputType = {
   id: string | null
   name: string | null
   host: string | null
-  apiKey: string | null
-  encryptedPassword: string | null
+  username: string | null
+  authorization: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -48,8 +48,8 @@ export type MxCredentialCountAggregateOutputType = {
   id: number
   name: number
   host: number
-  apiKey: number
-  encryptedPassword: number
+  username: number
+  authorization: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -60,8 +60,8 @@ export type MxCredentialMinAggregateInputType = {
   id?: true
   name?: true
   host?: true
-  apiKey?: true
-  encryptedPassword?: true
+  username?: true
+  authorization?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,8 +70,8 @@ export type MxCredentialMaxAggregateInputType = {
   id?: true
   name?: true
   host?: true
-  apiKey?: true
-  encryptedPassword?: true
+  username?: true
+  authorization?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -80,8 +80,8 @@ export type MxCredentialCountAggregateInputType = {
   id?: true
   name?: true
   host?: true
-  apiKey?: true
-  encryptedPassword?: true
+  username?: true
+  authorization?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -163,8 +163,8 @@ export type MxCredentialGroupByOutputType = {
   id: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username: string
+  authorization: string
   createdAt: Date
   updatedAt: Date
   _count: MxCredentialCountAggregateOutputType | null
@@ -194,8 +194,8 @@ export type MxCredentialWhereInput = {
   id?: Prisma.StringFilter<"MxCredential"> | string
   name?: Prisma.StringFilter<"MxCredential"> | string
   host?: Prisma.StringFilter<"MxCredential"> | string
-  apiKey?: Prisma.StringFilter<"MxCredential"> | string
-  encryptedPassword?: Prisma.StringFilter<"MxCredential"> | string
+  username?: Prisma.StringFilter<"MxCredential"> | string
+  authorization?: Prisma.StringFilter<"MxCredential"> | string
   createdAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   backupTasks?: Prisma.BackupTaskListRelationFilter
@@ -205,8 +205,8 @@ export type MxCredentialOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   host?: Prisma.SortOrder
-  apiKey?: Prisma.SortOrder
-  encryptedPassword?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  authorization?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   backupTasks?: Prisma.BackupTaskOrderByRelationAggregateInput
@@ -219,8 +219,8 @@ export type MxCredentialWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MxCredentialWhereInput | Prisma.MxCredentialWhereInput[]
   name?: Prisma.StringFilter<"MxCredential"> | string
   host?: Prisma.StringFilter<"MxCredential"> | string
-  apiKey?: Prisma.StringFilter<"MxCredential"> | string
-  encryptedPassword?: Prisma.StringFilter<"MxCredential"> | string
+  username?: Prisma.StringFilter<"MxCredential"> | string
+  authorization?: Prisma.StringFilter<"MxCredential"> | string
   createdAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   backupTasks?: Prisma.BackupTaskListRelationFilter
@@ -230,8 +230,8 @@ export type MxCredentialOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   host?: Prisma.SortOrder
-  apiKey?: Prisma.SortOrder
-  encryptedPassword?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  authorization?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MxCredentialCountOrderByAggregateInput
@@ -246,8 +246,8 @@ export type MxCredentialScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
   name?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
   host?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
-  apiKey?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
-  encryptedPassword?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
+  username?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
+  authorization?: Prisma.StringWithAggregatesFilter<"MxCredential"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MxCredential"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MxCredential"> | Date | string
 }
@@ -256,8 +256,8 @@ export type MxCredentialCreateInput = {
   id?: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username?: string
+  authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   backupTasks?: Prisma.BackupTaskCreateNestedManyWithoutMxInput
@@ -267,8 +267,8 @@ export type MxCredentialUncheckedCreateInput = {
   id?: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username?: string
+  authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   backupTasks?: Prisma.BackupTaskUncheckedCreateNestedManyWithoutMxInput
@@ -278,8 +278,8 @@ export type MxCredentialUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   backupTasks?: Prisma.BackupTaskUpdateManyWithoutMxNestedInput
@@ -289,8 +289,8 @@ export type MxCredentialUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   backupTasks?: Prisma.BackupTaskUncheckedUpdateManyWithoutMxNestedInput
@@ -300,8 +300,8 @@ export type MxCredentialCreateManyInput = {
   id?: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username?: string
+  authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -310,8 +310,8 @@ export type MxCredentialUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -320,8 +320,8 @@ export type MxCredentialUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,8 +330,8 @@ export type MxCredentialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   host?: Prisma.SortOrder
-  apiKey?: Prisma.SortOrder
-  encryptedPassword?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  authorization?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -340,8 +340,8 @@ export type MxCredentialMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   host?: Prisma.SortOrder
-  apiKey?: Prisma.SortOrder
-  encryptedPassword?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  authorization?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -350,8 +350,8 @@ export type MxCredentialMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   host?: Prisma.SortOrder
-  apiKey?: Prisma.SortOrder
-  encryptedPassword?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  authorization?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -379,8 +379,8 @@ export type MxCredentialCreateWithoutBackupTasksInput = {
   id?: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username?: string
+  authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -389,8 +389,8 @@ export type MxCredentialUncheckedCreateWithoutBackupTasksInput = {
   id?: string
   name: string
   host: string
-  apiKey: string
-  encryptedPassword: string
+  username?: string
+  authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -415,8 +415,8 @@ export type MxCredentialUpdateWithoutBackupTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -425,8 +425,8 @@ export type MxCredentialUncheckedUpdateWithoutBackupTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   host?: Prisma.StringFieldUpdateOperationsInput | string
-  apiKey?: Prisma.StringFieldUpdateOperationsInput | string
-  encryptedPassword?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -466,8 +466,8 @@ export type MxCredentialSelect<ExtArgs extends runtime.Types.Extensions.Internal
   id?: boolean
   name?: boolean
   host?: boolean
-  apiKey?: boolean
-  encryptedPassword?: boolean
+  username?: boolean
+  authorization?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   backupTasks?: boolean | Prisma.MxCredential$backupTasksArgs<ExtArgs>
@@ -478,8 +478,8 @@ export type MxCredentialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   name?: boolean
   host?: boolean
-  apiKey?: boolean
-  encryptedPassword?: boolean
+  username?: boolean
+  authorization?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["mxCredential"]>
@@ -488,8 +488,8 @@ export type MxCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   name?: boolean
   host?: boolean
-  apiKey?: boolean
-  encryptedPassword?: boolean
+  username?: boolean
+  authorization?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["mxCredential"]>
@@ -498,13 +498,13 @@ export type MxCredentialSelectScalar = {
   id?: boolean
   name?: boolean
   host?: boolean
-  apiKey?: boolean
-  encryptedPassword?: boolean
+  username?: boolean
+  authorization?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MxCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "host" | "apiKey" | "encryptedPassword" | "createdAt" | "updatedAt", ExtArgs["result"]["mxCredential"]>
+export type MxCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "host" | "username" | "authorization" | "createdAt" | "updatedAt", ExtArgs["result"]["mxCredential"]>
 export type MxCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   backupTasks?: boolean | Prisma.MxCredential$backupTasksArgs<ExtArgs>
   _count?: boolean | Prisma.MxCredentialCountOutputTypeDefaultArgs<ExtArgs>
@@ -521,8 +521,8 @@ export type $MxCredentialPayload<ExtArgs extends runtime.Types.Extensions.Intern
     id: string
     name: string
     host: string
-    apiKey: string
-    encryptedPassword: string
+    username: string
+    authorization: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["mxCredential"]>
@@ -952,8 +952,8 @@ export interface MxCredentialFieldRefs {
   readonly id: Prisma.FieldRef<"MxCredential", 'String'>
   readonly name: Prisma.FieldRef<"MxCredential", 'String'>
   readonly host: Prisma.FieldRef<"MxCredential", 'String'>
-  readonly apiKey: Prisma.FieldRef<"MxCredential", 'String'>
-  readonly encryptedPassword: Prisma.FieldRef<"MxCredential", 'String'>
+  readonly username: Prisma.FieldRef<"MxCredential", 'String'>
+  readonly authorization: Prisma.FieldRef<"MxCredential", 'String'>
   readonly createdAt: Prisma.FieldRef<"MxCredential", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"MxCredential", 'DateTime'>
 }

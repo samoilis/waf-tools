@@ -13,7 +13,7 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const { name, host, apiKey, password } = body;
+  const { name, host, username, password } = body;
 
   const existing = await prisma.mxCredential.findUnique({ where: { id } });
   if (!existing) {
@@ -23,8 +23,15 @@ export async function PUT(
   const data: Record<string, unknown> = {};
   if (name) data.name = name;
   if (host) data.host = host;
-  if (apiKey) data.apiKey = apiKey;
-  if (password) data.encryptedPassword = password;
+  if (username) data.username = username;
+
+  // Recompute authorization only when password is provided
+  if (password) {
+    const finalUsername = username || existing.username;
+    data.authorization = Buffer.from(`${finalUsername}:${password}`).toString(
+      "base64",
+    );
+  }
 
   const server = await prisma.mxCredential.update({
     where: { id },
@@ -33,7 +40,7 @@ export async function PUT(
       id: true,
       name: true,
       host: true,
-      apiKey: true,
+      username: true,
       createdAt: true,
       updatedAt: true,
     },

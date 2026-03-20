@@ -41,6 +41,12 @@ const DOW_LABELS: Record<string, string> = {
 
 function humanSchedule(cron: string): string {
   const [min, hr, dom, , dow] = cron.split(/\s+/);
+  // Detect every-N-hours pattern: "start/interval"
+  if (hr.includes("/")) {
+    const [start, interval] = hr.split("/");
+    const time = `${start.padStart(2, "0")}:${min.padStart(2, "0")}`;
+    return `Every ${interval}h starting at ${time}`;
+  }
   const time = `${hr.padStart(2, "0")}:${min.padStart(2, "0")}`;
   if (dom !== "*") return `Monthly (${dom}) at ${time}`;
   if (dow !== "*") {

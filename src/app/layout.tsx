@@ -3,6 +3,7 @@ import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { theme } from "@/theme";
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -27,7 +28,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body suppressHydrationWarning>
-        <MantineProvider defaultColorScheme="auto">
+        <MantineProvider theme={theme} defaultColorScheme="auto">
           <Notifications />
           <AuthProvider>
             <QueryProvider>{children}</QueryProvider>

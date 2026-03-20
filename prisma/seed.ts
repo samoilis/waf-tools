@@ -35,6 +35,23 @@ async function main() {
     "reg.companyName": "",
     "reg.licenseExpiry": "",
     "reg.licenseKey": "",
+    // Notifications
+    "notify.email.taskFail": "[]",
+    "notify.email.certExpiry": "[]",
+    "notify.syslog.severity": "warning",
+    // SMTP
+    "smtp.host": "",
+    "smtp.port": "587",
+    "smtp.username": "",
+    "smtp.password": "",
+    "smtp.fromAddress": "",
+    "smtp.fromName": "Imperva WAF Tools",
+    "smtp.tls": "true",
+    // Syslog
+    "syslog.host": "",
+    "syslog.port": "514",
+    "syslog.protocol": "udp",
+    "syslog.facility": "local0",
     // LDAP
     "auth.ldap.enabled": "false",
     "auth.ldap.host": "",
