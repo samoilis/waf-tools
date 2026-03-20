@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth & Users ────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+enum AuthProvider {
+  LOCAL
+  LDAP
+  RADIUS
+  TACACS
+}
+
+model User {
+  id           String       @id @default(cuid())
+  username     String       @unique
+  password     String?      // bcrypt hash — null for external auth users
+  displayName  String?
+  role         UserRole     @default(VIEWER)
+  authProvider AuthProvider @default(LOCAL)
+  isSystem     Boolean      @default(false) // true = cannot be deleted (default admin)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+// ─── Application Settings ───────────────────────────────
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique // e.g. "ldap.host", "radius.host", "tacacs.host"
+  value String         // encrypted where needed
+}
+
+// ─── Imperva MX Credentials ─────────────────────────────
+
+model MxCredential {
+  id                String   @id @default(cuid())
+  name              String
+  host              String
+  apiKey            String
+  encryptedPassword String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  backupTasks BackupTask[]
+}
+
+// ─── Backup Task Definition ─────────────────────────────
+
+enum BackupTaskStatus {
+  ACTIVE
+  PAUSED
+}
+
+model BackupTask {
+  id             String           @id @default(cuid())
+  name           String
+  mxId           String
+  scope          Json
+  cronExpression String           @default("0 2 * * *")
+  status         BackupTaskStatus @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  mx         MxCredential   @relation(fields: [mxId], references: [id], onDelete: Cascade)
+  executions ExecutionLog[]
+
+  @@index([mxId])
+}
+
+// ─── Execution Log ──────────────────────────────────────
+
+enum ExecutionStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model ExecutionLog {
+  id           String          @id @default(cuid())
+  taskId       String
+  status       ExecutionStatus @default(RUNNING)
+  errorMessage String?
+  startedAt    DateTime        @default(now())
+  finishedAt   DateTime?
+
+  task      BackupTask       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  snapshots BackupSnapshot[]
+
+  @@index([taskId])
+  @@index([startedAt])
+}
+
+// ─── Backup Snapshot (DB-only storage) ──────────────────
+
+model BackupSnapshot {
+  id          String   @id @default(cuid())
+  executionId String
+  entityType  String   // e.g. "site", "server_group", "ip_dictionary", "web_profile"
+  entityId    String   // Imperva entity ID
+  entityName  String
+  data        Json     // full exported config as JSONB
+  createdAt   DateTime @default(now())
+
+  execution ExecutionLog @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+  @@index([entityType, entityId])
+}

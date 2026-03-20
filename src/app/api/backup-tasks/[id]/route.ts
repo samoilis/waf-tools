@@ -1,0 +1,78 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const body = await request.json();
+  const { name, mxId, scope, cronExpression, status } = body;
+
+  const existing = await prisma.backupTask.findUnique({ where: { id } });
+  if (!existing) {
+    return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  }
+
+  if (mxId) {
+    const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
+    if (!mx) {
+      return NextResponse.json(
+        { error: "MX server not found" },
+        { status: 404 },
+      );
+    }
+  }
+
+  const data: Record<string, unknown> = {};
+  if (name) data.name = name;
+  if (mxId) data.mxId = mxId;
+  if (scope !== undefined) data.scope = scope;
+  if (cronExpression) data.cronExpression = cronExpression;
+  if (status) data.status = status;
+
+  const task = await prisma.backupTask.update({
+    where: { id },
+    data,
+    select: {
+      id: true,
+      name: true,
+      mxId: true,
+      scope: true,
+      cronExpression: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      mx: { select: { id: true, name: true, host: true } },
+    },
+  });
+
+  return NextResponse.json(task);
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  const task = await prisma.backupTask.findUnique({ where: { id } });
+  if (!task) {
+    return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  }
+
+  await prisma.backupTask.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}

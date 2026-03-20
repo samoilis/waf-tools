@@ -1,0 +1,16 @@
+{
+	"servers": {
+		"prisma": {
+			"command": "pnpm",
+			"args": [
+				"prisma",
+				"mcp"
+			],
+			"type": "stdio"
+		},
+		"mantine-docs": {
+			"type": "http",
+			"url": "https://mantinedev.gitmcp.io/mantine"
+		}
+	}
+}
