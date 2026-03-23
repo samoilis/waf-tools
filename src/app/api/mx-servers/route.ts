@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit";
 
 export async function GET() {
   const session = await auth();
@@ -59,6 +60,14 @@ export async function POST(request: NextRequest) {
       createdAt: true,
       updatedAt: true,
     },
+  });
+
+  await createAuditLog({
+    userId: session.user.id,
+    username: session.user.username,
+    action: "CREATE_MX",
+    target: `MxCredential:${server.name}`,
+    details: { host },
   });
 
   return NextResponse.json(server, { status: 201 });

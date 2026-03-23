@@ -31,6 +31,9 @@ model User {
   isSystem     Boolean      @default(false) // true = cannot be deleted (default admin)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+
+  configSnapshots ConfigSnapshot[]
+  auditLogs       AuditLog[]
 }
 
 // ─── Application Settings ───────────────────────────────
@@ -52,7 +55,8 @@ model MxCredential {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  backupTasks BackupTask[]
+  backupTasks     BackupTask[]
+  configSnapshots ConfigSnapshot[]
 }
 
 // ─── Backup Task Definition ─────────────────────────────
@@ -116,4 +120,57 @@ model BackupSnapshot {
 
   @@index([executionId])
   @@index([entityType, entityId])
+}
+
+// ─── Config Snapshot (user-created modified copies) ─────
+
+model ConfigSnapshot {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  mxId        String
+  basedOnExec String?  // execution this snapshot was derived from
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  mx        MxCredential       @relation(fields: [mxId], references: [id], onDelete: Cascade)
+  createdBy User               @relation(fields: [createdById], references: [id])
+  items     ConfigSnapshotItem[]
+
+  @@index([mxId])
+  @@index([createdById])
+}
+
+model ConfigSnapshotItem {
+  id         String @id @default(cuid())
+  snapshotId String
+  entityType String  // e.g. "site", "ip_group", "web_profile"
+  entityId   String
+  entityName String
+  data       Json    // modified config data as JSONB
+
+  snapshot ConfigSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@index([snapshotId])
+  @@index([entityType, entityId])
+}
+
+// ─── Audit Log ──────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  username   String   // denormalized so logs survive user deletion
+  action     String   // e.g. "LOGIN", "CREATE_USER", "DELETE_MX", "UPDATE_SETTING"
+  target     String?  // e.g. "User:admin", "MxCredential:abc123"
+  details    Json?    // optional extra context
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

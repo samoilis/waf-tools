@@ -4,6 +4,8 @@ import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+// ─── Types ───────────────────────────────────────────────
+
 export interface MxSummary {
   id: string;
   name: string;
@@ -11,61 +13,109 @@ export interface MxSummary {
   totalSnapshots: number;
 }
 
-export interface EntityTypeSummary {
-  entityType: string;
+export interface ExecutionSummary {
+  id: string;
+  taskName: string;
+  startedAt: string;
+  finishedAt: string | null;
   snapshotCount: number;
-  entityCount: number;
 }
 
-export interface EntitySummary {
+export interface TreeEntity {
   entityId: string;
   entityName: string;
-  versionCount: number;
-  latestAt: string | null;
-  oldestAt: string | null;
 }
 
-export interface SnapshotVersion {
+export type TreeData = Record<string, TreeEntity[]>;
+
+export interface EntitySnapshot {
   id: string;
   entityName: string;
+  entityType: string;
+  entityId: string;
   data: Record<string, unknown>;
   createdAt: string;
-  execution: {
-    id: string;
-    startedAt: string;
-    task: { name: string };
-  };
 }
 
-export function useMxSummaries() {
-  return useSWR<MxSummary[]>("/api/snapshots", fetcher);
+// ─── Hooks ───────────────────────────────────────────────
+
+export function useMxServers() {
+  return useSWR<MxSummary[]>("/api/snapshots?view=servers", fetcher);
 }
 
-export function useEntityTypes(mxId: string | null) {
-  return useSWR<EntityTypeSummary[]>(
-    mxId ? `/api/snapshots?mxId=${mxId}` : null,
+export function useExecutions(mxId: string | null) {
+  return useSWR<ExecutionSummary[]>(
+    mxId ? `/api/snapshots?view=executions&mxId=${mxId}` : null,
     fetcher,
   );
 }
 
-export function useEntities(mxId: string | null, entityType: string | null) {
-  return useSWR<EntitySummary[]>(
-    mxId && entityType
-      ? `/api/snapshots?mxId=${mxId}&entityType=${entityType}`
+export function useTreeData(mxId: string | null, executionId: string | null) {
+  return useSWR<TreeData>(
+    mxId && executionId
+      ? `/api/snapshots?view=tree&mxId=${mxId}&executionId=${executionId}`
       : null,
     fetcher,
   );
 }
 
-export function useSnapshotVersions(
+export function useEntityData(
   mxId: string | null,
+  executionId: string | null,
   entityType: string | null,
   entityId: string | null,
 ) {
-  return useSWR<SnapshotVersion[]>(
-    mxId && entityType && entityId
-      ? `/api/snapshots/${encodeURIComponent(entityId)}?mxId=${mxId}&entityType=${entityType}`
+  return useSWR<EntitySnapshot>(
+    mxId && executionId && entityType && entityId
+      ? `/api/snapshots?view=entity&mxId=${mxId}&executionId=${executionId}&entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}`
       : null,
+    fetcher,
+  );
+}
+
+export function useAllEntityData(
+  mxId: string | null,
+  executionId: string | null,
+) {
+  return useSWR<EntitySnapshot[]>(
+    mxId && executionId
+      ? `/api/snapshots?view=allEntities&mxId=${mxId}&executionId=${executionId}`
+      : null,
+    fetcher,
+  );
+}
+
+// ─── Config Snapshot hooks (for viewing saved snapshots in Explorer) ─
+
+export interface ConfigSnapshotOption {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  _count: { items: number };
+}
+
+export interface ConfigSnapshotDetail {
+  id: string;
+  name: string;
+  items: {
+    entityType: string;
+    entityId: string;
+    entityName: string;
+    data: Record<string, unknown>;
+  }[];
+}
+
+export function useConfigSnapshotsForMx(mxId: string | null) {
+  return useSWR<ConfigSnapshotOption[]>(
+    mxId ? `/api/config-snapshots?mxId=${mxId}` : null,
+    fetcher,
+  );
+}
+
+export function useConfigSnapshotDetail(id: string | null) {
+  return useSWR<ConfigSnapshotDetail>(
+    id ? `/api/config-snapshots/${id}` : null,
     fetcher,
   );
 }

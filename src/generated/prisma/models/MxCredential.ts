@@ -199,6 +199,7 @@ export type MxCredentialWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   backupTasks?: Prisma.BackupTaskListRelationFilter
+  configSnapshots?: Prisma.ConfigSnapshotListRelationFilter
 }
 
 export type MxCredentialOrderByWithRelationInput = {
@@ -210,6 +211,7 @@ export type MxCredentialOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   backupTasks?: Prisma.BackupTaskOrderByRelationAggregateInput
+  configSnapshots?: Prisma.ConfigSnapshotOrderByRelationAggregateInput
 }
 
 export type MxCredentialWhereUniqueInput = Prisma.AtLeast<{
@@ -224,6 +226,7 @@ export type MxCredentialWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MxCredential"> | Date | string
   backupTasks?: Prisma.BackupTaskListRelationFilter
+  configSnapshots?: Prisma.ConfigSnapshotListRelationFilter
 }, "id">
 
 export type MxCredentialOrderByWithAggregationInput = {
@@ -261,6 +264,7 @@ export type MxCredentialCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   backupTasks?: Prisma.BackupTaskCreateNestedManyWithoutMxInput
+  configSnapshots?: Prisma.ConfigSnapshotCreateNestedManyWithoutMxInput
 }
 
 export type MxCredentialUncheckedCreateInput = {
@@ -272,6 +276,7 @@ export type MxCredentialUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   backupTasks?: Prisma.BackupTaskUncheckedCreateNestedManyWithoutMxInput
+  configSnapshots?: Prisma.ConfigSnapshotUncheckedCreateNestedManyWithoutMxInput
 }
 
 export type MxCredentialUpdateInput = {
@@ -283,6 +288,7 @@ export type MxCredentialUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   backupTasks?: Prisma.BackupTaskUpdateManyWithoutMxNestedInput
+  configSnapshots?: Prisma.ConfigSnapshotUpdateManyWithoutMxNestedInput
 }
 
 export type MxCredentialUncheckedUpdateInput = {
@@ -294,6 +300,7 @@ export type MxCredentialUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   backupTasks?: Prisma.BackupTaskUncheckedUpdateManyWithoutMxNestedInput
+  configSnapshots?: Prisma.ConfigSnapshotUncheckedUpdateManyWithoutMxNestedInput
 }
 
 export type MxCredentialCreateManyInput = {
@@ -375,6 +382,20 @@ export type MxCredentialUpdateOneRequiredWithoutBackupTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MxCredentialUpdateToOneWithWhereWithoutBackupTasksInput, Prisma.MxCredentialUpdateWithoutBackupTasksInput>, Prisma.MxCredentialUncheckedUpdateWithoutBackupTasksInput>
 }
 
+export type MxCredentialCreateNestedOneWithoutConfigSnapshotsInput = {
+  create?: Prisma.XOR<Prisma.MxCredentialCreateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedCreateWithoutConfigSnapshotsInput>
+  connectOrCreate?: Prisma.MxCredentialCreateOrConnectWithoutConfigSnapshotsInput
+  connect?: Prisma.MxCredentialWhereUniqueInput
+}
+
+export type MxCredentialUpdateOneRequiredWithoutConfigSnapshotsNestedInput = {
+  create?: Prisma.XOR<Prisma.MxCredentialCreateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedCreateWithoutConfigSnapshotsInput>
+  connectOrCreate?: Prisma.MxCredentialCreateOrConnectWithoutConfigSnapshotsInput
+  upsert?: Prisma.MxCredentialUpsertWithoutConfigSnapshotsInput
+  connect?: Prisma.MxCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MxCredentialUpdateToOneWithWhereWithoutConfigSnapshotsInput, Prisma.MxCredentialUpdateWithoutConfigSnapshotsInput>, Prisma.MxCredentialUncheckedUpdateWithoutConfigSnapshotsInput>
+}
+
 export type MxCredentialCreateWithoutBackupTasksInput = {
   id?: string
   name: string
@@ -383,6 +404,7 @@ export type MxCredentialCreateWithoutBackupTasksInput = {
   authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  configSnapshots?: Prisma.ConfigSnapshotCreateNestedManyWithoutMxInput
 }
 
 export type MxCredentialUncheckedCreateWithoutBackupTasksInput = {
@@ -393,6 +415,7 @@ export type MxCredentialUncheckedCreateWithoutBackupTasksInput = {
   authorization?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  configSnapshots?: Prisma.ConfigSnapshotUncheckedCreateNestedManyWithoutMxInput
 }
 
 export type MxCredentialCreateOrConnectWithoutBackupTasksInput = {
@@ -419,6 +442,7 @@ export type MxCredentialUpdateWithoutBackupTasksInput = {
   authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  configSnapshots?: Prisma.ConfigSnapshotUpdateManyWithoutMxNestedInput
 }
 
 export type MxCredentialUncheckedUpdateWithoutBackupTasksInput = {
@@ -429,6 +453,67 @@ export type MxCredentialUncheckedUpdateWithoutBackupTasksInput = {
   authorization?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  configSnapshots?: Prisma.ConfigSnapshotUncheckedUpdateManyWithoutMxNestedInput
+}
+
+export type MxCredentialCreateWithoutConfigSnapshotsInput = {
+  id?: string
+  name: string
+  host: string
+  username?: string
+  authorization?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  backupTasks?: Prisma.BackupTaskCreateNestedManyWithoutMxInput
+}
+
+export type MxCredentialUncheckedCreateWithoutConfigSnapshotsInput = {
+  id?: string
+  name: string
+  host: string
+  username?: string
+  authorization?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  backupTasks?: Prisma.BackupTaskUncheckedCreateNestedManyWithoutMxInput
+}
+
+export type MxCredentialCreateOrConnectWithoutConfigSnapshotsInput = {
+  where: Prisma.MxCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MxCredentialCreateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedCreateWithoutConfigSnapshotsInput>
+}
+
+export type MxCredentialUpsertWithoutConfigSnapshotsInput = {
+  update: Prisma.XOR<Prisma.MxCredentialUpdateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedUpdateWithoutConfigSnapshotsInput>
+  create: Prisma.XOR<Prisma.MxCredentialCreateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedCreateWithoutConfigSnapshotsInput>
+  where?: Prisma.MxCredentialWhereInput
+}
+
+export type MxCredentialUpdateToOneWithWhereWithoutConfigSnapshotsInput = {
+  where?: Prisma.MxCredentialWhereInput
+  data: Prisma.XOR<Prisma.MxCredentialUpdateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedUpdateWithoutConfigSnapshotsInput>
+}
+
+export type MxCredentialUpdateWithoutConfigSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  backupTasks?: Prisma.BackupTaskUpdateManyWithoutMxNestedInput
+}
+
+export type MxCredentialUncheckedUpdateWithoutConfigSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  host?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  authorization?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  backupTasks?: Prisma.BackupTaskUncheckedUpdateManyWithoutMxNestedInput
 }
 
 
@@ -438,10 +523,12 @@ export type MxCredentialUncheckedUpdateWithoutBackupTasksInput = {
 
 export type MxCredentialCountOutputType = {
   backupTasks: number
+  configSnapshots: number
 }
 
 export type MxCredentialCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   backupTasks?: boolean | MxCredentialCountOutputTypeCountBackupTasksArgs
+  configSnapshots?: boolean | MxCredentialCountOutputTypeCountConfigSnapshotsArgs
 }
 
 /**
@@ -461,6 +548,13 @@ export type MxCredentialCountOutputTypeCountBackupTasksArgs<ExtArgs extends runt
   where?: Prisma.BackupTaskWhereInput
 }
 
+/**
+ * MxCredentialCountOutputType without action
+ */
+export type MxCredentialCountOutputTypeCountConfigSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConfigSnapshotWhereInput
+}
+
 
 export type MxCredentialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -471,6 +565,7 @@ export type MxCredentialSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   backupTasks?: boolean | Prisma.MxCredential$backupTasksArgs<ExtArgs>
+  configSnapshots?: boolean | Prisma.MxCredential$configSnapshotsArgs<ExtArgs>
   _count?: boolean | Prisma.MxCredentialCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mxCredential"]>
 
@@ -507,6 +602,7 @@ export type MxCredentialSelectScalar = {
 export type MxCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "host" | "username" | "authorization" | "createdAt" | "updatedAt", ExtArgs["result"]["mxCredential"]>
 export type MxCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   backupTasks?: boolean | Prisma.MxCredential$backupTasksArgs<ExtArgs>
+  configSnapshots?: boolean | Prisma.MxCredential$configSnapshotsArgs<ExtArgs>
   _count?: boolean | Prisma.MxCredentialCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MxCredentialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -516,6 +612,7 @@ export type $MxCredentialPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "MxCredential"
   objects: {
     backupTasks: Prisma.$BackupTaskPayload<ExtArgs>[]
+    configSnapshots: Prisma.$ConfigSnapshotPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -920,6 +1017,7 @@ readonly fields: MxCredentialFieldRefs;
 export interface Prisma__MxCredentialClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   backupTasks<T extends Prisma.MxCredential$backupTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MxCredential$backupTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BackupTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  configSnapshots<T extends Prisma.MxCredential$configSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MxCredential$configSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConfigSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1370,6 +1468,30 @@ export type MxCredential$backupTasksArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.BackupTaskScalarFieldEnum | Prisma.BackupTaskScalarFieldEnum[]
+}
+
+/**
+ * MxCredential.configSnapshots
+ */
+export type MxCredential$configSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConfigSnapshot
+   */
+  select?: Prisma.ConfigSnapshotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConfigSnapshot
+   */
+  omit?: Prisma.ConfigSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConfigSnapshotInclude<ExtArgs> | null
+  where?: Prisma.ConfigSnapshotWhereInput
+  orderBy?: Prisma.ConfigSnapshotOrderByWithRelationInput | Prisma.ConfigSnapshotOrderByWithRelationInput[]
+  cursor?: Prisma.ConfigSnapshotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConfigSnapshotScalarFieldEnum | Prisma.ConfigSnapshotScalarFieldEnum[]
 }
 
 /**

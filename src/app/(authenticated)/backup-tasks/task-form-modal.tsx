@@ -20,7 +20,7 @@ import { AlertCircle } from "lucide-react";
 import type { BackupTask } from "./use-backup-tasks";
 import { useMxServers } from "../mx-servers/use-mx-servers";
 
-// ─── Entity types for Imperva WAF ────────────────────────
+// ─── Entity types for Imperva Backup ─────────────────────
 const ENTITY_OPTIONS = [
   { key: "sites", label: "Sites" },
   { key: "server_groups", label: "Server Groups" },

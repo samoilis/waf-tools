@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit";
 
 export async function GET() {
   const session = await auth();
@@ -34,6 +35,13 @@ export async function PUT(request: NextRequest) {
   );
 
   await prisma.$transaction(ops);
+
+  await createAuditLog({
+    userId: session.user.id,
+    username: session.user.username,
+    action: "UPDATE_SETTING",
+    details: { keys: Object.keys(body) },
+  });
 
   return NextResponse.json({ ok: true });
 }

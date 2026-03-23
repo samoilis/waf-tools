@@ -21,7 +21,9 @@ import {
   Database,
   FileText,
   FolderSearch,
+  Camera,
   Users,
+  ScrollText,
   LogOut,
   ChevronDown,
 } from "lucide-react";
@@ -32,11 +34,13 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const navLinks = [
   { label: "Dashboard", href: "/", icon: Home },
-  { label: "MX Servers", href: "/mx-servers", icon: Database },
-  { label: "Backup Tasks", href: "/backup-tasks", icon: FileText },
-  { label: "Backup Explorer", href: "/backup-explorer", icon: FolderSearch },
-  { label: "Users", href: "/users", icon: Users, adminOnly: true },
-  { label: "Settings", href: "/settings", icon: Settings, adminOnly: true },
+  { label: "Backup Explorer", href: "/backup-explorer", icon: FolderSearch, section: "Manage" },
+  { label: "Config Snapshots", href: "/config-snapshots", icon: Camera, section: "Manage" },
+  { label: "MX Servers", href: "/mx-servers", icon: Database, section: "Setup" },
+  { label: "Backup Tasks", href: "/backup-tasks", icon: FileText, section: "Setup" },
+  { label: "Users", href: "/users", icon: Users, adminOnly: true, section: "Administration" },
+  { label: "Settings", href: "/settings", icon: Settings, adminOnly: true, section: "Administration" },
+  { label: "Audit Logs", href: "/audit-logs", icon: ScrollText, adminOnly: true, section: "Administration" },
 ];
 
 export function AppShellLayout({ children }: { children: React.ReactNode }) {
@@ -61,7 +65,7 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Shield size={28} />
-            <Title order={3}>Imperva WAF Tools</Title>
+            <Title order={3}>Imperva Backup</Title>
           </Group>
           <Group>
             <ThemeToggle />
@@ -102,10 +106,10 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
         <AppShell.Section grow component={ScrollArea}>
           {visibleLinks.map((link, index) => {
             const prevLink = visibleLinks[index - 1];
-            const showDivider = link.adminOnly && prevLink && !prevLink.adminOnly;
+            const showDivider = link.section && link.section !== prevLink?.section;
             return (
               <div key={link.href}>
-                {showDivider && <Divider my="xs" label="Administration" labelPosition="left" />}
+                {showDivider && <Divider my="xs" label={link.section} labelPosition="left" />}
                 <NavLink
                   component={Link}
                   href={link.href}
@@ -119,6 +123,12 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
               </div>
             );
           })}
+        </AppShell.Section>
+        <AppShell.Section>
+          <Divider my="xs" />
+          <Text size="xs" c="dimmed" ta="center" py="xs">
+            &copy; 2026 Odyssey Consultants SA
+          </Text>
         </AppShell.Section>
       </AppShell.Navbar>
 

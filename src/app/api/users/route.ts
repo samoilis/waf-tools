@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { hash } from "bcryptjs";
+import { createAuditLog } from "@/lib/audit";
 
 export async function GET() {
   const session = await auth();
@@ -78,6 +79,14 @@ export async function POST(request: NextRequest) {
       createdAt: true,
       updatedAt: true,
     },
+  });
+
+  await createAuditLog({
+    userId: session.user.id,
+    username: session.user.username,
+    action: "CREATE_USER",
+    target: `User:${user.username}`,
+    details: { role, authProvider },
   });
 
   return NextResponse.json(user, { status: 201 });

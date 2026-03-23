@@ -6,12 +6,12 @@ services:
     environment:
       POSTGRES_USER: imperva
       POSTGRES_PASSWORD: imperva
-      POSTGRES_DB: imperva_waf
+      POSTGRES_DB: imperva_backup
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U imperva -d imperva_waf"]
+      test: ["CMD-SHELL", "pg_isready -U imperva -d imperva_backup"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -26,7 +26,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://imperva:imperva@db:5432/imperva_waf
+      - DATABASE_URL=postgresql://imperva:imperva@db:5432/imperva_backup
     restart: unless-stopped
     depends_on:
       db:
@@ -40,7 +40,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://imperva:imperva@db:5432/imperva_waf
+      - DATABASE_URL=postgresql://imperva:imperva@db:5432/imperva_backup
     restart: unless-stopped
     depends_on:
       db:

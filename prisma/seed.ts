@@ -45,7 +45,7 @@ async function main() {
     "smtp.username": "",
     "smtp.password": "",
     "smtp.fromAddress": "",
-    "smtp.fromName": "Imperva WAF Tools",
+    "smtp.fromName": "Imperva Backup",
     "smtp.tls": "true",
     // Syslog
     "syslog.host": "",

@@ -1,43 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Title,
   Group,
   Select,
-  Table,
-  Badge,
   Text,
   Loader,
   Center,
   Alert,
-  Card,
   Stack,
-  Breadcrumbs,
-  Anchor,
-  ActionIcon,
-  Tooltip,
-  Modal,
   ScrollArea,
   Code,
-  Grid,
+  Box,
+  TextInput,
   Button,
+  Modal,
+  Textarea,
+  Tooltip,
+  ActionIcon,
+  NavLink,
+  Badge,
+  Table,
+  SegmentedControl,
   Checkbox,
 } from "@mantine/core";
 import {
   FolderSearch,
   AlertCircle,
-  ChevronRight,
-  Eye,
+  Search,
+  Replace,
   GitCompare,
-  History,
+  Save,
+  Folder,
+  FileText,
+  X,
+  Pencil,
+  Eye,
+  Undo2,
 } from "lucide-react";
+import { JsonEditor } from "@/components/json-editor";
 import {
-  useMxSummaries,
-  useEntityTypes,
-  useEntities,
-  useSnapshotVersions,
-  type SnapshotVersion,
+  useMxServers,
+  useExecutions,
+  useTreeData,
+  useEntityData,
+  useAllEntityData,
+  useConfigSnapshotsForMx,
+  useConfigSnapshotDetail,
+  type TreeData,
+  type ExecutionSummary,
 } from "./use-snapshots";
 
 // ─── Entity type labels ──────────────────────────────────
@@ -58,166 +70,635 @@ function entityLabel(type: string): string {
   return ENTITY_LABELS[type] || type;
 }
 
-// ─── Simple JSON diff ────────────────────────────────────
+// ─── JSON diff utility ───────────────────────────────────
 function computeDiff(
   a: Record<string, unknown>,
   b: Record<string, unknown>,
 ): { key: string; oldVal: unknown; newVal: unknown }[] {
   const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
   const diffs: { key: string; oldVal: unknown; newVal: unknown }[] = [];
-
   for (const key of allKeys) {
-    const aStr = JSON.stringify(a[key]);
-    const bStr = JSON.stringify(b[key]);
-    if (aStr !== bStr) {
+    if (JSON.stringify(a[key]) !== JSON.stringify(b[key])) {
       diffs.push({ key, oldVal: a[key], newVal: b[key] });
     }
   }
   return diffs;
 }
 
-export function BackupExplorerClient() {
-  const [mxId, setMxId] = useState<string | null>(null);
-  const [entityType, setEntityType] = useState<string | null>(null);
-  const [entityId, setEntityId] = useState<string | null>(null);
-  const [entityName, setEntityName] = useState<string | null>(null);
+// ─── Highlight search matches in text ────────────────────
+function highlightText(text: string, search: string): React.ReactNode {
+  if (!search) return text;
+  const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+  return parts.map((part, i) =>
+    part.toLowerCase() === search.toLowerCase() ? (
+      <mark key={i} style={{ background: "#facc15", padding: 0 }}>
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
 
-  // Modals
-  const [viewSnapshot, setViewSnapshot] = useState<SnapshotVersion | null>(
+// ─── Find/Replace in JSON data ───────────────────────────
+function replaceInData(
+  data: Record<string, unknown>,
+  search: string,
+  replacement: string,
+): { result: Record<string, unknown>; count: number } {
+  let count = 0;
+  function walk(value: unknown): unknown {
+    if (typeof value === "string") {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escaped, "g");
+      const matches = value.match(regex);
+      if (matches) count += matches.length;
+      return value.replace(regex, replacement);
+    }
+    if (Array.isArray(value)) return value.map(walk);
+    if (value && typeof value === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value)) {
+        out[k] = walk(v);
+      }
+      return out;
+    }
+    return value;
+  }
+  const result = walk(data) as Record<string, unknown>;
+  return { result, count };
+}
+
+// ─── Count matches in JSON data ──────────────────────────
+function countMatches(data: Record<string, unknown>, search: string): number {
+  if (!search) return 0;
+  const str = JSON.stringify(data, null, 2);
+  const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return (str.match(new RegExp(escaped, "gi")) ?? []).length;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════════════════════
+
+export function BackupExplorerClient() {
+  // ─── Source mode ───────────────────────────────────────
+  const [sourceMode, setSourceMode] = useState<"execution" | "snapshot">(
+    "execution",
+  );
+  const [configSnapshotId, setConfigSnapshotId] = useState<string | null>(null);
+
+  // ─── Selection state ───────────────────────────────────
+  const [mxId, setMxId] = useState<string | null>(null);
+  const [executionId, setExecutionId] = useState<string | null>(null);
+  const [selectedEntityType, setSelectedEntityType] = useState<string | null>(
     null,
   );
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareSelection, setCompareSelection] = useState<string[]>([]);
-  const [compareResult, setCompareResult] = useState<{
-    older: SnapshotVersion;
-    newer: SnapshotVersion;
-    diffs: { key: string; oldVal: unknown; newVal: unknown }[];
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+
+  // ─── Per-entity modifications: key = "entityType::entityId"
+  const [modifiedEntities, setModifiedEntities] = useState<
+    Record<string, Record<string, unknown>>
+  >({});
+
+  // ─── Find/Replace modal ────────────────────────────────
+  const [showFindModal, setShowFindModal] = useState(false);
+  const [findModalMode, setFindModalMode] = useState<"find" | "replace">(
+    "find",
+  );
+  const [findText, setFindText] = useState("");
+  const [replaceText, setReplaceText] = useState("");
+  const [findScope, setFindScope] = useState<Set<string>>(new Set());
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [pendingReplaceResult, setPendingReplaceResult] = useState<{
+    modifications: Record<string, Record<string, unknown>>;
+    totalCount: number;
   } | null>(null);
 
-  // Data hooks
-  const { data: mxServers, isLoading: mxLoading } = useMxSummaries();
-  const { data: entityTypes, isLoading: typesLoading } = useEntityTypes(mxId);
-  const { data: entities, isLoading: entitiesLoading } = useEntities(
-    mxId,
-    entityType,
-  );
-  const { data: versions, isLoading: versionsLoading } = useSnapshotVersions(
-    mxId,
-    entityType,
-    entityId,
-  );
+  // ─── Inline edit state ─────────────────────────────────
+  const [editMode, setEditMode] = useState(false);
+  const [editBuffer, setEditBuffer] = useState("");
+  const [editError, setEditError] = useState<string | null>(null);
 
-  const mxOptions = (mxServers ?? []).map((s) => ({
-    value: s.id,
-    label: `${s.name} (${s.host})`,
-  }));
+  // ─── Diff state ────────────────────────────────────────
+  const [diffExecId, setDiffExecId] = useState<string | null>(null);
+  const [showDiffModal, setShowDiffModal] = useState(false);
 
-  const selectedMx = mxServers?.find((s) => s.id === mxId);
+  // ─── Save snapshot modal ───────────────────────────────
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [snapshotName, setSnapshotName] = useState("");
+  const [snapshotDesc, setSnapshotDesc] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // ─── Breadcrumbs ───────────────────────────────────────
-  const crumbs: { label: string; onClick?: () => void }[] = [
-    {
-      label: "MX Servers",
-      onClick: () => {
-        setMxId(null);
-        setEntityType(null);
-        setEntityId(null);
-        setEntityName(null);
-        setCompareMode(false);
-        setCompareSelection([]);
-      },
-    },
-  ];
-
-  if (selectedMx) {
-    crumbs.push({
-      label: selectedMx.name,
-      onClick: () => {
-        setEntityType(null);
-        setEntityId(null);
-        setEntityName(null);
-        setCompareMode(false);
-        setCompareSelection([]);
-      },
-    });
-  }
-
-  if (entityType) {
-    crumbs.push({
-      label: entityLabel(entityType),
-      onClick: () => {
-        setEntityId(null);
-        setEntityName(null);
-        setCompareMode(false);
-        setCompareSelection([]);
-      },
-    });
-  }
-
-  if (entityName) {
-    crumbs.push({ label: entityName });
-  }
-
-  // ─── Compare handler ──────────────────────────────────
-  function handleCompare() {
-    if (compareSelection.length !== 2 || !versions) return;
-    const [idA, idB] = compareSelection;
-    const a = versions.find((v) => v.id === idA)!;
-    const b = versions.find((v) => v.id === idB)!;
-
-    // Order: older first, newer second
-    const [older, newer] =
-      new Date(a.createdAt) < new Date(b.createdAt) ? [a, b] : [b, a];
-
-    const diffs = computeDiff(
-      older.data as Record<string, unknown>,
-      newer.data as Record<string, unknown>,
+  // ─── Data hooks ────────────────────────────────────────
+  const { data: mxServers, isLoading: mxLoading } = useMxServers();
+  const { data: executions, isLoading: execLoading } = useExecutions(mxId);
+  const { data: configSnapshots } = useConfigSnapshotsForMx(mxId);
+  const { data: configSnapshotDetail, isLoading: csDetailLoading } =
+    useConfigSnapshotDetail(
+      sourceMode === "snapshot" ? configSnapshotId : null,
     );
 
-    setCompareResult({ older, newer, diffs });
+  const { data: treeData, isLoading: treeLoading } = useTreeData(
+    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? executionId : null,
+  );
+  const { data: entityData, isLoading: entityLoading } = useEntityData(
+    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? executionId : null,
+    selectedEntityType,
+    selectedEntityId,
+  );
+  const { data: allEntitiesData } = useAllEntityData(
+    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? executionId : null,
+  );
+
+  // ─── Config snapshot tree + entity (snapshot mode) ─────
+  const csTreeData: TreeData | undefined = useMemo(() => {
+    if (sourceMode !== "snapshot" || !configSnapshotDetail) return undefined;
+    const tree: TreeData = {};
+    for (const item of configSnapshotDetail.items) {
+      if (!tree[item.entityType]) tree[item.entityType] = [];
+      tree[item.entityType].push({
+        entityId: item.entityId,
+        entityName: item.entityName,
+      });
+    }
+    return tree;
+  }, [sourceMode, configSnapshotDetail]);
+
+  const csEntityData = useMemo(() => {
+    if (
+      sourceMode !== "snapshot" ||
+      !configSnapshotDetail ||
+      !selectedEntityType ||
+      !selectedEntityId
+    )
+      return null;
+    const item = configSnapshotDetail.items.find(
+      (i) =>
+        i.entityType === selectedEntityType &&
+        i.entityId === selectedEntityId,
+    );
+    return item
+      ? { ...item, id: configSnapshotDetail.id, createdAt: "" }
+      : null;
+  }, [sourceMode, configSnapshotDetail, selectedEntityType, selectedEntityId]);
+
+  // ─── Unified tree/entity based on mode ─────────────────
+  const activeTreeData = sourceMode === "execution" ? treeData : csTreeData;
+  const activeTreeLoading =
+    sourceMode === "execution" ? treeLoading : csDetailLoading;
+  const activeEntityData =
+    sourceMode === "execution" ? entityData : csEntityData;
+  const activeEntityLoading =
+    sourceMode === "execution" ? entityLoading : csDetailLoading;
+
+  // ─── All entities unified (for save & find) ────────────
+  const allEntities = useMemo(() => {
+    if (sourceMode === "execution") {
+      return allEntitiesData ?? [];
+    }
+    if (sourceMode === "snapshot" && configSnapshotDetail) {
+      return configSnapshotDetail.items.map((item) => ({
+        id: configSnapshotDetail.id,
+        entityType: item.entityType,
+        entityId: item.entityId,
+        entityName: item.entityName,
+        data: item.data,
+        createdAt: "",
+      }));
+    }
+    return [];
+  }, [sourceMode, allEntitiesData, configSnapshotDetail]);
+
+  // ─── Diff entity data (from another execution) ────────
+  const { data: diffEntityData } = useEntityData(
+    mxId,
+    diffExecId,
+    selectedEntityType,
+    selectedEntityId,
+  );
+
+  // ─── Auto-select latest execution ──────────────────────
+  const latestExecId = executions?.[0]?.id ?? null;
+
+  // ─── Computed state ────────────────────────────────────
+  const hasModifications = Object.keys(modifiedEntities).length > 0;
+
+  const entityKey =
+    selectedEntityType && selectedEntityId
+      ? `${selectedEntityType}::${selectedEntityId}`
+      : null;
+
+  const displayData =
+    entityKey && modifiedEntities[entityKey]
+      ? modifiedEntities[entityKey]
+      : ((activeEntityData?.data as Record<string, unknown>) ?? null);
+
+  const displayJson = displayData
+    ? JSON.stringify(displayData, null, 2)
+    : "";
+
+  const canUseActions = !!(
+    mxId &&
+    ((sourceMode === "execution" && executionId) ||
+      (sourceMode === "snapshot" && configSnapshotId))
+  );
+
+  // ─── Find results (scoped) ────────────────────────────
+  const findResults = useMemo(() => {
+    if (!findText || !allEntities.length) return [];
+    const results: {
+      entityType: string;
+      entityId: string;
+      entityName: string;
+      matchCount: number;
+    }[] = [];
+    for (const entity of allEntities) {
+      const key = `${entity.entityType}::${entity.entityId}`;
+      if (findScope.size > 0 && !findScope.has(key)) continue;
+      const data =
+        modifiedEntities[key] ?? (entity.data as Record<string, unknown>);
+      const count = countMatches(data, findText);
+      if (count > 0) {
+        results.push({
+          entityType: entity.entityType,
+          entityId: entity.entityId,
+          entityName: entity.entityName,
+          matchCount: count,
+        });
+      }
+    }
+    return results;
+  }, [findText, allEntities, findScope, modifiedEntities]);
+
+  const totalFindMatches = useMemo(
+    () => findResults.reduce((sum, r) => sum + r.matchCount, 0),
+    [findResults],
+  );
+
+  // ─── Select options ───────────────────────────────────
+  const executionOptions = useMemo(
+    () =>
+      (executions ?? []).map((e: ExecutionSummary) => ({
+        value: e.id,
+        label: `${e.taskName} — ${new Date(e.startedAt).toLocaleString()} (${e.snapshotCount} items)`,
+      })),
+    [executions],
+  );
+
+  const mxOptions = useMemo(
+    () =>
+      (mxServers ?? []).map((s) => ({
+        value: s.id,
+        label: `${s.name} (${s.host})`,
+      })),
+    [mxServers],
+  );
+
+  const diffExecOptions = useMemo(
+    () =>
+      (executions ?? [])
+        .filter((e) => e.id !== executionId)
+        .map((e) => ({
+          value: e.id,
+          label: `${e.taskName} — ${new Date(e.startedAt).toLocaleString()}`,
+        })),
+    [executions, executionId],
+  );
+
+  // ─── Handlers ──────────────────────────────────────────
+  const handleMxChange = useCallback((val: string | null) => {
+    setMxId(val);
+    setExecutionId(null);
+    setConfigSnapshotId(null);
+    setSelectedEntityType(null);
+    setSelectedEntityId(null);
+    setModifiedEntities({});
+    setFindText("");
+    setReplaceText("");
+  }, []);
+
+  const handleExecutionChange = useCallback((val: string | null) => {
+    setExecutionId(val);
+    setSelectedEntityType(null);
+    setSelectedEntityId(null);
+    setModifiedEntities({});
+  }, []);
+
+  const handleEntitySelect = useCallback(
+    (entityType: string, entityId: string) => {
+      setSelectedEntityType(entityType);
+      setSelectedEntityId(entityId);
+    },
+    [],
+  );
+
+  const handleReplace = useCallback(() => {
+    if (!findText || !allEntities.length) return;
+    const modifications: Record<string, Record<string, unknown>> = {};
+    let totalCount = 0;
+    for (const entity of allEntities) {
+      const key = `${entity.entityType}::${entity.entityId}`;
+      if (findScope.size > 0 && !findScope.has(key)) continue;
+      const data =
+        modifiedEntities[key] ?? (entity.data as Record<string, unknown>);
+      const { result, count } = replaceInData(data, findText, replaceText);
+      if (count > 0) {
+        modifications[key] = result;
+        totalCount += count;
+      }
+    }
+    if (totalCount > 0) {
+      setPendingReplaceResult({ modifications, totalCount });
+      setShowReplaceConfirm(true);
+    }
+  }, [findText, replaceText, allEntities, findScope, modifiedEntities]);
+
+  const handleConfirmReplace = useCallback(() => {
+    if (!pendingReplaceResult) return;
+    setModifiedEntities((prev) => ({
+      ...prev,
+      ...pendingReplaceResult.modifications,
+    }));
+    setShowReplaceConfirm(false);
+    setPendingReplaceResult(null);
+  }, [pendingReplaceResult]);
+
+  const handleDiscardChanges = useCallback(() => {
+    setModifiedEntities({});
+  }, []);
+
+  const handleSaveSnapshot = useCallback(async () => {
+    if (!snapshotName.trim() || !mxId || !allEntities.length) return;
+    setSaving(true);
+    try {
+      const items = allEntities.map((entity) => {
+        const key = `${entity.entityType}::${entity.entityId}`;
+        const data =
+          modifiedEntities[key] ??
+          (entity.data as Record<string, unknown>);
+        return {
+          entityType: entity.entityType,
+          entityId: entity.entityId,
+          entityName: entity.entityName,
+          data,
+        };
+      });
+
+      const res = await fetch("/api/config-snapshots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: snapshotName.trim(),
+          description: snapshotDesc.trim() || null,
+          mxId,
+          basedOnExec: sourceMode === "execution" ? executionId : null,
+          items,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save snapshot");
+      setShowSaveModal(false);
+      setSnapshotName("");
+      setSnapshotDesc("");
+      setModifiedEntities({});
+    } catch {
+      // TODO: surface error to user
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    snapshotName,
+    snapshotDesc,
+    mxId,
+    executionId,
+    sourceMode,
+    allEntities,
+    modifiedEntities,
+  ]);
+
+  // ─── Auto-select latest execution ──────────────────────
+  if (latestExecId && !executionId && executions && executions.length > 0) {
+    setExecutionId(latestExecId);
   }
 
-  function toggleCompareSelection(id: string) {
-    setCompareSelection((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 2) return [prev[1], id]; // replace oldest
-      return [...prev, id];
+  // ─── Diff result ───────────────────────────────────────
+  const diffResult = useMemo(() => {
+    if (!showDiffModal || !diffEntityData || !activeEntityData) return null;
+    const currentData =
+      entityKey && modifiedEntities[entityKey]
+        ? modifiedEntities[entityKey]
+        : (activeEntityData.data as Record<string, unknown>);
+    return computeDiff(
+      diffEntityData.data as Record<string, unknown>,
+      currentData,
+    );
+  }, [showDiffModal, diffEntityData, activeEntityData, modifiedEntities, entityKey]);
+
+  // ─── Scope toggle helpers ─────────────────────────────
+  const toggleScope = useCallback((key: string) => {
+    setFindScope((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
     });
-  }
+  }, []);
 
-  // ─── Loading state ─────────────────────────────────────
-  const isLoading = mxLoading || typesLoading || entitiesLoading || versionsLoading;
+  const toggleScopeType = useCallback(
+    (type: string) => {
+      if (!activeTreeData) return;
+      const entities = activeTreeData[type] ?? [];
+      const keys = entities.map((e) => `${type}::${e.entityId}`);
+      setFindScope((prev) => {
+        const next = new Set(prev);
+        const allSelected = keys.every((k) => next.has(k));
+        if (allSelected) {
+          keys.forEach((k) => next.delete(k));
+        } else {
+          keys.forEach((k) => next.add(k));
+        }
+        return next;
+      });
+    },
+    [activeTreeData],
+  );
+
+  // ─── Sync edit buffer when entity changes or edit mode toggles ──
+  useEffect(() => {
+    if (editMode && displayData) {
+      setEditBuffer(JSON.stringify(displayData, null, 2));
+      setEditError(null);
+    }
+  }, [editMode, selectedEntityType, selectedEntityId]);
+
+  // ─── Reset edit mode on entity switch ──────────────────
+  useEffect(() => {
+    setEditMode(false);
+    setEditError(null);
+  }, [selectedEntityType, selectedEntityId]);
+
+  const handleEditChange = useCallback(
+    (value: string) => {
+      setEditBuffer(value);
+      try {
+        JSON.parse(value);
+        setEditError(null);
+      } catch (e) {
+        setEditError((e as Error).message);
+      }
+    },
+    [],
+  );
+
+  const handleApplyEdit = useCallback(() => {
+    if (!entityKey || editError) return;
+    try {
+      const parsed = JSON.parse(editBuffer);
+      setModifiedEntities((prev) => ({ ...prev, [entityKey]: parsed }));
+      setEditMode(false);
+    } catch {
+      // should not happen since editError guards this
+    }
+  }, [entityKey, editBuffer, editError]);
+
+  const handleRevertEntity = useCallback(() => {
+    if (!entityKey) return;
+    setModifiedEntities((prev) => {
+      const next = { ...prev };
+      delete next[entityKey];
+      return next;
+    });
+    setEditMode(false);
+  }, [entityKey]);
+
+  const isLoading = mxLoading || execLoading;
+
+  // ═════════════════════════════════════════════════════════
+  // Render
+  // ═════════════════════════════════════════════════════════
 
   return (
     <>
-      <Group justify="space-between" mb="lg">
+      {/* ─── Header ─── */}
+      <Group justify="space-between" mb="md">
         <Group gap="sm">
           <FolderSearch size={28} />
           <Title order={2}>Backup Explorer</Title>
         </Group>
       </Group>
 
-      {/* Breadcrumbs */}
-      {crumbs.length > 1 && (
-        <Breadcrumbs mb="md" separator={<ChevronRight size={14} />}>
-          {crumbs.map((c, i) =>
-            c.onClick && i < crumbs.length - 1 ? (
-              <Anchor
-                key={i}
-                size="sm"
-                onClick={c.onClick}
-                style={{ cursor: "pointer" }}
-              >
-                {c.label}
-              </Anchor>
-            ) : (
-              <Text key={i} size="sm" fw={500}>
-                {c.label}
-              </Text>
-            ),
-          )}
-        </Breadcrumbs>
-      )}
+      {/* ─── Toolbar ─── */}
+      <Group mb="md" gap="sm" wrap="wrap">
+        <Select
+          placeholder="Select MX Server"
+          data={mxOptions}
+          value={mxId}
+          onChange={handleMxChange}
+          searchable
+          clearable
+          w={300}
+          disabled={mxLoading}
+        />
+        {mxId && (
+          <SegmentedControl
+            size="xs"
+            data={[
+              { label: "Backup Execution", value: "execution" },
+              { label: "Saved Snapshot", value: "snapshot" },
+            ]}
+            value={sourceMode}
+            onChange={(val) => {
+              setSourceMode(val as "execution" | "snapshot");
+              setSelectedEntityType(null);
+              setSelectedEntityId(null);
+              setModifiedEntities({});
+            }}
+          />
+        )}
+        {mxId && sourceMode === "execution" && (
+          <Select
+            placeholder={execLoading ? "Loading..." : "Select Execution"}
+            data={executionOptions}
+            value={executionId}
+            onChange={handleExecutionChange}
+            searchable
+            clearable
+            w={420}
+            disabled={execLoading || !executions?.length}
+          />
+        )}
+        {mxId && sourceMode === "snapshot" && (
+          <Select
+            placeholder="Select Snapshot"
+            data={(configSnapshots ?? []).map((s) => ({
+              value: s.id,
+              label: `${s.name} (${s._count.items} items)`,
+            }))}
+            value={configSnapshotId}
+            onChange={(val) => {
+              setConfigSnapshotId(val);
+              setSelectedEntityType(null);
+              setSelectedEntityId(null);
+              setModifiedEntities({});
+            }}
+            searchable
+            clearable
+            w={420}
+          />
+        )}
+
+        {/* Action icons — enabled when MX + execution/snapshot selected */}
+        <Group gap={4} ml="auto">
+          <Tooltip label="Find">
+            <ActionIcon
+              variant="subtle"
+              size="md"
+              disabled={!canUseActions}
+              onClick={() => {
+                setFindModalMode("find");
+                setShowFindModal(true);
+              }}
+            >
+              <Search size={18} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Find & Replace">
+            <ActionIcon
+              variant="subtle"
+              size="md"
+              disabled={!canUseActions}
+              onClick={() => {
+                setFindModalMode("replace");
+                setShowFindModal(true);
+              }}
+            >
+              <Replace size={18} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Diff with another execution">
+            <ActionIcon
+              variant="subtle"
+              size="md"
+              disabled={
+                !canUseActions || !selectedEntityType || !selectedEntityId
+              }
+              onClick={() => setShowDiffModal(true)}
+            >
+              <GitCompare size={18} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+
+        {hasModifications && (
+          <Badge color="yellow" variant="filled" size="lg">
+            Modified
+          </Badge>
+        )}
+      </Group>
 
       {isLoading && (
         <Center h={200}>
@@ -225,373 +706,675 @@ export function BackupExplorerClient() {
         </Center>
       )}
 
-      {/* ─── Step 1: Select MX Server ─── */}
-      {!mxId && !mxLoading && (
-        <>
-          {mxServers?.length === 0 ? (
-            <Alert
-              variant="light"
-              color="blue"
-              icon={<AlertCircle size={16} />}
+      {mxId &&
+        !execLoading &&
+        sourceMode === "execution" &&
+        executions?.length === 0 && (
+          <Alert variant="light" color="blue" icon={<AlertCircle size={16} />}>
+            No successful executions found for this MX server. Run a backup
+            task first.
+          </Alert>
+        )}
+
+      {/* ─── Main split layout ─── */}
+      {canUseActions && (
+        <Box
+          style={{
+            display: "grid",
+            gridTemplateColumns: "300px 1fr",
+            gap: "var(--mantine-spacing-md)",
+            height: "calc(100vh - 220px)",
+            minHeight: 400,
+          }}
+        >
+          {/* ─── Left: Tree View ─── */}
+          <Box
+            style={{
+              border: "1px solid var(--mantine-color-default-border)",
+              borderRadius: "var(--mantine-radius-md)",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box
+              px="sm"
+              py="xs"
+              style={{
+                borderBottom: "1px solid var(--mantine-color-default-border)",
+              }}
             >
-              No MX servers configured. Add servers and run backup tasks first.
-            </Alert>
-          ) : (
-            <Grid>
-              {mxServers?.map((mx) => (
-                <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={mx.id}>
-                  <Card
-                    shadow="sm"
-                    padding="lg"
-                    withBorder
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setMxId(mx.id)}
-                  >
-                    <Group justify="space-between" mb="xs">
-                      <Text fw={600}>{mx.name}</Text>
-                      <Badge variant="light" color="gray">
-                        {mx.totalSnapshots} snapshots
-                      </Badge>
-                    </Group>
-                    <Text size="sm" c="dimmed" ff="monospace">
-                      {mx.host}
+              <Text size="sm" fw={600}>
+                Entities
+              </Text>
+            </Box>
+            <ScrollArea style={{ flex: 1 }}>
+              {activeTreeLoading ? (
+                <Center h={100}>
+                  <Loader size="sm" />
+                </Center>
+              ) : !activeTreeData ||
+                Object.keys(activeTreeData).length === 0 ? (
+                <Text size="sm" c="dimmed" p="sm">
+                  No entities found.
+                </Text>
+              ) : (
+                <Box p={4}>
+                  {Object.entries(activeTreeData as TreeData).map(
+                    ([type, entities]) => (
+                      <NavLink
+                        key={type}
+                        label={
+                          <Group gap={4}>
+                            <Text size="sm" fw={500}>
+                              {entityLabel(type)}
+                            </Text>
+                            <Badge size="xs" variant="light" color="gray">
+                              {entities.length}
+                            </Badge>
+                          </Group>
+                        }
+                        leftSection={<Folder size={16} />}
+                        childrenOffset={20}
+                        defaultOpened={type === selectedEntityType}
+                      >
+                        {entities.map((entity) => (
+                          <NavLink
+                            key={entity.entityId}
+                            label={
+                              <Group gap={4}>
+                                <Text size="sm" truncate>
+                                  {entity.entityName}
+                                </Text>
+                                {modifiedEntities[
+                                  `${type}::${entity.entityId}`
+                                ] && (
+                                  <Badge
+                                    size="xs"
+                                    color="yellow"
+                                    variant="filled"
+                                  >
+                                    M
+                                  </Badge>
+                                )}
+                              </Group>
+                            }
+                            leftSection={<FileText size={14} />}
+                            active={
+                              selectedEntityType === type &&
+                              selectedEntityId === entity.entityId
+                            }
+                            onClick={() =>
+                              handleEntitySelect(type, entity.entityId)
+                            }
+                          />
+                        ))}
+                      </NavLink>
+                    ),
+                  )}
+                </Box>
+              )}
+            </ScrollArea>
+          </Box>
+
+          {/* ─── Right: Data Panel ─── */}
+          <Box
+            style={{
+              border: "1px solid var(--mantine-color-default-border)",
+              borderRadius: "var(--mantine-radius-md)",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Panel header */}
+            <Box
+              px="sm"
+              py="xs"
+              style={{
+                borderBottom: "1px solid var(--mantine-color-default-border)",
+              }}
+            >
+              {selectedEntityType && selectedEntityId ? (
+                <Group justify="space-between">
+                  <Group gap="xs">
+                    <Text size="sm" fw={600}>
+                      {activeEntityData?.entityName ?? "Loading..."}
                     </Text>
-                  </Card>
-                </Grid.Col>
-              ))}
-            </Grid>
-          )}
-        </>
-      )}
-
-      {/* ─── Step 2: Select Entity Type ─── */}
-      {mxId && !entityType && !typesLoading && (
-        <>
-          {entityTypes?.length === 0 ? (
-            <Alert
-              variant="light"
-              color="blue"
-              icon={<AlertCircle size={16} />}
-            >
-              No snapshots found for this MX server. Run a backup task first.
-            </Alert>
-          ) : (
-            <Grid>
-              {entityTypes?.map((et) => (
-                <Grid.Col
-                  span={{ base: 12, sm: 6, md: 4 }}
-                  key={et.entityType}
-                >
-                  <Card
-                    shadow="sm"
-                    padding="lg"
-                    withBorder
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setEntityType(et.entityType)}
-                  >
-                    <Group justify="space-between" mb="xs">
-                      <Text fw={600}>{entityLabel(et.entityType)}</Text>
-                      <ChevronRight size={16} />
-                    </Group>
-                    <Group gap="lg">
-                      <div>
-                        <Text size="xs" c="dimmed">
-                          Entities
-                        </Text>
-                        <Text fw={500}>{et.entityCount}</Text>
-                      </div>
-                      <div>
-                        <Text size="xs" c="dimmed">
-                          Snapshots
-                        </Text>
-                        <Text fw={500}>{et.snapshotCount}</Text>
-                      </div>
-                    </Group>
-                  </Card>
-                </Grid.Col>
-              ))}
-            </Grid>
-          )}
-        </>
-      )}
-
-      {/* ─── Step 3: Entity List ─── */}
-      {mxId && entityType && !entityId && !entitiesLoading && (
-        <>
-          {entities?.length === 0 ? (
-            <Alert
-              variant="light"
-              color="blue"
-              icon={<AlertCircle size={16} />}
-            >
-              No entities found for this type.
-            </Alert>
-          ) : (
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Entity Name</Table.Th>
-                  <Table.Th>Entity ID</Table.Th>
-                  <Table.Th>Versions</Table.Th>
-                  <Table.Th>Latest Backup</Table.Th>
-                  <Table.Th w={80}>Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {entities?.map((entity) => (
-                  <Table.Tr key={entity.entityId}>
-                    <Table.Td>
-                      <Text fw={500}>{entity.entityName}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" ff="monospace" c="dimmed">
-                        {entity.entityId}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge variant="light" color="blue">
-                        {entity.versionCount}
+                    <Badge size="xs" variant="light">
+                      {entityLabel(selectedEntityType)}
+                    </Badge>
+                    {entityKey && modifiedEntities[entityKey] && (
+                      <Badge size="xs" color="yellow" variant="filled">
+                        Modified
                       </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      {entity.latestAt
-                        ? new Date(entity.latestAt).toLocaleString()
-                        : "—"}
-                    </Table.Td>
-                    <Table.Td>
-                      <Tooltip label="View versions">
+                    )}
+                  </Group>
+                  <Group gap={4}>
+                    {entityKey && modifiedEntities[entityKey] && (
+                      <Tooltip label="Revert this entity">
                         <ActionIcon
                           variant="subtle"
-                          onClick={() => {
-                            setEntityId(entity.entityId);
-                            setEntityName(entity.entityName);
-                          }}
+                          color="orange"
+                          size="sm"
+                          onClick={handleRevertEntity}
                         >
-                          <History size={16} />
+                          <Undo2 size={14} />
                         </ActionIcon>
                       </Tooltip>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </>
-      )}
+                    )}
+                    <Tooltip label={editMode ? "View mode" : "Edit JSON"}>
+                      <ActionIcon
+                        variant={editMode ? "filled" : "subtle"}
+                        color={editMode ? "blue" : "gray"}
+                        size="sm"
+                        onClick={() => {
+                          if (editMode) {
+                            setEditMode(false);
+                          } else {
+                            setEditMode(true);
+                            if (displayData) {
+                              setEditBuffer(JSON.stringify(displayData, null, 2));
+                              setEditError(null);
+                            }
+                          }
+                        }}
+                      >
+                        {editMode ? <Eye size={14} /> : <Pencil size={14} />}
+                      </ActionIcon>
+                    </Tooltip>
+                    {hasModifications && (
+                      <>
+                        <Tooltip label="Save as Snapshot">
+                          <ActionIcon
+                            variant="filled"
+                            color="blue"
+                            size="sm"
+                            onClick={() => setShowSaveModal(true)}
+                          >
+                            <Save size={14} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label="Discard all changes">
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            size="sm"
+                            onClick={handleDiscardChanges}
+                          >
+                            <X size={14} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </>
+                    )}
+                  </Group>
+                </Group>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Select an entity from the tree to view its data
+                </Text>
+              )}
+            </Box>
 
-      {/* ─── Step 4: Snapshot Versions ─── */}
-      {mxId && entityType && entityId && !versionsLoading && (
-        <Stack gap="md">
-          {compareMode && (
-            <Group>
-              <Text size="sm" c="dimmed">
-                Select 2 versions to compare
-              </Text>
-              <Button
-                size="xs"
-                disabled={compareSelection.length !== 2}
-                onClick={handleCompare}
-                leftSection={<GitCompare size={14} />}
-              >
-                Compare
-              </Button>
-              <Button
-                size="xs"
-                variant="subtle"
-                onClick={() => {
-                  setCompareMode(false);
-                  setCompareSelection([]);
+            {/* Search highlight indicator */}
+            {findText && selectedEntityType && selectedEntityId && (
+              <Box
+                px="sm"
+                py={4}
+                style={{
+                  borderBottom:
+                    "1px solid var(--mantine-color-default-border)",
+                  background: "var(--mantine-color-yellow-light)",
                 }}
               >
-                Cancel
-              </Button>
-            </Group>
-          )}
-
-          {!compareMode && (
-            <Group>
-              <Button
-                size="xs"
-                variant="light"
-                leftSection={<GitCompare size={14} />}
-                onClick={() => setCompareMode(true)}
-              >
-                Compare Versions
-              </Button>
-            </Group>
-          )}
-
-          {versions?.length === 0 ? (
-            <Alert
-              variant="light"
-              color="blue"
-              icon={<AlertCircle size={16} />}
-            >
-              No snapshot versions found.
-            </Alert>
-          ) : (
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  {compareMode && <Table.Th w={50}></Table.Th>}
-                  <Table.Th>Date</Table.Th>
-                  <Table.Th>Task</Table.Th>
-                  <Table.Th>Execution</Table.Th>
-                  <Table.Th w={80}>Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {versions?.map((v) => (
-                  <Table.Tr key={v.id}>
-                    {compareMode && (
-                      <Table.Td>
-                        <Checkbox
-                          checked={compareSelection.includes(v.id)}
-                          onChange={() => toggleCompareSelection(v.id)}
-                        />
-                      </Table.Td>
+                <Group gap="xs" justify="space-between">
+                  <Text size="xs">
+                    Highlighting &ldquo;{findText}&rdquo;
+                    {displayData && (
+                      <>
+                        {" — "}
+                        {countMatches(displayData, findText)} matches
+                      </>
                     )}
-                    <Table.Td>
-                      <Text size="sm">
-                        {new Date(v.createdAt).toLocaleString()}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{v.execution.task.name}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" ff="monospace" c="dimmed">
-                        {v.execution.id.slice(0, 8)}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Tooltip label="View data">
-                        <ActionIcon
+                  </Text>
+                  <ActionIcon
+                    variant="subtle"
+                    size="xs"
+                    onClick={() => setFindText("")}
+                  >
+                    <X size={12} />
+                  </ActionIcon>
+                </Group>
+              </Box>
+            )}
+
+            {/* Data content */}
+            {activeEntityLoading ? (
+              <Center style={{ flex: 1 }}>
+                <Loader size="sm" />
+              </Center>
+            ) : !selectedEntityType || !selectedEntityId ? (
+              <Center style={{ flex: 1 }}>
+                <Stack align="center" gap="xs">
+                  <FolderSearch size={48} opacity={0.3} />
+                  <Text size="sm" c="dimmed">
+                    Select an entity from the tree
+                  </Text>
+                </Stack>
+              </Center>
+            ) : displayData ? (
+              editMode ? (
+                <>
+                  <Box style={{ flex: 1, overflow: "hidden" }}>
+                    <JsonEditor
+                      value={editBuffer}
+                      onChange={handleEditChange}
+                      height="100%"
+                    />
+                  </Box>
+                  <Box
+                    px="sm"
+                    py="xs"
+                    style={{
+                      borderTop: "1px solid var(--mantine-color-default-border)",
+                    }}
+                  >
+                    <Group justify="space-between">
+                      {editError ? (
+                        <Text size="xs" c="red">
+                          {editError}
+                        </Text>
+                      ) : (
+                        <Text size="xs" c="green">
+                          Valid JSON
+                        </Text>
+                      )}
+                      <Group gap="xs">
+                        <Button
+                          size="xs"
                           variant="subtle"
-                          onClick={() => setViewSnapshot(v)}
+                          onClick={() => setEditMode(false)}
                         >
-                          <Eye size={16} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </Stack>
+                          Cancel
+                        </Button>
+                        <Button
+                          size="xs"
+                          color="blue"
+                          disabled={!!editError}
+                          onClick={handleApplyEdit}
+                        >
+                          Apply Changes
+                        </Button>
+                      </Group>
+                    </Group>
+                  </Box>
+                </>
+              ) : (
+                <Box style={{ flex: 1, overflow: "hidden" }}>
+                  <JsonEditor
+                    value={displayJson}
+                    readOnly
+                    height="100%"
+                  />
+                </Box>
+              )
+            ) : (
+              <Center style={{ flex: 1 }}>
+                <Text size="sm" c="dimmed">
+                  No data available
+                </Text>
+              </Center>
+            )}
+
+            {/* Bottom bar */}
+            {displayData && selectedEntityType && (
+              <Box
+                px="sm"
+                py="xs"
+                style={{
+                  borderTop: "1px solid var(--mantine-color-default-border)",
+                }}
+              >
+                <Group justify="space-between">
+                  <Text size="xs" c="dimmed">
+                    {activeEntityData?.entityId ?? ""}
+                    {activeEntityData &&
+                    "createdAt" in activeEntityData &&
+                    activeEntityData.createdAt
+                      ? ` — ${new Date(activeEntityData.createdAt).toLocaleString()}`
+                      : ""}
+                  </Text>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    leftSection={<Save size={14} />}
+                    onClick={() => setShowSaveModal(true)}
+                  >
+                    Save as Snapshot
+                  </Button>
+                </Group>
+              </Box>
+            )}
+          </Box>
+        </Box>
       )}
 
-      {/* ─── View Snapshot Modal ─── */}
+      {/* ─── Find / Find & Replace Modal ─── */}
       <Modal
-        opened={!!viewSnapshot}
-        onClose={() => setViewSnapshot(null)}
-        title={`Snapshot — ${viewSnapshot?.entityName}`}
+        opened={showFindModal}
+        onClose={() => {
+          setShowFindModal(false);
+          setReplaceText("");
+          setFindScope(new Set());
+        }}
+        title={findModalMode === "find" ? "Find" : "Find & Replace"}
         size="xl"
       >
-        {viewSnapshot && (
-          <Stack gap="sm">
-            <Group gap="lg">
-              <div>
-                <Text size="xs" c="dimmed">
-                  Date
+        <Box
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 280px",
+            gap: "var(--mantine-spacing-md)",
+            minHeight: 400,
+          }}
+        >
+          {/* Left: inputs + results */}
+          <Stack gap="md">
+            <TextInput
+              placeholder="Search text..."
+              value={findText}
+              onChange={(e) => setFindText(e.currentTarget.value)}
+              rightSection={
+                findText ? (
+                  <Badge size="xs" variant="light">
+                    {totalFindMatches}
+                  </Badge>
+                ) : undefined
+              }
+            />
+            {findModalMode === "replace" && (
+              <TextInput
+                placeholder="Replace with..."
+                value={replaceText}
+                onChange={(e) => setReplaceText(e.currentTarget.value)}
+              />
+            )}
+            {findModalMode === "replace" && (
+              <Button
+                variant="light"
+                onClick={handleReplace}
+                disabled={!findText || totalFindMatches === 0}
+              >
+                Replace All ({totalFindMatches} matches)
+              </Button>
+            )}
+
+            <Text size="sm" fw={600}>
+              Results{" "}
+              {findText
+                ? `(${findResults.length} entities, ${totalFindMatches} matches)`
+                : ""}
+            </Text>
+            <ScrollArea h={280}>
+              {!findText ? (
+                <Text size="sm" c="dimmed">
+                  Type to search...
                 </Text>
-                <Text size="sm">
-                  {new Date(viewSnapshot.createdAt).toLocaleString()}
+              ) : findResults.length === 0 ? (
+                <Text size="sm" c="dimmed">
+                  No matches found.
                 </Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">
-                  Task
-                </Text>
-                <Text size="sm">{viewSnapshot.execution.task.name}</Text>
-              </div>
-            </Group>
-            <ScrollArea h={500}>
-              <Code block style={{ fontSize: 13 }}>
-                {JSON.stringify(viewSnapshot.data, null, 2)}
-              </Code>
+              ) : (
+                <Stack gap={4}>
+                  {findResults.map((r) => (
+                    <NavLink
+                      key={`${r.entityType}::${r.entityId}`}
+                      label={
+                        <Group gap="xs">
+                          <Text size="sm">{r.entityName}</Text>
+                          <Badge size="xs" variant="light">
+                            {r.matchCount}
+                          </Badge>
+                        </Group>
+                      }
+                      description={entityLabel(r.entityType)}
+                      leftSection={<FileText size={14} />}
+                      onClick={() => {
+                        handleEntitySelect(r.entityType, r.entityId);
+                        setShowFindModal(false);
+                      }}
+                    />
+                  ))}
+                </Stack>
+              )}
             </ScrollArea>
           </Stack>
-        )}
+
+          {/* Right: scope tree with checkboxes */}
+          <Box
+            style={{
+              borderLeft: "1px solid var(--mantine-color-default-border)",
+              paddingLeft: "var(--mantine-spacing-md)",
+            }}
+          >
+            <Text size="sm" fw={600} mb="xs">
+              Scope
+            </Text>
+            <Text size="xs" c="dimmed" mb="sm">
+              Select entities to search in. Leave empty to search all.
+            </Text>
+            <ScrollArea h={340}>
+              {activeTreeData &&
+                Object.entries(activeTreeData).map(([type, entities]) => {
+                  const typeKeys = entities.map(
+                    (e) => `${type}::${e.entityId}`,
+                  );
+                  const allChecked =
+                    typeKeys.length > 0 &&
+                    typeKeys.every((k) => findScope.has(k));
+                  const someChecked = typeKeys.some((k) =>
+                    findScope.has(k),
+                  );
+                  return (
+                    <Box key={type} mb="xs">
+                      <Checkbox
+                        label={
+                          <Text size="sm" fw={500}>
+                            {entityLabel(type)} ({entities.length})
+                          </Text>
+                        }
+                        checked={allChecked}
+                        indeterminate={someChecked && !allChecked}
+                        onChange={() => toggleScopeType(type)}
+                        mb={4}
+                      />
+                      <Box ml="lg">
+                        {entities.map((entity) => (
+                          <Checkbox
+                            key={entity.entityId}
+                            label={
+                              <Text size="xs">{entity.entityName}</Text>
+                            }
+                            checked={findScope.has(
+                              `${type}::${entity.entityId}`,
+                            )}
+                            onChange={() =>
+                              toggleScope(`${type}::${entity.entityId}`)
+                            }
+                            mb={2}
+                            size="xs"
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  );
+                })}
+            </ScrollArea>
+          </Box>
+        </Box>
       </Modal>
 
-      {/* ─── Compare Modal ─── */}
+      {/* ─── Replace Confirmation Modal ─── */}
       <Modal
-        opened={!!compareResult}
-        onClose={() => setCompareResult(null)}
-        title="Version Comparison"
+        opened={showReplaceConfirm}
+        onClose={() => {
+          setShowReplaceConfirm(false);
+          setPendingReplaceResult(null);
+        }}
+        title="Confirm Replace"
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            This will replace{" "}
+            <strong>{pendingReplaceResult?.totalCount ?? 0}</strong> occurrences
+            of &ldquo;{findText}&rdquo; with &ldquo;{replaceText}&rdquo; across{" "}
+            <strong>
+              {Object.keys(pendingReplaceResult?.modifications ?? {}).length}
+            </strong>{" "}
+            entities.
+          </Text>
+          <Group justify="flex-end">
+            <Button
+              variant="subtle"
+              onClick={() => {
+                setShowReplaceConfirm(false);
+                setPendingReplaceResult(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleConfirmReplace}>
+              Confirm Replace
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* ─── Diff Modal ─── */}
+      <Modal
+        opened={showDiffModal}
+        onClose={() => {
+          setShowDiffModal(false);
+          setDiffExecId(null);
+        }}
+        title="Compare with another execution"
         size="xl"
       >
-        {compareResult && (
-          <Stack gap="md">
-            <Group gap="xl">
-              <div>
-                <Text size="xs" c="dimmed">
-                  Older
-                </Text>
-                <Text size="sm">
-                  {new Date(compareResult.older.createdAt).toLocaleString()}
-                </Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">
-                  Newer
-                </Text>
-                <Text size="sm">
-                  {new Date(compareResult.newer.createdAt).toLocaleString()}
-                </Text>
-              </div>
-            </Group>
-
-            {compareResult.diffs.length === 0 ? (
-              <Alert color="green" variant="light">
-                No differences found — these versions are identical.
-              </Alert>
-            ) : (
-              <ScrollArea h={500}>
-                <Table striped withTableBorder>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Property</Table.Th>
-                      <Table.Th>Older Value</Table.Th>
-                      <Table.Th>Newer Value</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {compareResult.diffs.map((d) => (
-                      <Table.Tr key={d.key}>
-                        <Table.Td>
-                          <Text size="sm" fw={500} ff="monospace">
-                            {d.key}
-                          </Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Code
-                            style={{ fontSize: 12 }}
-                            color="red"
-                            block
-                          >
-                            {JSON.stringify(d.oldVal, null, 2) ?? "undefined"}
-                          </Code>
-                        </Table.Td>
-                        <Table.Td>
-                          <Code
-                            style={{ fontSize: 12 }}
-                            color="green"
-                            block
-                          >
-                            {JSON.stringify(d.newVal, null, 2) ?? "undefined"}
-                          </Code>
-                        </Table.Td>
+        <Stack gap="md">
+          <Select
+            label="Compare with"
+            placeholder="Select execution to compare against"
+            data={diffExecOptions}
+            value={diffExecId}
+            onChange={setDiffExecId}
+            searchable
+          />
+          {diffExecId && diffResult && (
+            <>
+              {diffResult.length === 0 ? (
+                <Alert color="green" variant="light">
+                  No differences found — the entity data is identical.
+                </Alert>
+              ) : (
+                <ScrollArea h={400}>
+                  <Table striped withTableBorder>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Property</Table.Th>
+                        <Table.Th>Other Execution</Table.Th>
+                        <Table.Th>Current</Table.Th>
                       </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </ScrollArea>
-            )}
-          </Stack>
-        )}
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {diffResult.map((d) => (
+                        <Table.Tr key={d.key}>
+                          <Table.Td>
+                            <Text size="sm" fw={500} ff="monospace">
+                              {d.key}
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Code
+                              style={{ fontSize: 12 }}
+                              color="red"
+                              block
+                            >
+                              {JSON.stringify(d.oldVal, null, 2) ??
+                                "undefined"}
+                            </Code>
+                          </Table.Td>
+                          <Table.Td>
+                            <Code
+                              style={{ fontSize: 12 }}
+                              color="green"
+                              block
+                            >
+                              {JSON.stringify(d.newVal, null, 2) ??
+                                "undefined"}
+                            </Code>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </>
+          )}
+          {diffExecId && !diffEntityData && (
+            <Alert color="yellow" variant="light">
+              This entity does not exist in the selected execution.
+            </Alert>
+          )}
+        </Stack>
+      </Modal>
+
+      {/* ─── Save as Snapshot Modal ─── */}
+      <Modal
+        opened={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        title="Save as Snapshot"
+      >
+        <Stack gap="md">
+          <TextInput
+            label="Snapshot Name"
+            placeholder="e.g. Production IP migration v2"
+            value={snapshotName}
+            onChange={(e) => setSnapshotName(e.currentTarget.value)}
+            required
+          />
+          <Textarea
+            label="Description"
+            placeholder="Describe what changes were made..."
+            value={snapshotDesc}
+            onChange={(e) => setSnapshotDesc(e.currentTarget.value)}
+            autosize
+            minRows={3}
+          />
+          <Text size="xs" c="dimmed">
+            This will save all {allEntities.length} entities from the current{" "}
+            {sourceMode === "execution" ? "execution" : "snapshot"}.
+            {hasModifications &&
+              ` ${Object.keys(modifiedEntities).length} modified entities will include your changes.`}
+          </Text>
+          <Group justify="flex-end">
+            <Button
+              variant="subtle"
+              onClick={() => setShowSaveModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              leftSection={<Save size={14} />}
+              onClick={handleSaveSnapshot}
+              loading={saving}
+              disabled={!snapshotName.trim()}
+            >
+              Save Snapshot
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </>
   );

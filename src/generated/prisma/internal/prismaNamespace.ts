@@ -389,7 +389,10 @@ export const ModelName = {
   MxCredential: 'MxCredential',
   BackupTask: 'BackupTask',
   ExecutionLog: 'ExecutionLog',
-  BackupSnapshot: 'BackupSnapshot'
+  BackupSnapshot: 'BackupSnapshot',
+  ConfigSnapshot: 'ConfigSnapshot',
+  ConfigSnapshotItem: 'ConfigSnapshotItem',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "setting" | "mxCredential" | "backupTask" | "executionLog" | "backupSnapshot"
+    modelProps: "user" | "setting" | "mxCredential" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -853,6 +856,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ConfigSnapshot: {
+      payload: Prisma.$ConfigSnapshotPayload<ExtArgs>
+      fields: Prisma.ConfigSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConfigSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConfigSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.ConfigSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConfigSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.ConfigSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.ConfigSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.ConfigSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConfigSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.ConfigSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        update: {
+          args: Prisma.ConfigSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConfigSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConfigSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConfigSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConfigSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.ConfigSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConfigSnapshot>
+        }
+        groupBy: {
+          args: Prisma.ConfigSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConfigSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConfigSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConfigSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConfigSnapshotItem: {
+      payload: Prisma.$ConfigSnapshotItemPayload<ExtArgs>
+      fields: Prisma.ConfigSnapshotItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConfigSnapshotItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConfigSnapshotItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        findFirst: {
+          args: Prisma.ConfigSnapshotItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConfigSnapshotItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        findMany: {
+          args: Prisma.ConfigSnapshotItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>[]
+        }
+        create: {
+          args: Prisma.ConfigSnapshotItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        createMany: {
+          args: Prisma.ConfigSnapshotItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConfigSnapshotItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>[]
+        }
+        delete: {
+          args: Prisma.ConfigSnapshotItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        update: {
+          args: Prisma.ConfigSnapshotItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConfigSnapshotItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConfigSnapshotItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConfigSnapshotItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConfigSnapshotItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConfigSnapshotItemPayload>
+        }
+        aggregate: {
+          args: Prisma.ConfigSnapshotItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConfigSnapshotItem>
+        }
+        groupBy: {
+          args: Prisma.ConfigSnapshotItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConfigSnapshotItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConfigSnapshotItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConfigSnapshotItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditLog: {
+      payload: Prisma.$AuditLogPayload<ExtArgs>
+      fields: Prisma.AuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.AuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.AuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        update: {
+          args: Prisma.AuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditLog>
+        }
+        groupBy: {
+          args: Prisma.AuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -968,6 +1193,46 @@ export const BackupSnapshotScalarFieldEnum = {
 export type BackupSnapshotScalarFieldEnum = (typeof BackupSnapshotScalarFieldEnum)[keyof typeof BackupSnapshotScalarFieldEnum]
 
 
+export const ConfigSnapshotScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  mxId: 'mxId',
+  basedOnExec: 'basedOnExec',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConfigSnapshotScalarFieldEnum = (typeof ConfigSnapshotScalarFieldEnum)[keyof typeof ConfigSnapshotScalarFieldEnum]
+
+
+export const ConfigSnapshotItemScalarFieldEnum = {
+  id: 'id',
+  snapshotId: 'snapshotId',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  entityName: 'entityName',
+  data: 'data'
+} as const
+
+export type ConfigSnapshotItemScalarFieldEnum = (typeof ConfigSnapshotItemScalarFieldEnum)[keyof typeof ConfigSnapshotItemScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  username: 'username',
+  action: 'action',
+  target: 'target',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -981,6 +1246,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1233,6 +1506,9 @@ export type GlobalOmitConfig = {
   backupTask?: Prisma.BackupTaskOmit
   executionLog?: Prisma.ExecutionLogOmit
   backupSnapshot?: Prisma.BackupSnapshotOmit
+  configSnapshot?: Prisma.ConfigSnapshotOmit
+  configSnapshotItem?: Prisma.ConfigSnapshotItemOmit
+  auditLog?: Prisma.AuditLogOmit
 }
 
 /* Types for Logging */

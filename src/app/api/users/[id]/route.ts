@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { hash } from "bcryptjs";
+import { createAuditLog } from "@/lib/audit";
 
 export async function PUT(
   request: NextRequest,
@@ -48,6 +49,14 @@ export async function PUT(
     },
   });
 
+  await createAuditLog({
+    userId: session.user.id,
+    username: session.user.username,
+    action: "UPDATE_USER",
+    target: `User:${user.username}`,
+    details: { fields: Object.keys(data) },
+  });
+
   return NextResponse.json(user);
 }
 
@@ -75,6 +84,13 @@ export async function DELETE(
   }
 
   await prisma.user.delete({ where: { id } });
+
+  await createAuditLog({
+    userId: session.user.id,
+    username: session.user.username,
+    action: "DELETE_USER",
+    target: `User:${user.username}`,
+  });
 
   return NextResponse.json({ success: true });
 }

@@ -137,7 +137,7 @@ export function SmtpSyslogTab({ settings, onSave }: SmtpSyslogTabProps) {
             />
             <TextInput
               label="From Name"
-              placeholder="Imperva WAF Tools"
+              placeholder="Imperva Backup"
               value={smtpFromName}
               onChange={(e) => setSmtpFromName(e.currentTarget.value)}
               autoComplete="off"

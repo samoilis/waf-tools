@@ -1,5 +1,3 @@
-"use client";
-
 import { createTheme, MantineColorsTuple } from "@mantine/core";
 
 // Navy blue palette — 10 shades from lightest to darkest

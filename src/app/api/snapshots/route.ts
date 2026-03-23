@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
-// GET /api/snapshots?mxId=...&entityType=...
-// Returns grouped snapshot data for the Backup Explorer
+// GET /api/snapshots
+//   ?view=servers                       → list MX servers with snapshot counts
+//   ?view=executions&mxId=...           → list executions for an MX
+//   ?view=tree&mxId=...&executionId=... → tree data (entity types + entities) for an execution
+//   ?view=entity&mxId=...&executionId=...&entityType=...&entityId=... → single entity data
 export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user) {
@@ -11,11 +14,11 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = request.nextUrl;
+  const view = searchParams.get("view") ?? "servers";
   const mxId = searchParams.get("mxId");
-  const entityType = searchParams.get("entityType");
 
-  // If no mxId: return entity type counts per MX server
-  if (!mxId) {
+  // ─── List MX servers ───────────────────────────────────
+  if (view === "servers") {
     const servers = await prisma.mxCredential.findMany({
       select: {
         id: true,
@@ -25,9 +28,7 @@ export async function GET(request: NextRequest) {
           select: {
             executions: {
               where: { status: "SUCCESS" },
-              select: {
-                _count: { select: { snapshots: true } },
-              },
+              select: { _count: { select: { snapshots: true } } },
             },
           },
         },
@@ -41,101 +42,150 @@ export async function GET(request: NextRequest) {
           acc + t.executions.reduce((a, e) => a + e._count.snapshots, 0),
         0,
       );
-      return {
-        id: s.id,
-        name: s.name,
-        host: s.host,
-        totalSnapshots,
-      };
+      return { id: s.id, name: s.name, host: s.host, totalSnapshots };
     });
 
     return NextResponse.json(result);
   }
 
-  // If mxId but no entityType: return distinct entity types with counts
-  if (!entityType) {
-    const entityTypes = await prisma.backupSnapshot.groupBy({
-      by: ["entityType"],
+  if (!mxId) {
+    return NextResponse.json({ error: "mxId is required" }, { status: 400 });
+  }
+
+  // ─── List executions for an MX ─────────────────────────
+  if (view === "executions") {
+    const executions = await prisma.executionLog.findMany({
       where: {
-        execution: {
-          task: { mxId },
-          status: "SUCCESS",
-        },
-      },
-      _count: { id: true },
-    });
-
-    // Also get unique entity count per type
-    const result = await Promise.all(
-      entityTypes.map(async (et) => {
-        const uniqueEntities = await prisma.backupSnapshot.findMany({
-          where: {
-            entityType: et.entityType,
-            execution: {
-              task: { mxId },
-              status: "SUCCESS",
-            },
-          },
-          distinct: ["entityId"],
-          select: { entityId: true },
-        });
-
-        return {
-          entityType: et.entityType,
-          snapshotCount: et._count.id,
-          entityCount: uniqueEntities.length,
-        };
-      }),
-    );
-
-    return NextResponse.json(result);
-  }
-
-  // If mxId + entityType: return entities with their snapshot versions
-  const entities = await prisma.backupSnapshot.findMany({
-    where: {
-      entityType,
-      execution: {
         task: { mxId },
         status: "SUCCESS",
       },
-    },
-    distinct: ["entityId"],
-    select: {
-      entityId: true,
-      entityName: true,
-    },
-    orderBy: { entityName: "asc" },
-  });
+      select: {
+        id: true,
+        startedAt: true,
+        finishedAt: true,
+        task: { select: { name: true } },
+        _count: { select: { snapshots: true } },
+      },
+      orderBy: { startedAt: "desc" },
+    });
 
-  // For each entity get version count and latest snapshot date
-  const result = await Promise.all(
-    entities.map(async (entity) => {
-      const versions = await prisma.backupSnapshot.findMany({
-        where: {
-          entityType,
-          entityId: entity.entityId,
-          execution: {
-            task: { mxId },
-            status: "SUCCESS",
-          },
-        },
-        select: {
-          id: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: "desc" },
+    const result = executions.map((e) => ({
+      id: e.id,
+      taskName: e.task.name,
+      startedAt: e.startedAt,
+      finishedAt: e.finishedAt,
+      snapshotCount: e._count.snapshots,
+    }));
+
+    return NextResponse.json(result);
+  }
+
+  const executionId = searchParams.get("executionId");
+
+  // ─── Tree data for an execution ────────────────────────
+  if (view === "tree") {
+    if (!executionId) {
+      return NextResponse.json(
+        { error: "executionId is required" },
+        { status: 400 },
+      );
+    }
+
+    const snapshots = await prisma.backupSnapshot.findMany({
+      where: {
+        executionId,
+        execution: { task: { mxId }, status: "SUCCESS" },
+      },
+      select: {
+        entityType: true,
+        entityId: true,
+        entityName: true,
+      },
+      orderBy: [{ entityType: "asc" }, { entityName: "asc" }],
+    });
+
+    // Group by entityType
+    const tree: Record<string, { entityId: string; entityName: string }[]> = {};
+    for (const s of snapshots) {
+      if (!tree[s.entityType]) tree[s.entityType] = [];
+      tree[s.entityType].push({
+        entityId: s.entityId,
+        entityName: s.entityName,
       });
+    }
 
-      return {
-        entityId: entity.entityId,
-        entityName: entity.entityName,
-        versionCount: versions.length,
-        latestAt: versions[0]?.createdAt ?? null,
-        oldestAt: versions[versions.length - 1]?.createdAt ?? null,
-      };
-    }),
+    return NextResponse.json(tree);
+  }
+
+  // ─── Single entity data ────────────────────────────────
+  if (view === "entity") {
+    const entityType = searchParams.get("entityType");
+    const entityId = searchParams.get("entityId");
+
+    if (!executionId || !entityType || !entityId) {
+      return NextResponse.json(
+        { error: "executionId, entityType, and entityId are required" },
+        { status: 400 },
+      );
+    }
+
+    const snapshot = await prisma.backupSnapshot.findFirst({
+      where: {
+        executionId,
+        entityType,
+        entityId,
+        execution: { task: { mxId }, status: "SUCCESS" },
+      },
+      select: {
+        id: true,
+        entityName: true,
+        entityType: true,
+        entityId: true,
+        data: true,
+        createdAt: true,
+      },
+    });
+
+    if (!snapshot) {
+      return NextResponse.json(
+        { error: "Snapshot not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(snapshot);
+  }
+
+  // ─── All entity data for an execution ──────────────────
+  if (view === "allEntities") {
+    if (!executionId) {
+      return NextResponse.json(
+        { error: "executionId is required" },
+        { status: 400 },
+      );
+    }
+
+    const snapshots = await prisma.backupSnapshot.findMany({
+      where: {
+        executionId,
+        execution: { task: { mxId }, status: "SUCCESS" },
+      },
+      select: {
+        id: true,
+        entityName: true,
+        entityType: true,
+        entityId: true,
+        data: true,
+        createdAt: true,
+      },
+      orderBy: [{ entityType: "asc" }, { entityName: "asc" }],
+    });
+
+    return NextResponse.json(snapshots);
+  }
+
+  return NextResponse.json(
+    { error: "Invalid view parameter" },
+    { status: 400 },
   );
-
-  return NextResponse.json(result);
 }

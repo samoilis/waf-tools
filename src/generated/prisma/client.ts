@@ -71,3 +71,18 @@ export type ExecutionLog = Prisma.ExecutionLogModel
  * 
  */
 export type BackupSnapshot = Prisma.BackupSnapshotModel
+/**
+ * Model ConfigSnapshot
+ * 
+ */
+export type ConfigSnapshot = Prisma.ConfigSnapshotModel
+/**
+ * Model ConfigSnapshotItem
+ * 
+ */
+export type ConfigSnapshotItem = Prisma.ConfigSnapshotItemModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

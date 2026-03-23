@@ -101,7 +101,7 @@ const CHECK_INTERVAL_MS = 60_000; // 1 minute
 
 async function main() {
   console.log("═══════════════════════════════════════════");
-  console.log("  Imperva WAF Tools – Backup Scheduler");
+  console.log("  Imperva Backup – Scheduler");
   console.log("═══════════════════════════════════════════");
   console.log(`Checking for due tasks every ${CHECK_INTERVAL_MS / 1000}s`);
   console.log(
