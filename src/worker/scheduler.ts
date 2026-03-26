@@ -14,6 +14,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CronExpressionParser } from "cron-parser";
 import { executeBackupTask } from "./executor";
+import { getLicenseStatus } from "@/lib/license";
 
 // ─── Prisma setup (standalone, not shared with Next.js) ──
 
@@ -53,12 +54,33 @@ function cronMatchesNow(cronExpression: string, now: Date): boolean {
 // ─── Tick: check and run due tasks ───────────────────────
 
 const runningTasks = new Set<string>();
+let lastLicenseWarning = 0;
 
 async function tick() {
   const now = new Date();
   const timestamp = now.toISOString().slice(0, 16).replace("T", " ");
 
   try {
+    // Check license before executing any tasks
+    const license = await getLicenseStatus(prisma);
+    if (license.degraded) {
+      // Log warning at most once per hour
+      const nowMs = Date.now();
+      if (nowMs - lastLicenseWarning > 3_600_000) {
+        lastLicenseWarning = nowMs;
+        console.warn(
+          `[${timestamp}] ⚠ License not active — skipping task execution. ${
+            license.gracePeriod
+              ? "Grace period expired."
+              : license.expired
+                ? "License expired."
+                : "Invalid or missing license."
+          }`,
+        );
+      }
+      return;
+    }
+
     const tasks = await prisma.backupTask.findMany({
       where: { status: "ACTIVE" },
       include: {

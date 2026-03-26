@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   TextInput,
@@ -14,27 +14,73 @@ import {
   Alert,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { AlertCircle, KeyRound, Building2, CalendarClock } from "lucide-react";
+import {
+  AlertCircle,
+  KeyRound,
+  Building2,
+  CalendarClock,
+  Info,
+  ShieldAlert,
+} from "lucide-react";
+
+interface LicenseStatus {
+  registered: boolean;
+  valid: boolean;
+  expired: boolean;
+  degraded: boolean;
+  gracePeriod: boolean;
+  company: string | null;
+  expiry: string | null;
+  graceExpiresAt: string | null;
+}
 
 interface RegistrationTabProps {
   settings: Record<string, string>;
   onSave: (values: Record<string, string>) => Promise<void>;
 }
 
-function isLicenseExpired(dateStr: string | undefined): boolean {
-  if (!dateStr) return true;
-  return new Date(dateStr) < new Date();
+function daysUntil(dateStr: string): number {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86_400_000));
+}
+
+function statusBadge(license: LicenseStatus | null) {
+  if (!license) return null;
+
+  if (license.registered && license.valid && !license.expired) {
+    return <Badge color="green" variant="light">Active</Badge>;
+  }
+  if (license.registered && license.valid && license.expired) {
+    return <Badge color="red" variant="light">Expired</Badge>;
+  }
+  if (license.registered && !license.valid) {
+    return <Badge color="red" variant="light">Invalid Key</Badge>;
+  }
+  if (license.gracePeriod) {
+    return <Badge color="blue" variant="light">Grace Period</Badge>;
+  }
+  return <Badge color="yellow" variant="light">Not Registered</Badge>;
 }
 
 export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
   const [licenseKey, setLicenseKey] = useState(settings["reg.licenseKey"] ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [license, setLicense] = useState<LicenseStatus | null>(null);
 
-  const companyName = settings["reg.companyName"] ?? "";
-  const licenseExpiry = settings["reg.licenseExpiry"] ?? "";
-  const hasKey = !!settings["reg.licenseKey"];
-  const expired = isLicenseExpired(settings["reg.licenseExpiry"]);
+  const fetchLicenseStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settings/license");
+      if (res.ok) setLicense(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    fetchLicenseStatus();
+  }, [fetchLicenseStatus]);
+
+  const companyName = license?.company ?? settings["reg.companyName"] ?? "";
+  const licenseExpiry = license?.expiry ?? settings["reg.licenseExpiry"] ?? "";
 
   async function handleSave() {
     setError(null);
@@ -43,9 +89,11 @@ export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
       await onSave({
         "reg.licenseKey": licenseKey,
       });
+      // Refresh license status after save
+      await fetchLicenseStatus();
       notifications.show({
         title: "Saved",
-        message: "Registration settings updated successfully",
+        message: "License key updated successfully",
         color: "green",
       });
     } catch (e: unknown) {
@@ -64,24 +112,51 @@ export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
         </Alert>
       )}
 
+      {license?.gracePeriod && license.graceExpiresAt && (
+        <Alert icon={<Info size={16} />} color="blue" variant="light">
+          <Text size="sm">
+            <b>Evaluation period:</b> {daysUntil(license.graceExpiresAt)} days remaining.
+            Enter a license key below to activate all features permanently.
+          </Text>
+        </Alert>
+      )}
+
+      {license?.degraded && !license.registered && !license.gracePeriod && (
+        <Alert icon={<ShieldAlert size={16} />} color="orange" variant="light">
+          <Text size="sm">
+            <b>Limited mode:</b> The evaluation period has ended. Backup tasks and configuration changes are disabled.
+            Enter a valid license key to restore full functionality.
+          </Text>
+        </Alert>
+      )}
+
+      {license?.degraded && license.expired && (
+        <Alert icon={<ShieldAlert size={16} />} color="red" variant="light">
+          <Text size="sm">
+            <b>License expired:</b> Backup tasks and configuration changes are disabled.
+            Please update your license key to restore full functionality.
+          </Text>
+        </Alert>
+      )}
+
+      {license?.registered && !license.valid && (
+        <Alert icon={<AlertCircle size={16} />} color="red" variant="light">
+          <Text size="sm">
+            The current license key is invalid. Please enter a valid license key.
+          </Text>
+        </Alert>
+      )}
+
       <Card withBorder p="lg">
         <Group mb="md" gap="sm">
           <Title order={4}>License Information</Title>
-          {hasKey && !expired && (
-            <Badge color="green" variant="light">Active</Badge>
-          )}
-          {hasKey && expired && (
-            <Badge color="red" variant="light">Expired</Badge>
-          )}
-          {!hasKey && (
-            <Badge color="yellow" variant="light">Not Registered</Badge>
-          )}
+          {statusBadge(license)}
         </Group>
 
         <Stack gap="md">
           <TextInput
             label="Company Name"
-            placeholder="—"
+            placeholder="Populated automatically from license key"
             leftSection={<Building2 size={16} />}
             value={companyName}
             readOnly
@@ -90,7 +165,7 @@ export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
 
           <TextInput
             label="License Expiry Date"
-            placeholder="—"
+            placeholder="Populated automatically from license key"
             leftSection={<CalendarClock size={16} />}
             value={licenseExpiry}
             readOnly
@@ -99,7 +174,7 @@ export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
 
           <Textarea
             label="License Key"
-            placeholder="Paste your private license key here to activate the application"
+            placeholder="Paste your license key here to activate the application"
             leftSection={<KeyRound size={16} />}
             value={licenseKey}
             onChange={(e) => setLicenseKey(e.currentTarget.value)}
@@ -109,28 +184,12 @@ export function RegistrationTab({ settings, onSave }: RegistrationTabProps) {
             autoComplete="off"
             styles={{ input: { fontFamily: "monospace", fontSize: 13 } }}
           />
-
-          {!hasKey && (
-            <Alert color="orange" variant="light" icon={<AlertCircle size={16} />}>
-              <Text size="sm">
-                No license key has been registered. Please enter a valid license key to activate all features.
-              </Text>
-            </Alert>
-          )}
-
-          {hasKey && expired && (
-            <Alert color="red" variant="light" icon={<AlertCircle size={16} />}>
-              <Text size="sm">
-                Your license has expired. Please update your license key to continue using all features.
-              </Text>
-            </Alert>
-          )}
         </Stack>
       </Card>
 
       <Group justify="flex-end">
         <Button onClick={handleSave} loading={saving}>
-          Save Registration Settings
+          Save License Key
         </Button>
       </Group>
     </Stack>

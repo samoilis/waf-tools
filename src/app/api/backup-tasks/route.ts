@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit";
+import { requireActiveLicense } from "@/lib/license-guard";
 
 export async function GET() {
   const session = await auth();
@@ -33,6 +34,9 @@ export async function POST(request: NextRequest) {
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
+
+  const licenseBlock = await requireActiveLicense();
+  if (licenseBlock) return licenseBlock;
 
   const body = await request.json();
   const { name, mxId, scope, cronExpression, status } = body;

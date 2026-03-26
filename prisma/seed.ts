@@ -31,6 +31,8 @@ async function main() {
 
   // ── Seed default settings ──────────────────────────────
   const defaultSettings: Record<string, string> = {
+    // System
+    "system.installDate": new Date().toISOString().slice(0, 10),
     // Registration
     "reg.companyName": "",
     "reg.licenseExpiry": "",
