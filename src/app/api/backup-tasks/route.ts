@@ -14,14 +14,12 @@ export async function GET() {
     select: {
       id: true,
       name: true,
-      mxId: true,
       serverId: true,
       scope: true,
       cronExpression: true,
       status: true,
       createdAt: true,
       updatedAt: true,
-      mx: { select: { id: true, name: true, host: true } },
       server: {
         select: {
           id: true,
@@ -49,9 +47,9 @@ export async function POST(request: NextRequest) {
   if (licenseBlock) return licenseBlock;
 
   const body = await request.json();
-  const { name, mxId, serverId, scope, cronExpression, status } = body;
+  const { name, serverId, scope, cronExpression, status } = body;
 
-  if (!name || (!mxId && !serverId)) {
+  if (!name || !serverId) {
     return NextResponse.json(
       { error: "Name and server are required" },
       { status: 400 },
@@ -59,31 +57,20 @@ export async function POST(request: NextRequest) {
   }
 
   // Validate server exists
-  if (serverId) {
-    const server = await prisma.wafServer.findUnique({
-      where: { id: serverId },
-    });
-    if (!server) {
-      return NextResponse.json(
-        { error: "WAF server not found" },
-        { status: 404 },
-      );
-    }
-  } else if (mxId) {
-    const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
-    if (!mx) {
-      return NextResponse.json(
-        { error: "MX server not found" },
-        { status: 404 },
-      );
-    }
+  const server = await prisma.wafServer.findUnique({
+    where: { id: serverId },
+  });
+  if (!server) {
+    return NextResponse.json(
+      { error: "WAF server not found" },
+      { status: 404 },
+    );
   }
 
   const task = await prisma.backupTask.create({
     data: {
       name,
-      mxId: mxId || null,
-      serverId: serverId || null,
+      serverId,
       scope: scope ?? {},
       cronExpression: cronExpression || "0 2 * * *",
       status: status || "ACTIVE",
@@ -91,14 +78,12 @@ export async function POST(request: NextRequest) {
     select: {
       id: true,
       name: true,
-      mxId: true,
       serverId: true,
       scope: true,
       cronExpression: true,
       status: true,
       createdAt: true,
       updatedAt: true,
-      mx: { select: { id: true, name: true, host: true } },
       server: {
         select: {
           id: true,

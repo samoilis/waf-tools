@@ -61,6 +61,8 @@ async function main() {
     "auth.ldap.baseDn": "",
     "auth.ldap.bindDn": "",
     "auth.ldap.bindPassword": "",
+    "auth.ldap.userFilter": "(uid={{username}})",
+    "auth.ldap.adminGroup": "",
     // RADIUS
     "auth.radius.enabled": "false",
     "auth.radius.host": "",
@@ -83,18 +85,18 @@ async function main() {
   console.log("✅ Default settings seeded");
 
   // ── Seed sample backup tasks ───────────────────────────
-  const mxServers = await prisma.mxCredential.findMany({
+  const wafServers = await prisma.wafServer.findMany({
     take: 2,
     orderBy: { createdAt: "asc" },
   });
 
-  if (mxServers.length > 0) {
+  if (wafServers.length > 0) {
     const existingTasks = await prisma.backupTask.count();
     if (existingTasks === 0) {
       await prisma.backupTask.create({
         data: {
           name: "Daily Full Backup",
-          mxId: mxServers[0].id,
+          serverId: wafServers[0].id,
           scope: {
             sites: true,
             server_groups: true,
@@ -112,11 +114,11 @@ async function main() {
         },
       });
 
-      const secondMx = mxServers[1] ?? mxServers[0];
+      const secondServer = wafServers[1] ?? wafServers[0];
       await prisma.backupTask.create({
         data: {
           name: "Weekly Policies Backup",
-          mxId: secondMx.id,
+          serverId: secondServer.id,
           scope: {
             sites: false,
             server_groups: false,
@@ -139,7 +141,7 @@ async function main() {
       console.log("ℹ️  Backup tasks already exist, skipping.");
     }
   } else {
-    console.log("⚠️  No MX servers found — skipping backup task seeding.");
+    console.log("⚠️  No WAF servers found — skipping backup task seeding.");
   }
 
   await prisma.$disconnect();

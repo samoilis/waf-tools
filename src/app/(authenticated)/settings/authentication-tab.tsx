@@ -12,6 +12,7 @@ import {
   Title,
   Divider,
   Alert,
+  Collapse,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { AlertCircle } from "lucide-react";
@@ -37,6 +38,8 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
   const [ldapBaseDn, setLdapBaseDn] = useState(str(settings["auth.ldap.baseDn"]));
   const [ldapBindDn, setLdapBindDn] = useState(str(settings["auth.ldap.bindDn"]));
   const [ldapBindPassword, setLdapBindPassword] = useState(str(settings["auth.ldap.bindPassword"]));
+  const [ldapUserFilter, setLdapUserFilter] = useState(str(settings["auth.ldap.userFilter"]) || "(uid={{username}})");
+  const [ldapAdminGroup, setLdapAdminGroup] = useState(str(settings["auth.ldap.adminGroup"]));
 
   // RADIUS
   const [radiusEnabled, setRadiusEnabled] = useState(bool(settings["auth.radius.enabled"]));
@@ -67,6 +70,8 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
         "auth.ldap.baseDn": ldapBaseDn,
         "auth.ldap.bindDn": ldapBindDn,
         "auth.ldap.bindPassword": ldapBindPassword,
+        "auth.ldap.userFilter": ldapUserFilter,
+        "auth.ldap.adminGroup": ldapAdminGroup,
         "auth.radius.enabled": String(radiusEnabled),
         "auth.radius.host": radiusHost,
         "auth.radius.port": radiusPort,
@@ -107,6 +112,7 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             onChange={(e) => setLdapEnabled(e.currentTarget.checked)}
           />
         </Group>
+        <Collapse expanded={ldapEnabled}>
         <Stack gap="sm">
           <Group grow>
             <TextInput
@@ -149,7 +155,27 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             disabled={!ldapEnabled}
             autoComplete="new-password"
           />
+          <Divider label="Search & Group Mapping" labelPosition="center" />
+          <TextInput
+            label="User Filter"
+            description="Use {{username}} as placeholder. Example: (sAMAccountName={{username}})"
+            placeholder="(uid={{username}})"
+            value={ldapUserFilter}
+            onChange={(e) => setLdapUserFilter(e.currentTarget.value)}
+            disabled={!ldapEnabled}
+            autoComplete="off"
+          />
+          <TextInput
+            label="Admin Group (CN)"
+            description="Users in this group get the ADMIN role. Leave empty to skip group mapping."
+            placeholder="WafAdmins"
+            value={ldapAdminGroup}
+            onChange={(e) => setLdapAdminGroup(e.currentTarget.value)}
+            disabled={!ldapEnabled}
+            autoComplete="off"
+          />
         </Stack>
+        </Collapse>
       </Card>
 
       <Divider />
@@ -164,6 +190,7 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             onChange={(e) => setRadiusEnabled(e.currentTarget.checked)}
           />
         </Group>
+        <Collapse expanded={radiusEnabled}>
         <Stack gap="sm">
           <Group grow>
             <TextInput
@@ -191,6 +218,7 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             autoComplete="new-password"
           />
         </Stack>
+        </Collapse>
       </Card>
 
       <Divider />
@@ -205,6 +233,7 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             onChange={(e) => setTacacsEnabled(e.currentTarget.checked)}
           />
         </Group>
+        <Collapse expanded={tacacsEnabled}>
         <Stack gap="sm">
           <Group grow>
             <TextInput
@@ -232,6 +261,7 @@ export function AuthenticationTab({ settings, onSave }: AuthenticationTabProps) 
             autoComplete="new-password"
           />
         </Stack>
+        </Collapse>
       </Card>
 
       <Group justify="flex-end">

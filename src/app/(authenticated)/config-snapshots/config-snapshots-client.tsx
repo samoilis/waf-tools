@@ -151,7 +151,7 @@ export function ConfigSnapshotsClient() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">{s.server?.name ?? s.mx?.name ?? "—"}</Text>
+                  <Text size="sm">{s.server?.name ?? "—"}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Badge variant="light" color="blue">
@@ -225,7 +225,7 @@ export function ConfigSnapshotsClient() {
             <Group gap="lg">
               <div>
                 <Text size="xs" c="dimmed">Server</Text>
-                <Text size="sm">{snapshotDetail.server?.name ?? snapshotDetail.mx?.name ?? "—"}</Text>
+                <Text size="sm">{snapshotDetail.server?.name ?? "—"}</Text>
               </div>
               <div>
                 <Text size="xs" c="dimmed">Created By</Text>

@@ -23,6 +23,7 @@ import {
   Camera,
   Users,
   ScrollText,
+  ClipboardList,
   LogOut,
   ChevronDown,
 } from "lucide-react";
@@ -40,18 +41,23 @@ const navLinks = [
   { label: "Users", href: "/users", icon: Users, adminOnly: true, section: "Administration" },
   { label: "Settings", href: "/settings", icon: Settings, adminOnly: true, section: "Administration" },
   { label: "Audit Logs", href: "/audit-logs", icon: ScrollText, adminOnly: true, section: "Administration" },
+  { label: "Backup Logs", href: "/backup-logs", icon: ClipboardList, section: "Administration" },
 ];
 
 export function AppShellLayout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const isAdmin = session?.user?.role === "ADMIN";
 
   const visibleLinks = navLinks.filter(
     (link) => !link.adminOnly || isAdmin,
   );
+
+  if (status === "loading") {
+    return null;
+  }
 
   return (
     <AppShell

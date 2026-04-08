@@ -13,8 +13,6 @@
 - [Updating](#updating)
 - [Troubleshooting](#troubleshooting)
 
----
-
 ## Prerequisites
 
 | Requirement        | Version | Notes                               |
@@ -24,8 +22,6 @@
 | **Node.js**        | 22+     | For local development only          |
 | **pnpm**           | 9+      | Package manager (`corepack enable`) |
 | **PostgreSQL**     | 15+     | If not using the bundled Docker DB  |
-
----
 
 ## Environment Variables
 
@@ -53,8 +49,6 @@ AUTH_URL="https://your-domain.com"
 ```bash
 openssl rand -base64 48
 ```
-
----
 
 ## Option 1 — Docker Compose (Recommended)
 
@@ -134,8 +128,6 @@ worker:
     - DATABASE_URL=postgresql://user:password@your-db-host:5432/your_db
 ```
 
----
-
 ## Option 2 — Local Development
 
 ### 1. Clone & install
@@ -186,8 +178,6 @@ The app runs at [http://localhost:3000](http://localhost:3000) with Turbopack HM
 npx tsx src/worker/scheduler.ts
 ```
 
----
-
 ## Option 3 — Manual Production Build
 
 For deployments without Docker (e.g. bare-metal, VM, systemd).
@@ -228,8 +218,6 @@ NODE_ENV=production npx tsx src/worker/scheduler.ts
 > pm2 start npx --name waf-worker -- tsx src/worker/scheduler.ts
 > ```
 
----
-
 ## License Activation
 
 The application requires a valid license key. You can set it in two ways:
@@ -255,8 +243,6 @@ environment:
 2. Go to **Settings → Registration**
 3. Paste your license key and save
 
----
-
 ## Default Credentials
 
 | Username | Password  | Role  |
@@ -266,8 +252,6 @@ environment:
 > **Important:** Change the default password immediately after first login via **Settings → Authentication** or the **Users** screen.
 
 The `admin` user is a system user and cannot be deleted.
-
----
 
 ## Architecture Overview
 
@@ -296,8 +280,6 @@ The `admin` user is a system user and cannot be deleted.
 - **worker** — Background process that executes scheduled backup tasks via vendor-specific adapters.
 - **db** — PostgreSQL database storing configs, snapshots, logs, users, and settings.
 
----
-
 ## Updating
 
 ### Docker Compose
@@ -320,8 +302,6 @@ npx prisma migrate deploy
 pnpm build
 # Restart web server and worker
 ```
-
----
 
 ## Troubleshooting
 

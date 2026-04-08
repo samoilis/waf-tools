@@ -54,7 +54,6 @@ export const ModelName = {
   User: 'User',
   Setting: 'Setting',
   WafServer: 'WafServer',
-  MxCredential: 'MxCredential',
   BackupTask: 'BackupTask',
   ExecutionLog: 'ExecutionLog',
   BackupSnapshot: 'BackupSnapshot',
@@ -118,23 +117,9 @@ export const WafServerScalarFieldEnum = {
 export type WafServerScalarFieldEnum = (typeof WafServerScalarFieldEnum)[keyof typeof WafServerScalarFieldEnum]
 
 
-export const MxCredentialScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  host: 'host',
-  username: 'username',
-  authorization: 'authorization',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type MxCredentialScalarFieldEnum = (typeof MxCredentialScalarFieldEnum)[keyof typeof MxCredentialScalarFieldEnum]
-
-
 export const BackupTaskScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  mxId: 'mxId',
   serverId: 'serverId',
   scope: 'scope',
   cronExpression: 'cronExpression',
@@ -175,7 +160,6 @@ export const ConfigSnapshotScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  mxId: 'mxId',
   serverId: 'serverId',
   basedOnExec: 'basedOnExec',
   createdById: 'createdById',

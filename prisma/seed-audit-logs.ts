@@ -8,9 +8,9 @@ const ACTIONS = [
   "CREATE_USER",
   "UPDATE_USER",
   "DELETE_USER",
-  "CREATE_MX",
-  "UPDATE_MX",
-  "DELETE_MX",
+  "CREATE_SERVER",
+  "UPDATE_SERVER",
+  "DELETE_SERVER",
   "CREATE_TASK",
   "UPDATE_TASK",
   "DELETE_TASK",
@@ -35,7 +35,7 @@ const IPS = [
   "10.10.1.7",
   null,
 ];
-const MX_NAMES = ["MX-Prod-EU", "MX-Prod-US", "MX-Staging", "MX-DR"];
+const SERVER_NAMES = ["WAF-Prod-EU", "WAF-Prod-US", "WAF-Staging", "WAF-DR"];
 const TASK_NAMES = [
   "Daily Full Backup",
   "Weekly Policies Backup",
@@ -76,10 +76,10 @@ function targetForAction(action: string): string | null {
     case "UPDATE_USER":
     case "DELETE_USER":
       return `User:${pick(USERNAMES)}`;
-    case "CREATE_MX":
-    case "UPDATE_MX":
-    case "DELETE_MX":
-      return `MxCredential:${pick(MX_NAMES)}`;
+    case "CREATE_SERVER":
+    case "UPDATE_SERVER":
+    case "DELETE_SERVER":
+      return `WafServer:${pick(SERVER_NAMES)}`;
     case "CREATE_TASK":
     case "UPDATE_TASK":
     case "DELETE_TASK":
@@ -118,13 +118,13 @@ function detailsForAction(action: string): object | null {
           ["role", "authProvider"],
         ]),
       };
-    case "UPDATE_MX":
+    case "UPDATE_SERVER":
       return {
         fields: pick([
           ["name"],
           ["host"],
-          ["username", "password"],
-          ["host", "username"],
+          ["credentials"],
+          ["host", "credentials"],
         ]),
       };
     case "UPDATE_TASK":
@@ -133,7 +133,7 @@ function detailsForAction(action: string): object | null {
           ["status"],
           ["cronExpression"],
           ["name", "scope"],
-          ["mxId"],
+          ["serverId"],
         ]),
       };
     case "UPDATE_SETTING":

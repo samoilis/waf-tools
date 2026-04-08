@@ -1188,10 +1188,8 @@ async function main() {
   console.log("🗑️  Cleaning existing WAF data...");
   await prisma.backupSnapshot.deleteMany({});
   await prisma.executionLog.deleteMany({});
-  await prisma.backupTask.deleteMany({ where: { serverId: { not: null } } });
-  await prisma.configSnapshot.deleteMany({
-    where: { serverId: { not: null } },
-  });
+  await prisma.backupTask.deleteMany({});
+  await prisma.configSnapshot.deleteMany({});
   await prisma.wafServer.deleteMany({});
   console.log("   Done.");
 

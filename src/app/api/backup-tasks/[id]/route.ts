@@ -18,7 +18,7 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const { name, mxId, serverId, scope, cronExpression, status } = body;
+  const { name, serverId, scope, cronExpression, status } = body;
 
   const existing = await prisma.backupTask.findUnique({ where: { id } });
   if (!existing) {
@@ -35,23 +35,12 @@ export async function PUT(
         { status: 404 },
       );
     }
-  } else if (mxId) {
-    const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
-    if (!mx) {
-      return NextResponse.json(
-        { error: "MX server not found" },
-        { status: 404 },
-      );
-    }
   }
 
   const data: Record<string, unknown> = {};
   if (name) data.name = name;
   if (serverId) {
     data.serverId = serverId;
-    data.mxId = null;
-  } else if (mxId) {
-    data.mxId = mxId;
   }
   if (scope !== undefined) data.scope = scope;
   if (cronExpression) data.cronExpression = cronExpression;
@@ -63,14 +52,12 @@ export async function PUT(
     select: {
       id: true,
       name: true,
-      mxId: true,
       serverId: true,
       scope: true,
       cronExpression: true,
       status: true,
       createdAt: true,
       updatedAt: true,
-      mx: { select: { id: true, name: true, host: true } },
       server: {
         select: {
           id: true,

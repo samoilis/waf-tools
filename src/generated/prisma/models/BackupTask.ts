@@ -27,7 +27,6 @@ export type AggregateBackupTask = {
 export type BackupTaskMinAggregateOutputType = {
   id: string | null
   name: string | null
-  mxId: string | null
   serverId: string | null
   cronExpression: string | null
   status: $Enums.BackupTaskStatus | null
@@ -38,7 +37,6 @@ export type BackupTaskMinAggregateOutputType = {
 export type BackupTaskMaxAggregateOutputType = {
   id: string | null
   name: string | null
-  mxId: string | null
   serverId: string | null
   cronExpression: string | null
   status: $Enums.BackupTaskStatus | null
@@ -49,7 +47,6 @@ export type BackupTaskMaxAggregateOutputType = {
 export type BackupTaskCountAggregateOutputType = {
   id: number
   name: number
-  mxId: number
   serverId: number
   scope: number
   cronExpression: number
@@ -63,7 +60,6 @@ export type BackupTaskCountAggregateOutputType = {
 export type BackupTaskMinAggregateInputType = {
   id?: true
   name?: true
-  mxId?: true
   serverId?: true
   cronExpression?: true
   status?: true
@@ -74,7 +70,6 @@ export type BackupTaskMinAggregateInputType = {
 export type BackupTaskMaxAggregateInputType = {
   id?: true
   name?: true
-  mxId?: true
   serverId?: true
   cronExpression?: true
   status?: true
@@ -85,7 +80,6 @@ export type BackupTaskMaxAggregateInputType = {
 export type BackupTaskCountAggregateInputType = {
   id?: true
   name?: true
-  mxId?: true
   serverId?: true
   scope?: true
   cronExpression?: true
@@ -170,8 +164,7 @@ export type BackupTaskGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type BackupTaskGroupByOutputType = {
   id: string
   name: string
-  mxId: string | null
-  serverId: string | null
+  serverId: string
   scope: runtime.JsonValue
   cronExpression: string
   status: $Enums.BackupTaskStatus
@@ -203,29 +196,25 @@ export type BackupTaskWhereInput = {
   NOT?: Prisma.BackupTaskWhereInput | Prisma.BackupTaskWhereInput[]
   id?: Prisma.StringFilter<"BackupTask"> | string
   name?: Prisma.StringFilter<"BackupTask"> | string
-  mxId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
-  serverId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
+  serverId?: Prisma.StringFilter<"BackupTask"> | string
   scope?: Prisma.JsonFilter<"BackupTask">
   cronExpression?: Prisma.StringFilter<"BackupTask"> | string
   status?: Prisma.EnumBackupTaskStatusFilter<"BackupTask"> | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
-  mx?: Prisma.XOR<Prisma.MxCredentialNullableScalarRelationFilter, Prisma.MxCredentialWhereInput> | null
-  server?: Prisma.XOR<Prisma.WafServerNullableScalarRelationFilter, Prisma.WafServerWhereInput> | null
+  server?: Prisma.XOR<Prisma.WafServerScalarRelationFilter, Prisma.WafServerWhereInput>
   executions?: Prisma.ExecutionLogListRelationFilter
 }
 
 export type BackupTaskOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  mxId?: Prisma.SortOrderInput | Prisma.SortOrder
-  serverId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serverId?: Prisma.SortOrder
   scope?: Prisma.SortOrder
   cronExpression?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mx?: Prisma.MxCredentialOrderByWithRelationInput
   server?: Prisma.WafServerOrderByWithRelationInput
   executions?: Prisma.ExecutionLogOrderByRelationAggregateInput
 }
@@ -236,23 +225,20 @@ export type BackupTaskWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BackupTaskWhereInput[]
   NOT?: Prisma.BackupTaskWhereInput | Prisma.BackupTaskWhereInput[]
   name?: Prisma.StringFilter<"BackupTask"> | string
-  mxId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
-  serverId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
+  serverId?: Prisma.StringFilter<"BackupTask"> | string
   scope?: Prisma.JsonFilter<"BackupTask">
   cronExpression?: Prisma.StringFilter<"BackupTask"> | string
   status?: Prisma.EnumBackupTaskStatusFilter<"BackupTask"> | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
-  mx?: Prisma.XOR<Prisma.MxCredentialNullableScalarRelationFilter, Prisma.MxCredentialWhereInput> | null
-  server?: Prisma.XOR<Prisma.WafServerNullableScalarRelationFilter, Prisma.WafServerWhereInput> | null
+  server?: Prisma.XOR<Prisma.WafServerScalarRelationFilter, Prisma.WafServerWhereInput>
   executions?: Prisma.ExecutionLogListRelationFilter
 }, "id">
 
 export type BackupTaskOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  mxId?: Prisma.SortOrderInput | Prisma.SortOrder
-  serverId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serverId?: Prisma.SortOrder
   scope?: Prisma.SortOrder
   cronExpression?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -269,8 +255,7 @@ export type BackupTaskScalarWhereWithAggregatesInput = {
   NOT?: Prisma.BackupTaskScalarWhereWithAggregatesInput | Prisma.BackupTaskScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"BackupTask"> | string
   name?: Prisma.StringWithAggregatesFilter<"BackupTask"> | string
-  mxId?: Prisma.StringNullableWithAggregatesFilter<"BackupTask"> | string | null
-  serverId?: Prisma.StringNullableWithAggregatesFilter<"BackupTask"> | string | null
+  serverId?: Prisma.StringWithAggregatesFilter<"BackupTask"> | string
   scope?: Prisma.JsonWithAggregatesFilter<"BackupTask">
   cronExpression?: Prisma.StringWithAggregatesFilter<"BackupTask"> | string
   status?: Prisma.EnumBackupTaskStatusWithAggregatesFilter<"BackupTask"> | $Enums.BackupTaskStatus
@@ -286,16 +271,14 @@ export type BackupTaskCreateInput = {
   status?: $Enums.BackupTaskStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutBackupTasksInput
-  server?: Prisma.WafServerCreateNestedOneWithoutBackupTasksInput
+  server: Prisma.WafServerCreateNestedOneWithoutBackupTasksInput
   executions?: Prisma.ExecutionLogCreateNestedManyWithoutTaskInput
 }
 
 export type BackupTaskUncheckedCreateInput = {
   id?: string
   name: string
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: string
   status?: $Enums.BackupTaskStatus
@@ -312,16 +295,14 @@ export type BackupTaskUpdateInput = {
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutBackupTasksNestedInput
-  server?: Prisma.WafServerUpdateOneWithoutBackupTasksNestedInput
+  server?: Prisma.WafServerUpdateOneRequiredWithoutBackupTasksNestedInput
   executions?: Prisma.ExecutionLogUpdateManyWithoutTaskNestedInput
 }
 
 export type BackupTaskUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
@@ -333,8 +314,7 @@ export type BackupTaskUncheckedUpdateInput = {
 export type BackupTaskCreateManyInput = {
   id?: string
   name: string
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: string
   status?: $Enums.BackupTaskStatus
@@ -355,8 +335,7 @@ export type BackupTaskUpdateManyMutationInput = {
 export type BackupTaskUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
@@ -377,7 +356,6 @@ export type BackupTaskOrderByRelationAggregateInput = {
 export type BackupTaskCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   scope?: Prisma.SortOrder
   cronExpression?: Prisma.SortOrder
@@ -389,7 +367,6 @@ export type BackupTaskCountOrderByAggregateInput = {
 export type BackupTaskMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   cronExpression?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -400,7 +377,6 @@ export type BackupTaskMaxOrderByAggregateInput = {
 export type BackupTaskMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   cronExpression?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -455,48 +431,6 @@ export type BackupTaskUncheckedUpdateManyWithoutServerNestedInput = {
   deleteMany?: Prisma.BackupTaskScalarWhereInput | Prisma.BackupTaskScalarWhereInput[]
 }
 
-export type BackupTaskCreateNestedManyWithoutMxInput = {
-  create?: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput> | Prisma.BackupTaskCreateWithoutMxInput[] | Prisma.BackupTaskUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.BackupTaskCreateOrConnectWithoutMxInput | Prisma.BackupTaskCreateOrConnectWithoutMxInput[]
-  createMany?: Prisma.BackupTaskCreateManyMxInputEnvelope
-  connect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-}
-
-export type BackupTaskUncheckedCreateNestedManyWithoutMxInput = {
-  create?: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput> | Prisma.BackupTaskCreateWithoutMxInput[] | Prisma.BackupTaskUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.BackupTaskCreateOrConnectWithoutMxInput | Prisma.BackupTaskCreateOrConnectWithoutMxInput[]
-  createMany?: Prisma.BackupTaskCreateManyMxInputEnvelope
-  connect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-}
-
-export type BackupTaskUpdateManyWithoutMxNestedInput = {
-  create?: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput> | Prisma.BackupTaskCreateWithoutMxInput[] | Prisma.BackupTaskUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.BackupTaskCreateOrConnectWithoutMxInput | Prisma.BackupTaskCreateOrConnectWithoutMxInput[]
-  upsert?: Prisma.BackupTaskUpsertWithWhereUniqueWithoutMxInput | Prisma.BackupTaskUpsertWithWhereUniqueWithoutMxInput[]
-  createMany?: Prisma.BackupTaskCreateManyMxInputEnvelope
-  set?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  disconnect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  delete?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  connect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  update?: Prisma.BackupTaskUpdateWithWhereUniqueWithoutMxInput | Prisma.BackupTaskUpdateWithWhereUniqueWithoutMxInput[]
-  updateMany?: Prisma.BackupTaskUpdateManyWithWhereWithoutMxInput | Prisma.BackupTaskUpdateManyWithWhereWithoutMxInput[]
-  deleteMany?: Prisma.BackupTaskScalarWhereInput | Prisma.BackupTaskScalarWhereInput[]
-}
-
-export type BackupTaskUncheckedUpdateManyWithoutMxNestedInput = {
-  create?: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput> | Prisma.BackupTaskCreateWithoutMxInput[] | Prisma.BackupTaskUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.BackupTaskCreateOrConnectWithoutMxInput | Prisma.BackupTaskCreateOrConnectWithoutMxInput[]
-  upsert?: Prisma.BackupTaskUpsertWithWhereUniqueWithoutMxInput | Prisma.BackupTaskUpsertWithWhereUniqueWithoutMxInput[]
-  createMany?: Prisma.BackupTaskCreateManyMxInputEnvelope
-  set?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  disconnect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  delete?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  connect?: Prisma.BackupTaskWhereUniqueInput | Prisma.BackupTaskWhereUniqueInput[]
-  update?: Prisma.BackupTaskUpdateWithWhereUniqueWithoutMxInput | Prisma.BackupTaskUpdateWithWhereUniqueWithoutMxInput[]
-  updateMany?: Prisma.BackupTaskUpdateManyWithWhereWithoutMxInput | Prisma.BackupTaskUpdateManyWithWhereWithoutMxInput[]
-  deleteMany?: Prisma.BackupTaskScalarWhereInput | Prisma.BackupTaskScalarWhereInput[]
-}
-
 export type EnumBackupTaskStatusFieldUpdateOperationsInput = {
   set?: $Enums.BackupTaskStatus
 }
@@ -523,14 +457,12 @@ export type BackupTaskCreateWithoutServerInput = {
   status?: $Enums.BackupTaskStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutBackupTasksInput
   executions?: Prisma.ExecutionLogCreateNestedManyWithoutTaskInput
 }
 
 export type BackupTaskUncheckedCreateWithoutServerInput = {
   id?: string
   name: string
-  mxId?: string | null
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: string
   status?: $Enums.BackupTaskStatus
@@ -571,63 +503,12 @@ export type BackupTaskScalarWhereInput = {
   NOT?: Prisma.BackupTaskScalarWhereInput | Prisma.BackupTaskScalarWhereInput[]
   id?: Prisma.StringFilter<"BackupTask"> | string
   name?: Prisma.StringFilter<"BackupTask"> | string
-  mxId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
-  serverId?: Prisma.StringNullableFilter<"BackupTask"> | string | null
+  serverId?: Prisma.StringFilter<"BackupTask"> | string
   scope?: Prisma.JsonFilter<"BackupTask">
   cronExpression?: Prisma.StringFilter<"BackupTask"> | string
   status?: Prisma.EnumBackupTaskStatusFilter<"BackupTask"> | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BackupTask"> | Date | string
-}
-
-export type BackupTaskCreateWithoutMxInput = {
-  id?: string
-  name: string
-  scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: string
-  status?: $Enums.BackupTaskStatus
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  server?: Prisma.WafServerCreateNestedOneWithoutBackupTasksInput
-  executions?: Prisma.ExecutionLogCreateNestedManyWithoutTaskInput
-}
-
-export type BackupTaskUncheckedCreateWithoutMxInput = {
-  id?: string
-  name: string
-  serverId?: string | null
-  scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: string
-  status?: $Enums.BackupTaskStatus
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  executions?: Prisma.ExecutionLogUncheckedCreateNestedManyWithoutTaskInput
-}
-
-export type BackupTaskCreateOrConnectWithoutMxInput = {
-  where: Prisma.BackupTaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput>
-}
-
-export type BackupTaskCreateManyMxInputEnvelope = {
-  data: Prisma.BackupTaskCreateManyMxInput | Prisma.BackupTaskCreateManyMxInput[]
-  skipDuplicates?: boolean
-}
-
-export type BackupTaskUpsertWithWhereUniqueWithoutMxInput = {
-  where: Prisma.BackupTaskWhereUniqueInput
-  update: Prisma.XOR<Prisma.BackupTaskUpdateWithoutMxInput, Prisma.BackupTaskUncheckedUpdateWithoutMxInput>
-  create: Prisma.XOR<Prisma.BackupTaskCreateWithoutMxInput, Prisma.BackupTaskUncheckedCreateWithoutMxInput>
-}
-
-export type BackupTaskUpdateWithWhereUniqueWithoutMxInput = {
-  where: Prisma.BackupTaskWhereUniqueInput
-  data: Prisma.XOR<Prisma.BackupTaskUpdateWithoutMxInput, Prisma.BackupTaskUncheckedUpdateWithoutMxInput>
-}
-
-export type BackupTaskUpdateManyWithWhereWithoutMxInput = {
-  where: Prisma.BackupTaskScalarWhereInput
-  data: Prisma.XOR<Prisma.BackupTaskUpdateManyMutationInput, Prisma.BackupTaskUncheckedUpdateManyWithoutMxInput>
 }
 
 export type BackupTaskCreateWithoutExecutionsInput = {
@@ -638,15 +519,13 @@ export type BackupTaskCreateWithoutExecutionsInput = {
   status?: $Enums.BackupTaskStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutBackupTasksInput
-  server?: Prisma.WafServerCreateNestedOneWithoutBackupTasksInput
+  server: Prisma.WafServerCreateNestedOneWithoutBackupTasksInput
 }
 
 export type BackupTaskUncheckedCreateWithoutExecutionsInput = {
   id?: string
   name: string
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: string
   status?: $Enums.BackupTaskStatus
@@ -678,15 +557,13 @@ export type BackupTaskUpdateWithoutExecutionsInput = {
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutBackupTasksNestedInput
-  server?: Prisma.WafServerUpdateOneWithoutBackupTasksNestedInput
+  server?: Prisma.WafServerUpdateOneRequiredWithoutBackupTasksNestedInput
 }
 
 export type BackupTaskUncheckedUpdateWithoutExecutionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
@@ -697,7 +574,6 @@ export type BackupTaskUncheckedUpdateWithoutExecutionsInput = {
 export type BackupTaskCreateManyServerInput = {
   id?: string
   name: string
-  mxId?: string | null
   scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: string
   status?: $Enums.BackupTaskStatus
@@ -713,14 +589,12 @@ export type BackupTaskUpdateWithoutServerInput = {
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutBackupTasksNestedInput
   executions?: Prisma.ExecutionLogUpdateManyWithoutTaskNestedInput
 }
 
 export type BackupTaskUncheckedUpdateWithoutServerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
@@ -732,53 +606,6 @@ export type BackupTaskUncheckedUpdateWithoutServerInput = {
 export type BackupTaskUncheckedUpdateManyWithoutServerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type BackupTaskCreateManyMxInput = {
-  id?: string
-  name: string
-  serverId?: string | null
-  scope: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: string
-  status?: $Enums.BackupTaskStatus
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type BackupTaskUpdateWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  server?: Prisma.WafServerUpdateOneWithoutBackupTasksNestedInput
-  executions?: Prisma.ExecutionLogUpdateManyWithoutTaskNestedInput
-}
-
-export type BackupTaskUncheckedUpdateWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  executions?: Prisma.ExecutionLogUncheckedUpdateManyWithoutTaskNestedInput
-}
-
-export type BackupTaskUncheckedUpdateManyWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scope?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   cronExpression?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumBackupTaskStatusFieldUpdateOperationsInput | $Enums.BackupTaskStatus
@@ -820,15 +647,13 @@ export type BackupTaskCountOutputTypeCountExecutionsArgs<ExtArgs extends runtime
 export type BackupTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  mxId?: boolean
   serverId?: boolean
   scope?: boolean
   cronExpression?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   executions?: boolean | Prisma.BackupTask$executionsArgs<ExtArgs>
   _count?: boolean | Prisma.BackupTaskCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["backupTask"]>
@@ -836,35 +661,30 @@ export type BackupTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type BackupTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  mxId?: boolean
   serverId?: boolean
   scope?: boolean
   cronExpression?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["backupTask"]>
 
 export type BackupTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  mxId?: boolean
   serverId?: boolean
   scope?: boolean
   cronExpression?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["backupTask"]>
 
 export type BackupTaskSelectScalar = {
   id?: boolean
   name?: boolean
-  mxId?: boolean
   serverId?: boolean
   scope?: boolean
   cronExpression?: boolean
@@ -873,34 +693,29 @@ export type BackupTaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BackupTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "mxId" | "serverId" | "scope" | "cronExpression" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["backupTask"]>
+export type BackupTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "serverId" | "scope" | "cronExpression" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["backupTask"]>
 export type BackupTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   executions?: boolean | Prisma.BackupTask$executionsArgs<ExtArgs>
   _count?: boolean | Prisma.BackupTaskCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BackupTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
 }
 export type BackupTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.BackupTask$mxArgs<ExtArgs>
-  server?: boolean | Prisma.BackupTask$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
 }
 
 export type $BackupTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BackupTask"
   objects: {
-    mx: Prisma.$MxCredentialPayload<ExtArgs> | null
-    server: Prisma.$WafServerPayload<ExtArgs> | null
+    server: Prisma.$WafServerPayload<ExtArgs>
     executions: Prisma.$ExecutionLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
-    mxId: string | null
-    serverId: string | null
+    serverId: string
     scope: runtime.JsonValue
     cronExpression: string
     status: $Enums.BackupTaskStatus
@@ -1300,8 +1115,7 @@ readonly fields: BackupTaskFieldRefs;
  */
 export interface Prisma__BackupTaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  mx<T extends Prisma.BackupTask$mxArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BackupTask$mxArgs<ExtArgs>>): Prisma.Prisma__MxCredentialClient<runtime.Types.Result.GetResult<Prisma.$MxCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  server<T extends Prisma.BackupTask$serverArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BackupTask$serverArgs<ExtArgs>>): Prisma.Prisma__WafServerClient<runtime.Types.Result.GetResult<Prisma.$WafServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  server<T extends Prisma.WafServerDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WafServerDefaultArgs<ExtArgs>>): Prisma.Prisma__WafServerClient<runtime.Types.Result.GetResult<Prisma.$WafServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   executions<T extends Prisma.BackupTask$executionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BackupTask$executionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExecutionLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1334,7 +1148,6 @@ export interface Prisma__BackupTaskClient<T, Null = never, ExtArgs extends runti
 export interface BackupTaskFieldRefs {
   readonly id: Prisma.FieldRef<"BackupTask", 'String'>
   readonly name: Prisma.FieldRef<"BackupTask", 'String'>
-  readonly mxId: Prisma.FieldRef<"BackupTask", 'String'>
   readonly serverId: Prisma.FieldRef<"BackupTask", 'String'>
   readonly scope: Prisma.FieldRef<"BackupTask", 'Json'>
   readonly cronExpression: Prisma.FieldRef<"BackupTask", 'String'>
@@ -1739,44 +1552,6 @@ export type BackupTaskDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many BackupTasks to delete.
    */
   limit?: number
-}
-
-/**
- * BackupTask.mx
- */
-export type BackupTask$mxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MxCredential
-   */
-  select?: Prisma.MxCredentialSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MxCredential
-   */
-  omit?: Prisma.MxCredentialOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MxCredentialInclude<ExtArgs> | null
-  where?: Prisma.MxCredentialWhereInput
-}
-
-/**
- * BackupTask.server
- */
-export type BackupTask$serverArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the WafServer
-   */
-  select?: Prisma.WafServerSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the WafServer
-   */
-  omit?: Prisma.WafServerOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WafServerInclude<ExtArgs> | null
-  where?: Prisma.WafServerWhereInput
 }
 
 /**

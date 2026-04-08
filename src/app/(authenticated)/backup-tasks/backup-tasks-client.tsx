@@ -193,9 +193,9 @@ export function BackupTasksPageClient() {
                   <Text fw={500}>{task.name}</Text>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">{task.server?.name ?? task.mx?.name ?? "—"}</Text>
+                  <Text size="sm">{task.server?.name ?? "—"}</Text>
                   <Text size="xs" c="dimmed" ff="monospace">
-                    {task.server?.host ?? task.mx?.host ?? "—"}
+                    {task.server?.host ?? "—"}
                   </Text>
                 </Table.Td>
                 <Table.Td>

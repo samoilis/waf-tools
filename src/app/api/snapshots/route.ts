@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 // GET /api/snapshots
-//   ?view=servers                       → list MX servers with snapshot counts
-//   ?view=executions&mxId=...           → list executions for an MX
-//   ?view=tree&mxId=...&executionId=... → tree data (entity types + entities) for an execution
-//   ?view=entity&mxId=...&executionId=...&entityType=...&entityId=... → single entity data
+//   ?view=servers                            → list WAF servers with snapshot counts
+//   ?view=executions&serverId=...            → list executions for a server
+//   ?view=tree&serverId=...&executionId=...  → tree data (entity types + entities) for an execution
+//   ?view=entity&serverId=...&executionId=...&entityType=...&entityId=... → single entity data
 export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user) {
@@ -15,8 +15,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = request.nextUrl;
   const view = searchParams.get("view") ?? "servers";
-  const mxId = searchParams.get("mxId");
-  const serverId = searchParams.get("serverId") ?? mxId; // support both params
+  const serverId = searchParams.get("serverId");
 
   // ─── List WAF servers ──────────────────────────────────
   if (view === "servers") {

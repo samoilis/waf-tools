@@ -28,7 +28,6 @@ export type ConfigSnapshotMinAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  mxId: string | null
   serverId: string | null
   basedOnExec: string | null
   createdById: string | null
@@ -40,7 +39,6 @@ export type ConfigSnapshotMaxAggregateOutputType = {
   id: string | null
   name: string | null
   description: string | null
-  mxId: string | null
   serverId: string | null
   basedOnExec: string | null
   createdById: string | null
@@ -52,7 +50,6 @@ export type ConfigSnapshotCountAggregateOutputType = {
   id: number
   name: number
   description: number
-  mxId: number
   serverId: number
   basedOnExec: number
   createdById: number
@@ -66,7 +63,6 @@ export type ConfigSnapshotMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  mxId?: true
   serverId?: true
   basedOnExec?: true
   createdById?: true
@@ -78,7 +74,6 @@ export type ConfigSnapshotMaxAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  mxId?: true
   serverId?: true
   basedOnExec?: true
   createdById?: true
@@ -90,7 +85,6 @@ export type ConfigSnapshotCountAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  mxId?: true
   serverId?: true
   basedOnExec?: true
   createdById?: true
@@ -175,8 +169,7 @@ export type ConfigSnapshotGroupByOutputType = {
   id: string
   name: string
   description: string | null
-  mxId: string | null
-  serverId: string | null
+  serverId: string
   basedOnExec: string | null
   createdById: string
   createdAt: Date
@@ -208,14 +201,12 @@ export type ConfigSnapshotWhereInput = {
   id?: Prisma.StringFilter<"ConfigSnapshot"> | string
   name?: Prisma.StringFilter<"ConfigSnapshot"> | string
   description?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  mxId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  serverId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
+  serverId?: Prisma.StringFilter<"ConfigSnapshot"> | string
   basedOnExec?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
   createdById?: Prisma.StringFilter<"ConfigSnapshot"> | string
   createdAt?: Prisma.DateTimeFilter<"ConfigSnapshot"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConfigSnapshot"> | Date | string
-  mx?: Prisma.XOR<Prisma.MxCredentialNullableScalarRelationFilter, Prisma.MxCredentialWhereInput> | null
-  server?: Prisma.XOR<Prisma.WafServerNullableScalarRelationFilter, Prisma.WafServerWhereInput> | null
+  server?: Prisma.XOR<Prisma.WafServerScalarRelationFilter, Prisma.WafServerWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   items?: Prisma.ConfigSnapshotItemListRelationFilter
 }
@@ -224,13 +215,11 @@ export type ConfigSnapshotOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  mxId?: Prisma.SortOrderInput | Prisma.SortOrder
-  serverId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serverId?: Prisma.SortOrder
   basedOnExec?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mx?: Prisma.MxCredentialOrderByWithRelationInput
   server?: Prisma.WafServerOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   items?: Prisma.ConfigSnapshotItemOrderByRelationAggregateInput
@@ -243,14 +232,12 @@ export type ConfigSnapshotWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ConfigSnapshotWhereInput | Prisma.ConfigSnapshotWhereInput[]
   name?: Prisma.StringFilter<"ConfigSnapshot"> | string
   description?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  mxId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  serverId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
+  serverId?: Prisma.StringFilter<"ConfigSnapshot"> | string
   basedOnExec?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
   createdById?: Prisma.StringFilter<"ConfigSnapshot"> | string
   createdAt?: Prisma.DateTimeFilter<"ConfigSnapshot"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ConfigSnapshot"> | Date | string
-  mx?: Prisma.XOR<Prisma.MxCredentialNullableScalarRelationFilter, Prisma.MxCredentialWhereInput> | null
-  server?: Prisma.XOR<Prisma.WafServerNullableScalarRelationFilter, Prisma.WafServerWhereInput> | null
+  server?: Prisma.XOR<Prisma.WafServerScalarRelationFilter, Prisma.WafServerWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   items?: Prisma.ConfigSnapshotItemListRelationFilter
 }, "id">
@@ -259,8 +246,7 @@ export type ConfigSnapshotOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  mxId?: Prisma.SortOrderInput | Prisma.SortOrder
-  serverId?: Prisma.SortOrderInput | Prisma.SortOrder
+  serverId?: Prisma.SortOrder
   basedOnExec?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -277,8 +263,7 @@ export type ConfigSnapshotScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ConfigSnapshot"> | string
   name?: Prisma.StringWithAggregatesFilter<"ConfigSnapshot"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"ConfigSnapshot"> | string | null
-  mxId?: Prisma.StringNullableWithAggregatesFilter<"ConfigSnapshot"> | string | null
-  serverId?: Prisma.StringNullableWithAggregatesFilter<"ConfigSnapshot"> | string | null
+  serverId?: Prisma.StringWithAggregatesFilter<"ConfigSnapshot"> | string
   basedOnExec?: Prisma.StringNullableWithAggregatesFilter<"ConfigSnapshot"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"ConfigSnapshot"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConfigSnapshot"> | Date | string
@@ -292,8 +277,7 @@ export type ConfigSnapshotCreateInput = {
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutConfigSnapshotsInput
-  server?: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
+  server: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
   createdBy: Prisma.UserCreateNestedOneWithoutConfigSnapshotsInput
   items?: Prisma.ConfigSnapshotItemCreateNestedManyWithoutSnapshotInput
 }
@@ -302,8 +286,7 @@ export type ConfigSnapshotUncheckedCreateInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   basedOnExec?: string | null
   createdById: string
   createdAt?: Date | string
@@ -318,8 +301,7 @@ export type ConfigSnapshotUpdateInput = {
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutConfigSnapshotsNestedInput
-  server?: Prisma.WafServerUpdateOneWithoutConfigSnapshotsNestedInput
+  server?: Prisma.WafServerUpdateOneRequiredWithoutConfigSnapshotsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutConfigSnapshotsNestedInput
   items?: Prisma.ConfigSnapshotItemUpdateManyWithoutSnapshotNestedInput
 }
@@ -328,8 +310,7 @@ export type ConfigSnapshotUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -341,8 +322,7 @@ export type ConfigSnapshotCreateManyInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   basedOnExec?: string | null
   createdById: string
   createdAt?: Date | string
@@ -362,8 +342,7 @@ export type ConfigSnapshotUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -384,7 +363,6 @@ export type ConfigSnapshotCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   basedOnExec?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -396,7 +374,6 @@ export type ConfigSnapshotMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   basedOnExec?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -408,7 +385,6 @@ export type ConfigSnapshotMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  mxId?: Prisma.SortOrder
   serverId?: Prisma.SortOrder
   basedOnExec?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -505,48 +481,6 @@ export type ConfigSnapshotUncheckedUpdateManyWithoutServerNestedInput = {
   deleteMany?: Prisma.ConfigSnapshotScalarWhereInput | Prisma.ConfigSnapshotScalarWhereInput[]
 }
 
-export type ConfigSnapshotCreateNestedManyWithoutMxInput = {
-  create?: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput> | Prisma.ConfigSnapshotCreateWithoutMxInput[] | Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput | Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput[]
-  createMany?: Prisma.ConfigSnapshotCreateManyMxInputEnvelope
-  connect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-}
-
-export type ConfigSnapshotUncheckedCreateNestedManyWithoutMxInput = {
-  create?: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput> | Prisma.ConfigSnapshotCreateWithoutMxInput[] | Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput | Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput[]
-  createMany?: Prisma.ConfigSnapshotCreateManyMxInputEnvelope
-  connect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-}
-
-export type ConfigSnapshotUpdateManyWithoutMxNestedInput = {
-  create?: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput> | Prisma.ConfigSnapshotCreateWithoutMxInput[] | Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput | Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput[]
-  upsert?: Prisma.ConfigSnapshotUpsertWithWhereUniqueWithoutMxInput | Prisma.ConfigSnapshotUpsertWithWhereUniqueWithoutMxInput[]
-  createMany?: Prisma.ConfigSnapshotCreateManyMxInputEnvelope
-  set?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  disconnect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  delete?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  connect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  update?: Prisma.ConfigSnapshotUpdateWithWhereUniqueWithoutMxInput | Prisma.ConfigSnapshotUpdateWithWhereUniqueWithoutMxInput[]
-  updateMany?: Prisma.ConfigSnapshotUpdateManyWithWhereWithoutMxInput | Prisma.ConfigSnapshotUpdateManyWithWhereWithoutMxInput[]
-  deleteMany?: Prisma.ConfigSnapshotScalarWhereInput | Prisma.ConfigSnapshotScalarWhereInput[]
-}
-
-export type ConfigSnapshotUncheckedUpdateManyWithoutMxNestedInput = {
-  create?: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput> | Prisma.ConfigSnapshotCreateWithoutMxInput[] | Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput[]
-  connectOrCreate?: Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput | Prisma.ConfigSnapshotCreateOrConnectWithoutMxInput[]
-  upsert?: Prisma.ConfigSnapshotUpsertWithWhereUniqueWithoutMxInput | Prisma.ConfigSnapshotUpsertWithWhereUniqueWithoutMxInput[]
-  createMany?: Prisma.ConfigSnapshotCreateManyMxInputEnvelope
-  set?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  disconnect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  delete?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  connect?: Prisma.ConfigSnapshotWhereUniqueInput | Prisma.ConfigSnapshotWhereUniqueInput[]
-  update?: Prisma.ConfigSnapshotUpdateWithWhereUniqueWithoutMxInput | Prisma.ConfigSnapshotUpdateWithWhereUniqueWithoutMxInput[]
-  updateMany?: Prisma.ConfigSnapshotUpdateManyWithWhereWithoutMxInput | Prisma.ConfigSnapshotUpdateManyWithWhereWithoutMxInput[]
-  deleteMany?: Prisma.ConfigSnapshotScalarWhereInput | Prisma.ConfigSnapshotScalarWhereInput[]
-}
-
 export type ConfigSnapshotCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutItemsInput, Prisma.ConfigSnapshotUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.ConfigSnapshotCreateOrConnectWithoutItemsInput
@@ -568,8 +502,7 @@ export type ConfigSnapshotCreateWithoutCreatedByInput = {
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutConfigSnapshotsInput
-  server?: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
+  server: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
   items?: Prisma.ConfigSnapshotItemCreateNestedManyWithoutSnapshotInput
 }
 
@@ -577,8 +510,7 @@ export type ConfigSnapshotUncheckedCreateWithoutCreatedByInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -618,8 +550,7 @@ export type ConfigSnapshotScalarWhereInput = {
   id?: Prisma.StringFilter<"ConfigSnapshot"> | string
   name?: Prisma.StringFilter<"ConfigSnapshot"> | string
   description?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  mxId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
-  serverId?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
+  serverId?: Prisma.StringFilter<"ConfigSnapshot"> | string
   basedOnExec?: Prisma.StringNullableFilter<"ConfigSnapshot"> | string | null
   createdById?: Prisma.StringFilter<"ConfigSnapshot"> | string
   createdAt?: Prisma.DateTimeFilter<"ConfigSnapshot"> | Date | string
@@ -633,7 +564,6 @@ export type ConfigSnapshotCreateWithoutServerInput = {
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutConfigSnapshotsInput
   createdBy: Prisma.UserCreateNestedOneWithoutConfigSnapshotsInput
   items?: Prisma.ConfigSnapshotItemCreateNestedManyWithoutSnapshotInput
 }
@@ -642,7 +572,6 @@ export type ConfigSnapshotUncheckedCreateWithoutServerInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
   basedOnExec?: string | null
   createdById: string
   createdAt?: Date | string
@@ -676,56 +605,6 @@ export type ConfigSnapshotUpdateManyWithWhereWithoutServerInput = {
   data: Prisma.XOR<Prisma.ConfigSnapshotUpdateManyMutationInput, Prisma.ConfigSnapshotUncheckedUpdateManyWithoutServerInput>
 }
 
-export type ConfigSnapshotCreateWithoutMxInput = {
-  id?: string
-  name: string
-  description?: string | null
-  basedOnExec?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  server?: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutConfigSnapshotsInput
-  items?: Prisma.ConfigSnapshotItemCreateNestedManyWithoutSnapshotInput
-}
-
-export type ConfigSnapshotUncheckedCreateWithoutMxInput = {
-  id?: string
-  name: string
-  description?: string | null
-  serverId?: string | null
-  basedOnExec?: string | null
-  createdById: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  items?: Prisma.ConfigSnapshotItemUncheckedCreateNestedManyWithoutSnapshotInput
-}
-
-export type ConfigSnapshotCreateOrConnectWithoutMxInput = {
-  where: Prisma.ConfigSnapshotWhereUniqueInput
-  create: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput>
-}
-
-export type ConfigSnapshotCreateManyMxInputEnvelope = {
-  data: Prisma.ConfigSnapshotCreateManyMxInput | Prisma.ConfigSnapshotCreateManyMxInput[]
-  skipDuplicates?: boolean
-}
-
-export type ConfigSnapshotUpsertWithWhereUniqueWithoutMxInput = {
-  where: Prisma.ConfigSnapshotWhereUniqueInput
-  update: Prisma.XOR<Prisma.ConfigSnapshotUpdateWithoutMxInput, Prisma.ConfigSnapshotUncheckedUpdateWithoutMxInput>
-  create: Prisma.XOR<Prisma.ConfigSnapshotCreateWithoutMxInput, Prisma.ConfigSnapshotUncheckedCreateWithoutMxInput>
-}
-
-export type ConfigSnapshotUpdateWithWhereUniqueWithoutMxInput = {
-  where: Prisma.ConfigSnapshotWhereUniqueInput
-  data: Prisma.XOR<Prisma.ConfigSnapshotUpdateWithoutMxInput, Prisma.ConfigSnapshotUncheckedUpdateWithoutMxInput>
-}
-
-export type ConfigSnapshotUpdateManyWithWhereWithoutMxInput = {
-  where: Prisma.ConfigSnapshotScalarWhereInput
-  data: Prisma.XOR<Prisma.ConfigSnapshotUpdateManyMutationInput, Prisma.ConfigSnapshotUncheckedUpdateManyWithoutMxInput>
-}
-
 export type ConfigSnapshotCreateWithoutItemsInput = {
   id?: string
   name: string
@@ -733,8 +612,7 @@ export type ConfigSnapshotCreateWithoutItemsInput = {
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mx?: Prisma.MxCredentialCreateNestedOneWithoutConfigSnapshotsInput
-  server?: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
+  server: Prisma.WafServerCreateNestedOneWithoutConfigSnapshotsInput
   createdBy: Prisma.UserCreateNestedOneWithoutConfigSnapshotsInput
 }
 
@@ -742,8 +620,7 @@ export type ConfigSnapshotUncheckedCreateWithoutItemsInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   basedOnExec?: string | null
   createdById: string
   createdAt?: Date | string
@@ -773,8 +650,7 @@ export type ConfigSnapshotUpdateWithoutItemsInput = {
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutConfigSnapshotsNestedInput
-  server?: Prisma.WafServerUpdateOneWithoutConfigSnapshotsNestedInput
+  server?: Prisma.WafServerUpdateOneRequiredWithoutConfigSnapshotsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutConfigSnapshotsNestedInput
 }
 
@@ -782,8 +658,7 @@ export type ConfigSnapshotUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -794,8 +669,7 @@ export type ConfigSnapshotCreateManyCreatedByInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
-  serverId?: string | null
+  serverId: string
   basedOnExec?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -808,8 +682,7 @@ export type ConfigSnapshotUpdateWithoutCreatedByInput = {
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutConfigSnapshotsNestedInput
-  server?: Prisma.WafServerUpdateOneWithoutConfigSnapshotsNestedInput
+  server?: Prisma.WafServerUpdateOneRequiredWithoutConfigSnapshotsNestedInput
   items?: Prisma.ConfigSnapshotItemUpdateManyWithoutSnapshotNestedInput
 }
 
@@ -817,8 +690,7 @@ export type ConfigSnapshotUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -829,8 +701,7 @@ export type ConfigSnapshotUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverId?: Prisma.StringFieldUpdateOperationsInput | string
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -840,7 +711,6 @@ export type ConfigSnapshotCreateManyServerInput = {
   id?: string
   name: string
   description?: string | null
-  mxId?: string | null
   basedOnExec?: string | null
   createdById: string
   createdAt?: Date | string
@@ -854,7 +724,6 @@ export type ConfigSnapshotUpdateWithoutServerInput = {
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mx?: Prisma.MxCredentialUpdateOneWithoutConfigSnapshotsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutConfigSnapshotsNestedInput
   items?: Prisma.ConfigSnapshotItemUpdateManyWithoutSnapshotNestedInput
 }
@@ -863,7 +732,6 @@ export type ConfigSnapshotUncheckedUpdateWithoutServerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -875,53 +743,6 @@ export type ConfigSnapshotUncheckedUpdateManyWithoutServerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mxId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type ConfigSnapshotCreateManyMxInput = {
-  id?: string
-  name: string
-  description?: string | null
-  serverId?: string | null
-  basedOnExec?: string | null
-  createdById: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type ConfigSnapshotUpdateWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  server?: Prisma.WafServerUpdateOneWithoutConfigSnapshotsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutConfigSnapshotsNestedInput
-  items?: Prisma.ConfigSnapshotItemUpdateManyWithoutSnapshotNestedInput
-}
-
-export type ConfigSnapshotUncheckedUpdateWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  items?: Prisma.ConfigSnapshotItemUncheckedUpdateManyWithoutSnapshotNestedInput
-}
-
-export type ConfigSnapshotUncheckedUpdateManyWithoutMxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basedOnExec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -963,14 +784,12 @@ export type ConfigSnapshotSelect<ExtArgs extends runtime.Types.Extensions.Intern
   id?: boolean
   name?: boolean
   description?: boolean
-  mxId?: boolean
   serverId?: boolean
   basedOnExec?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   items?: boolean | Prisma.ConfigSnapshot$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.ConfigSnapshotCountOutputTypeDefaultArgs<ExtArgs>
@@ -980,14 +799,12 @@ export type ConfigSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   name?: boolean
   description?: boolean
-  mxId?: boolean
   serverId?: boolean
   basedOnExec?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["configSnapshot"]>
 
@@ -995,14 +812,12 @@ export type ConfigSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   name?: boolean
   description?: boolean
-  mxId?: boolean
   serverId?: boolean
   basedOnExec?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["configSnapshot"]>
 
@@ -1010,7 +825,6 @@ export type ConfigSnapshotSelectScalar = {
   id?: boolean
   name?: boolean
   description?: boolean
-  mxId?: boolean
   serverId?: boolean
   basedOnExec?: boolean
   createdById?: boolean
@@ -1018,30 +832,26 @@ export type ConfigSnapshotSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConfigSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "mxId" | "serverId" | "basedOnExec" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["configSnapshot"]>
+export type ConfigSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "serverId" | "basedOnExec" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["configSnapshot"]>
 export type ConfigSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   items?: boolean | Prisma.ConfigSnapshot$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.ConfigSnapshotCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConfigSnapshotIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type ConfigSnapshotIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mx?: boolean | Prisma.ConfigSnapshot$mxArgs<ExtArgs>
-  server?: boolean | Prisma.ConfigSnapshot$serverArgs<ExtArgs>
+  server?: boolean | Prisma.WafServerDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $ConfigSnapshotPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ConfigSnapshot"
   objects: {
-    mx: Prisma.$MxCredentialPayload<ExtArgs> | null
-    server: Prisma.$WafServerPayload<ExtArgs> | null
+    server: Prisma.$WafServerPayload<ExtArgs>
     createdBy: Prisma.$UserPayload<ExtArgs>
     items: Prisma.$ConfigSnapshotItemPayload<ExtArgs>[]
   }
@@ -1049,8 +859,7 @@ export type $ConfigSnapshotPayload<ExtArgs extends runtime.Types.Extensions.Inte
     id: string
     name: string
     description: string | null
-    mxId: string | null
-    serverId: string | null
+    serverId: string
     basedOnExec: string | null
     createdById: string
     createdAt: Date
@@ -1449,8 +1258,7 @@ readonly fields: ConfigSnapshotFieldRefs;
  */
 export interface Prisma__ConfigSnapshotClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  mx<T extends Prisma.ConfigSnapshot$mxArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConfigSnapshot$mxArgs<ExtArgs>>): Prisma.Prisma__MxCredentialClient<runtime.Types.Result.GetResult<Prisma.$MxCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  server<T extends Prisma.ConfigSnapshot$serverArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConfigSnapshot$serverArgs<ExtArgs>>): Prisma.Prisma__WafServerClient<runtime.Types.Result.GetResult<Prisma.$WafServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  server<T extends Prisma.WafServerDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WafServerDefaultArgs<ExtArgs>>): Prisma.Prisma__WafServerClient<runtime.Types.Result.GetResult<Prisma.$WafServerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.ConfigSnapshot$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConfigSnapshot$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConfigSnapshotItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1485,7 +1293,6 @@ export interface ConfigSnapshotFieldRefs {
   readonly id: Prisma.FieldRef<"ConfigSnapshot", 'String'>
   readonly name: Prisma.FieldRef<"ConfigSnapshot", 'String'>
   readonly description: Prisma.FieldRef<"ConfigSnapshot", 'String'>
-  readonly mxId: Prisma.FieldRef<"ConfigSnapshot", 'String'>
   readonly serverId: Prisma.FieldRef<"ConfigSnapshot", 'String'>
   readonly basedOnExec: Prisma.FieldRef<"ConfigSnapshot", 'String'>
   readonly createdById: Prisma.FieldRef<"ConfigSnapshot", 'String'>
@@ -1889,44 +1696,6 @@ export type ConfigSnapshotDeleteManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many ConfigSnapshots to delete.
    */
   limit?: number
-}
-
-/**
- * ConfigSnapshot.mx
- */
-export type ConfigSnapshot$mxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MxCredential
-   */
-  select?: Prisma.MxCredentialSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MxCredential
-   */
-  omit?: Prisma.MxCredentialOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MxCredentialInclude<ExtArgs> | null
-  where?: Prisma.MxCredentialWhereInput
-}
-
-/**
- * ConfigSnapshot.server
- */
-export type ConfigSnapshot$serverArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the WafServer
-   */
-  select?: Prisma.WafServerSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the WafServer
-   */
-  omit?: Prisma.WafServerOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.WafServerInclude<ExtArgs> | null
-  where?: Prisma.WafServerWhereInput
 }
 
 /**

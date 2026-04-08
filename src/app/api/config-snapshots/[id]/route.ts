@@ -19,7 +19,6 @@ export async function GET(
     where: { id },
     include: {
       items: { orderBy: [{ entityType: "asc" }, { entityName: "asc" }] },
-      mx: { select: { name: true, host: true } },
       server: { select: { name: true, host: true, vendorType: true } },
       createdBy: { select: { username: true, displayName: true } },
     },

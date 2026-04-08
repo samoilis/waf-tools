@@ -387,7 +387,6 @@ export const ModelName = {
   User: 'User',
   Setting: 'Setting',
   WafServer: 'WafServer',
-  MxCredential: 'MxCredential',
   BackupTask: 'BackupTask',
   ExecutionLog: 'ExecutionLog',
   BackupSnapshot: 'BackupSnapshot',
@@ -409,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "setting" | "wafServer" | "mxCredential" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
+    modelProps: "user" | "setting" | "wafServer" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -632,80 +631,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.WafServerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.WafServerCountAggregateOutputType> | number
-        }
-      }
-    }
-    MxCredential: {
-      payload: Prisma.$MxCredentialPayload<ExtArgs>
-      fields: Prisma.MxCredentialFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.MxCredentialFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.MxCredentialFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        findFirst: {
-          args: Prisma.MxCredentialFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.MxCredentialFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        findMany: {
-          args: Prisma.MxCredentialFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>[]
-        }
-        create: {
-          args: Prisma.MxCredentialCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        createMany: {
-          args: Prisma.MxCredentialCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.MxCredentialCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>[]
-        }
-        delete: {
-          args: Prisma.MxCredentialDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        update: {
-          args: Prisma.MxCredentialUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        deleteMany: {
-          args: Prisma.MxCredentialDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.MxCredentialUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.MxCredentialUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>[]
-        }
-        upsert: {
-          args: Prisma.MxCredentialUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MxCredentialPayload>
-        }
-        aggregate: {
-          args: Prisma.MxCredentialAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMxCredential>
-        }
-        groupBy: {
-          args: Prisma.MxCredentialGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MxCredentialGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.MxCredentialCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MxCredentialCountAggregateOutputType> | number
         }
       }
     }
@@ -1231,23 +1156,9 @@ export const WafServerScalarFieldEnum = {
 export type WafServerScalarFieldEnum = (typeof WafServerScalarFieldEnum)[keyof typeof WafServerScalarFieldEnum]
 
 
-export const MxCredentialScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  host: 'host',
-  username: 'username',
-  authorization: 'authorization',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type MxCredentialScalarFieldEnum = (typeof MxCredentialScalarFieldEnum)[keyof typeof MxCredentialScalarFieldEnum]
-
-
 export const BackupTaskScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  mxId: 'mxId',
   serverId: 'serverId',
   scope: 'scope',
   cronExpression: 'cronExpression',
@@ -1288,7 +1199,6 @@ export const ConfigSnapshotScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  mxId: 'mxId',
   serverId: 'serverId',
   basedOnExec: 'basedOnExec',
   createdById: 'createdById',
@@ -1623,7 +1533,6 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   setting?: Prisma.SettingOmit
   wafServer?: Prisma.WafServerOmit
-  mxCredential?: Prisma.MxCredentialOmit
   backupTask?: Prisma.BackupTaskOmit
   executionLog?: Prisma.ExecutionLogOmit
   backupSnapshot?: Prisma.BackupSnapshotOmit

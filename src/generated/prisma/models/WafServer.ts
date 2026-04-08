@@ -439,9 +439,9 @@ export type WafServerSumOrderByAggregateInput = {
   port?: Prisma.SortOrder
 }
 
-export type WafServerNullableScalarRelationFilter = {
-  is?: Prisma.WafServerWhereInput | null
-  isNot?: Prisma.WafServerWhereInput | null
+export type WafServerScalarRelationFilter = {
+  is?: Prisma.WafServerWhereInput
+  isNot?: Prisma.WafServerWhereInput
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -462,12 +462,10 @@ export type WafServerCreateNestedOneWithoutBackupTasksInput = {
   connect?: Prisma.WafServerWhereUniqueInput
 }
 
-export type WafServerUpdateOneWithoutBackupTasksNestedInput = {
+export type WafServerUpdateOneRequiredWithoutBackupTasksNestedInput = {
   create?: Prisma.XOR<Prisma.WafServerCreateWithoutBackupTasksInput, Prisma.WafServerUncheckedCreateWithoutBackupTasksInput>
   connectOrCreate?: Prisma.WafServerCreateOrConnectWithoutBackupTasksInput
   upsert?: Prisma.WafServerUpsertWithoutBackupTasksInput
-  disconnect?: Prisma.WafServerWhereInput | boolean
-  delete?: Prisma.WafServerWhereInput | boolean
   connect?: Prisma.WafServerWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WafServerUpdateToOneWithWhereWithoutBackupTasksInput, Prisma.WafServerUpdateWithoutBackupTasksInput>, Prisma.WafServerUncheckedUpdateWithoutBackupTasksInput>
 }
@@ -478,12 +476,10 @@ export type WafServerCreateNestedOneWithoutConfigSnapshotsInput = {
   connect?: Prisma.WafServerWhereUniqueInput
 }
 
-export type WafServerUpdateOneWithoutConfigSnapshotsNestedInput = {
+export type WafServerUpdateOneRequiredWithoutConfigSnapshotsNestedInput = {
   create?: Prisma.XOR<Prisma.WafServerCreateWithoutConfigSnapshotsInput, Prisma.WafServerUncheckedCreateWithoutConfigSnapshotsInput>
   connectOrCreate?: Prisma.WafServerCreateOrConnectWithoutConfigSnapshotsInput
   upsert?: Prisma.WafServerUpsertWithoutConfigSnapshotsInput
-  disconnect?: Prisma.WafServerWhereInput | boolean
-  delete?: Prisma.WafServerWhereInput | boolean
   connect?: Prisma.WafServerWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WafServerUpdateToOneWithWhereWithoutConfigSnapshotsInput, Prisma.WafServerUpdateWithoutConfigSnapshotsInput>, Prisma.WafServerUncheckedUpdateWithoutConfigSnapshotsInput>
 }

@@ -14,9 +14,11 @@ import {
   Divider,
   Alert,
   Select,
+  Modal,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { AlertCircle, Mail, Server } from "lucide-react";
+import { AlertCircle, Mail, Server, Send } from "lucide-react";
 
 interface SmtpSyslogTabProps {
   settings: Record<string, string>;
@@ -48,7 +50,101 @@ export function SmtpSyslogTab({ settings, onSave }: SmtpSyslogTabProps) {
   const [syslogFacility, setSyslogFacility] = useState(str(settings["syslog.facility"]) || "local0");
 
   const [saving, setSaving] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [sendingSyslogTest, setSendingSyslogTest] = useState(false);
+  const [testEmailTo, setTestEmailTo] = useState("");
+  const [testErrorOpened, { open: openTestError, close: closeTestError }] = useDisclosure(false);
+  const [testError, setTestError] = useState("");
+  const [testErrorTitle, setTestErrorTitle] = useState("Error");
   const [error, setError] = useState<string | null>(null);
+
+  async function handleSendTestEmail() {
+    if (!smtpHost || !smtpPort || !smtpFromAddress || !testEmailTo) {
+      setTestError("Please fill in Host, Port, From Address and a recipient email address.");
+      setTestErrorTitle("Test Email Error");
+      openTestError();
+      return;
+    }
+
+    setSendingTest(true);
+    try {
+      const res = await fetch("/api/settings/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: smtpHost,
+          port: smtpPort,
+          username: smtpUsername,
+          password: smtpPassword,
+          fromAddress: smtpFromAddress,
+          fromName: smtpFromName,
+          tls: smtpTls,
+          toAddress: testEmailTo,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setTestError(data.error || "Failed to send test email");
+        setTestErrorTitle("Test Email Error");
+        openTestError();
+      } else {
+        notifications.show({
+          title: "Success",
+          message: "Test email sent successfully!",
+          color: "green",
+        });
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to send test email";
+      setTestError(msg);
+      setTestErrorTitle("Test Email Error");
+      openTestError();
+    } finally {
+      setSendingTest(false);
+    }
+  }
+
+  async function handleSendTestSyslog() {
+    if (!syslogHost || !syslogPort) {
+      setTestError("Please fill in Host and Port.");
+      setTestErrorTitle("Test Syslog Error");
+      openTestError();
+      return;
+    }
+
+    setSendingSyslogTest(true);
+    try {
+      const res = await fetch("/api/settings/test-syslog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: syslogHost,
+          port: syslogPort,
+          protocol: syslogProtocol,
+          facility: syslogFacility,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setTestError(data.error || "Failed to send test syslog message");
+        setTestErrorTitle("Test Syslog Error");
+        openTestError();
+      } else {
+        notifications.show({
+          title: "Success",
+          message: "Test syslog message sent successfully!",
+          color: "green",
+        });
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to send test syslog message";
+      setTestError(msg);
+      setTestErrorTitle("Test Syslog Error");
+      openTestError();
+    } finally {
+      setSendingSyslogTest(false);
+    }
+  }
 
   async function handleSave() {
     setError(null);
@@ -148,8 +244,43 @@ export function SmtpSyslogTab({ settings, onSave }: SmtpSyslogTabProps) {
             checked={smtpTls}
             onChange={(e) => setSmtpTls(e.currentTarget.checked)}
           />
+          <Divider label="Send Test Email" labelPosition="left" />
+          <Group align="flex-end">
+            <TextInput
+              label="Recipient"
+              placeholder="test@example.com"
+              value={testEmailTo}
+              onChange={(e) => setTestEmailTo(e.currentTarget.value)}
+              style={{ flex: 1 }}
+              autoComplete="off"
+            />
+            <Button
+              leftSection={<Send size={16} />}
+              variant="light"
+              onClick={handleSendTestEmail}
+              loading={sendingTest}
+            >
+              Send Test Email
+            </Button>
+          </Group>
         </Stack>
       </Card>
+
+      <Modal
+        opened={testErrorOpened}
+        onClose={closeTestError}
+        title={testErrorTitle}
+        centered
+      >
+        <Alert icon={<AlertCircle size={16} />} color="red" variant="light">
+          {testError}
+        </Alert>
+        <Group justify="flex-end" mt="md">
+          <Button variant="light" onClick={closeTestError}>
+            Close
+          </Button>
+        </Group>
+      </Modal>
 
       <Divider />
 
@@ -203,6 +334,17 @@ export function SmtpSyslogTab({ settings, onSave }: SmtpSyslogTabProps) {
                 { value: "local7", label: "local7" },
               ]}
             />
+          </Group>
+          <Divider label="Send Test Message" labelPosition="left" />
+          <Group justify="flex-end">
+            <Button
+              leftSection={<Send size={16} />}
+              variant="light"
+              onClick={handleSendTestSyslog}
+              loading={sendingSyslogTest}
+            >
+              Send Test Message
+            </Button>
           </Group>
         </Stack>
       </Card>

@@ -72,21 +72,6 @@ model WafServer {
   configSnapshots ConfigSnapshot[] @relation("WafServerSnapshots")
 }
 
-// ─── Imperva MX Credentials (legacy) ────────────────────
-
-model MxCredential {
-  id            String   @id @default(cuid())
-  name          String
-  host          String
-  username      String   @default("")
-  authorization String   @default("") // Base64 of username:password
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  backupTasks     BackupTask[]     @relation("MxCredentialTasks")
-  configSnapshots ConfigSnapshot[] @relation("MxCredentialSnapshots")
-}
-
 // ─── Backup Task Definition ─────────────────────────────
 
 enum BackupTaskStatus {
@@ -97,19 +82,16 @@ enum BackupTaskStatus {
 model BackupTask {
   id             String           @id @default(cuid())
   name           String
-  mxId           String?
-  serverId       String?
+  serverId       String
   scope          Json
   cronExpression String           @default("0 2 * * *")
   status         BackupTaskStatus @default(ACTIVE)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  mx         MxCredential?  @relation("MxCredentialTasks", fields: [mxId], references: [id], onDelete: Cascade)
-  server     WafServer?     @relation("WafServerTasks", fields: [serverId], references: [id], onDelete: Cascade)
+  server     WafServer      @relation("WafServerTasks", fields: [serverId], references: [id], onDelete: Cascade)
   executions ExecutionLog[]
 
-  @@index([mxId])
   @@index([serverId])
 }
 
@@ -159,19 +141,16 @@ model ConfigSnapshot {
   id          String   @id @default(cuid())
   name        String
   description String?
-  mxId        String?
-  serverId    String?
+  serverId    String
   basedOnExec String?  // execution this snapshot was derived from
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  mx        MxCredential?      @relation("MxCredentialSnapshots", fields: [mxId], references: [id], onDelete: Cascade)
-  server    WafServer?         @relation("WafServerSnapshots", fields: [serverId], references: [id], onDelete: Cascade)
+  server    WafServer          @relation("WafServerSnapshots", fields: [serverId], references: [id], onDelete: Cascade)
   createdBy User               @relation(fields: [createdById], references: [id])
   items     ConfigSnapshotItem[]
 
-  @@index([mxId])
   @@index([serverId])
   @@index([createdById])
 }
@@ -196,8 +175,8 @@ model AuditLog {
   id         String   @id @default(cuid())
   userId     String?
   username   String   // denormalized so logs survive user deletion
-  action     String   // e.g. "LOGIN", "CREATE_USER", "DELETE_MX", "UPDATE_SETTING"
-  target     String?  // e.g. "User:admin", "MxCredential:abc123"
+  action     String   // e.g. "LOGIN", "CREATE_USER", "DELETE_SERVER", "UPDATE_SETTING"
+  target     String?  // e.g. "User:admin", "WafServer:abc123"
   details    Json?    // optional extra context
   ipAddress  String?
   createdAt  DateTime @default(now())

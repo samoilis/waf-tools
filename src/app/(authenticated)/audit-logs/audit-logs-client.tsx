@@ -14,13 +14,17 @@ import {
   TextInput,
   Select,
   Code,
+  Modal,
+  Button,
+  Stack,
 } from "@mantine/core";
+import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import {
   AlertCircle,
   ScrollText,
   Search,
 } from "lucide-react";
-import { useDebouncedValue } from "@mantine/hooks";
+import type { AuditLog } from "./use-audit-logs";
 import { useAuditLogs } from "./use-audit-logs";
 
 const ACTION_OPTIONS = [
@@ -31,9 +35,9 @@ const ACTION_OPTIONS = [
   { value: "CREATE_USER", label: "Create User" },
   { value: "UPDATE_USER", label: "Update User" },
   { value: "DELETE_USER", label: "Delete User" },
-  { value: "CREATE_MX", label: "Create MX" },
-  { value: "UPDATE_MX", label: "Update MX" },
-  { value: "DELETE_MX", label: "Delete MX" },
+  { value: "CREATE_SERVER", label: "Create Server" },
+  { value: "UPDATE_SERVER", label: "Update Server" },
+  { value: "DELETE_SERVER", label: "Delete Server" },
   { value: "CREATE_TASK", label: "Create Task" },
   { value: "UPDATE_TASK", label: "Update Task" },
   { value: "DELETE_TASK", label: "Delete Task" },
@@ -57,6 +61,9 @@ export function AuditLogsPageClient() {
   const [actionFilter, setActionFilter] = useState("");
   const [usernameSearch, setUsernameSearch] = useState("");
   const [debouncedUsername] = useDebouncedValue(usernameSearch, 300);
+
+  const [detailModalOpened, { open: openDetailModal, close: closeDetailModal }] = useDisclosure(false);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
   const { data, isLoading, error } = useAuditLogs(
     page,
@@ -142,7 +149,14 @@ export function AuditLogsPageClient() {
             </Table.Thead>
             <Table.Tbody>
               {data?.logs.map((log) => (
-                <Table.Tr key={log.id}>
+                <Table.Tr
+                  key={log.id}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    setSelectedLog(log);
+                    openDetailModal();
+                  }}
+                >
                   <Table.Td>
                     <Text size="sm">
                       {new Date(log.createdAt).toLocaleString()}
@@ -171,9 +185,9 @@ export function AuditLogsPageClient() {
                   </Table.Td>
                   <Table.Td>
                     {log.details ? (
-                      <Code block style={{ maxWidth: 300, fontSize: 11 }}>
-                        {JSON.stringify(log.details, null, 2)}
-                      </Code>
+                      <Text size="xs" c="dimmed" lineClamp={1} style={{ maxWidth: 300 }}>
+                        {JSON.stringify(log.details)}
+                      </Text>
                     ) : (
                       <Text size="sm" c="dimmed">
                         —
@@ -196,6 +210,54 @@ export function AuditLogsPageClient() {
           )}
         </>
       )}
+
+      <Modal
+        opened={detailModalOpened}
+        onClose={closeDetailModal}
+        title="Audit Log Details"
+        centered
+        size="lg"
+      >
+        {selectedLog && (
+          <Stack gap="sm">
+            <Group gap="xs">
+              <Text fw={600} size="sm">Timestamp:</Text>
+              <Text size="sm">{new Date(selectedLog.createdAt).toLocaleString()}</Text>
+            </Group>
+            <Group gap="xs">
+              <Text fw={600} size="sm">User:</Text>
+              <Text size="sm">{selectedLog.username}</Text>
+            </Group>
+            <Group gap="xs">
+              <Text fw={600} size="sm">Action:</Text>
+              <Badge color={actionColor(selectedLog.action)} variant="light">
+                {selectedLog.action}
+              </Badge>
+            </Group>
+            <Group gap="xs">
+              <Text fw={600} size="sm">Target:</Text>
+              <Text size="sm">{selectedLog.target ?? "—"}</Text>
+            </Group>
+            <Group gap="xs">
+              <Text fw={600} size="sm">IP Address:</Text>
+              <Text size="sm" ff="monospace">{selectedLog.ipAddress ?? "—"}</Text>
+            </Group>
+            <Text fw={600} size="sm">Details:</Text>
+            {selectedLog.details ? (
+              <Code block style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                {JSON.stringify(selectedLog.details, null, 2)}
+              </Code>
+            ) : (
+              <Text size="sm" c="dimmed">—</Text>
+            )}
+          </Stack>
+        )}
+        <Group justify="flex-end" mt="md">
+          <Button variant="light" onClick={closeDetailModal}>
+            Close
+          </Button>
+        </Group>
+      </Modal>
     </>
   );
 }

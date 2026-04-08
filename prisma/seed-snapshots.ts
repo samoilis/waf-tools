@@ -9,7 +9,7 @@ async function main() {
   });
   const prisma = new PrismaClient({ adapter });
 
-  const tasks = await prisma.backupTask.findMany({ include: { mx: true } });
+  const tasks = await prisma.backupTask.findMany();
   if (tasks.length === 0) {
     console.log("⚠️  No backup tasks found — run main seed first.");
     await prisma.$disconnect();

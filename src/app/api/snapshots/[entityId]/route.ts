@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
-// GET /api/snapshots/[entityId]?mxId=...&entityType=...
+// GET /api/snapshots/[entityId]?serverId=...&entityType=...
 // Returns all snapshot versions for a specific entity
 export async function GET(
   request: NextRequest,
@@ -15,12 +15,12 @@ export async function GET(
 
   const { entityId } = await params;
   const { searchParams } = request.nextUrl;
-  const mxId = searchParams.get("mxId");
+  const serverId = searchParams.get("serverId");
   const entityType = searchParams.get("entityType");
 
-  if (!mxId || !entityType) {
+  if (!serverId || !entityType) {
     return NextResponse.json(
-      { error: "mxId and entityType are required" },
+      { error: "serverId and entityType are required" },
       { status: 400 },
     );
   }
@@ -30,7 +30,7 @@ export async function GET(
       entityId,
       entityType,
       execution: {
-        task: { mxId },
+        task: { serverId },
         status: "SUCCESS",
       },
     },

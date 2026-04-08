@@ -82,7 +82,7 @@ async function tick() {
     }
 
     const tasks = await prisma.backupTask.findMany({
-      where: { status: "ACTIVE", serverId: { not: null } },
+      where: { status: "ACTIVE" },
       include: {
         server: {
           select: {

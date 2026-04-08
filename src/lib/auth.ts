@@ -3,6 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
+import { authenticateLdap } from "@/lib/auth-ldap";
+import { authenticateRadius } from "@/lib/auth-radius";
+import { authenticateTacacs } from "@/lib/auth-tacacs";
 import type { UserRole } from "@/generated/prisma/client";
 
 declare module "next-auth" {
@@ -42,55 +45,117 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        const username = credentials.username as string;
+        const password = credentials.password as string;
+
         const user = await prisma.user.findUnique({
-          where: { username: credentials.username as string },
+          where: { username },
         });
 
-        if (!user || !user.password) {
+        if (!user) {
           await createAuditLog({
-            username: credentials.username as string,
+            username,
             action: "LOGIN_FAILED",
-            details: { reason: "User not found or no password" },
+            details: { reason: "User not found" },
           });
           return null;
         }
 
-        // Only LOCAL auth users can login with password
-        if (user.authProvider !== "LOCAL") {
-          await createAuditLog({
-            username: credentials.username as string,
-            action: "LOGIN_FAILED",
-            details: { reason: "Non-local auth provider" },
-          });
-          return null;
+        let authenticated = false;
+        let resolvedRole: UserRole | undefined;
+
+        switch (user.authProvider) {
+          case "LOCAL": {
+            if (!user.password) {
+              await createAuditLog({
+                username,
+                action: "LOGIN_FAILED",
+                details: { reason: "No password set" },
+              });
+              return null;
+            }
+            authenticated = await compare(password, user.password);
+            break;
+          }
+          case "LDAP": {
+            try {
+              const result = await authenticateLdap(username, password);
+              authenticated = result.success;
+              resolvedRole = result.role;
+            } catch (err) {
+              await createAuditLog({
+                userId: user.id,
+                username,
+                action: "LOGIN_FAILED",
+                details: { reason: "LDAP error", error: err instanceof Error ? err.message : String(err) },
+              });
+              return null;
+            }
+            break;
+          }
+          case "RADIUS": {
+            try {
+              const result = await authenticateRadius(username, password);
+              authenticated = result.success;
+            } catch (err) {
+              await createAuditLog({
+                userId: user.id,
+                username,
+                action: "LOGIN_FAILED",
+                details: { reason: "RADIUS error", error: err instanceof Error ? err.message : String(err) },
+              });
+              return null;
+            }
+            break;
+          }
+          case "TACACS": {
+            try {
+              const result = await authenticateTacacs(username, password);
+              authenticated = result.success;
+            } catch (err) {
+              await createAuditLog({
+                userId: user.id,
+                username,
+                action: "LOGIN_FAILED",
+                details: { reason: "TACACS+ error", error: err instanceof Error ? err.message : String(err) },
+              });
+              return null;
+            }
+            break;
+          }
         }
 
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          user.password,
-        );
-
-        if (!isPasswordValid) {
+        if (!authenticated) {
           await createAuditLog({
             userId: user.id,
             username: user.username,
             action: "LOGIN_FAILED",
-            details: { reason: "Invalid password" },
+            details: { reason: "Invalid credentials", provider: user.authProvider },
           });
           return null;
+        }
+
+        // Update role from LDAP group mapping if resolved
+        const effectiveRole = resolvedRole ?? user.role;
+        if (resolvedRole && resolvedRole !== user.role) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: resolvedRole },
+          });
         }
 
         await createAuditLog({
           userId: user.id,
           username: user.username,
           action: "LOGIN",
+          details: { provider: user.authProvider },
         });
 
         return {
           id: user.id,
           username: user.username,
           name: user.displayName,
-          role: user.role,
+          role: effectiveRole,
         };
       },
     }),

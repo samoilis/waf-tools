@@ -33,11 +33,6 @@ export type Setting = Prisma.SettingModel
  */
 export type WafServer = Prisma.WafServerModel
 /**
- * Model MxCredential
- * 
- */
-export type MxCredential = Prisma.MxCredentialModel
-/**
  * Model BackupTask
  * 
  */

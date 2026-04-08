@@ -151,7 +151,7 @@ export function TaskFormModal({
     if (opened) {
       if (task) {
         setName(task.name);
-        setServerId(task.serverId ?? task.mxId);
+        setServerId(task.serverId);
         setStatus(task.status);
 
         // Parse scope
