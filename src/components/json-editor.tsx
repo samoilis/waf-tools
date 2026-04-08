@@ -64,6 +64,61 @@ function registerThemes(monaco: Parameters<typeof loader.init extends () => Prom
       "editor.lineHighlightBorder": "#00000000",
     },
   });
+
+  // Grayscale readonly themes
+  monaco.editor.defineTheme("win11-light-readonly", {
+    base: "vs",
+    inherit: true,
+    rules: [
+      { token: "string.key.json", foreground: "4a4a4a" },
+      { token: "string.value.json", foreground: "6b6b6b" },
+      { token: "number", foreground: "555555" },
+      { token: "keyword.json", foreground: "3a3a3a" },
+    ],
+    colors: {
+      "editor.background": "#f5f5f5",
+      "editor.foreground": "#3a3a3a",
+      "editorLineNumber.foreground": "#c0c0c0",
+      "editorLineNumber.activeForeground": "#8a8a8a",
+      "editor.lineHighlightBackground": "#f0f0f0",
+      "editor.selectionBackground": "#d0d0d060",
+      "editorWidget.background": "#f0f0f0",
+      "editorWidget.border": "#e0e0e0",
+      "input.background": "#fafafa",
+      "scrollbarSlider.background": "#c1c1c140",
+      "scrollbarSlider.hoverBackground": "#a0a0a060",
+      "scrollbarSlider.activeBackground": "#90909080",
+      "editorGutter.background": "#f5f5f5",
+      "editor.lineHighlightBorder": "#00000000",
+    },
+  });
+
+  monaco.editor.defineTheme("win11-dark-readonly", {
+    base: "vs-dark",
+    inherit: true,
+    rules: [
+      { token: "string.key.json", foreground: "a0a0a0" },
+      { token: "string.value.json", foreground: "888888" },
+      { token: "number", foreground: "999999" },
+      { token: "keyword.json", foreground: "b0b0b0" },
+    ],
+    colors: {
+      "editor.background": "#1e1e1e",
+      "editor.foreground": "#b0b0b0",
+      "editorLineNumber.foreground": "#4a4a4a",
+      "editorLineNumber.activeForeground": "#707070",
+      "editor.lineHighlightBackground": "#252525",
+      "editor.selectionBackground": "#40404040",
+      "editorWidget.background": "#222222",
+      "editorWidget.border": "#3a3a3a",
+      "input.background": "#2a2a2a",
+      "scrollbarSlider.background": "#4e4e4e40",
+      "scrollbarSlider.hoverBackground": "#5a5a5a60",
+      "scrollbarSlider.activeBackground": "#68686880",
+      "editorGutter.background": "#1e1e1e",
+      "editor.lineHighlightBorder": "#00000000",
+    },
+  });
 }
 
 interface JsonEditorProps {
@@ -94,7 +149,13 @@ export function JsonEditor({
     }
   }, []);
 
-  const themeName = colorScheme === "dark" ? "win11-dark" : "win11-light";
+  const themeName = readOnly
+    ? colorScheme === "dark"
+      ? "win11-dark-readonly"
+      : "win11-light-readonly"
+    : colorScheme === "dark"
+      ? "win11-dark"
+      : "win11-light";
 
   const handleMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;

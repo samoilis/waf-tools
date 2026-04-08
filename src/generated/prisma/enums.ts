@@ -27,6 +27,18 @@ export const AuthProvider = {
 export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
 
 
+export const WafVendor = {
+  IMPERVA: 'IMPERVA',
+  IMPERVA_CLOUD: 'IMPERVA_CLOUD',
+  FORTIWEB: 'FORTIWEB',
+  CLOUDFLARE: 'CLOUDFLARE',
+  AWS_WAF: 'AWS_WAF',
+  AKAMAI: 'AKAMAI'
+} as const
+
+export type WafVendor = (typeof WafVendor)[keyof typeof WafVendor]
+
+
 export const BackupTaskStatus = {
   ACTIVE: 'ACTIVE',
   PAUSED: 'PAUSED'

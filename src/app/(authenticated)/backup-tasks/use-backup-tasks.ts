@@ -7,13 +7,15 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export interface BackupTask {
   id: string;
   name: string;
-  mxId: string;
+  mxId: string | null;
+  serverId: string | null;
   scope: Record<string, unknown>;
   cronExpression: string;
   status: "ACTIVE" | "PAUSED";
   createdAt: string;
   updatedAt: string;
-  mx: { id: string; name: string; host: string };
+  mx: { id: string; name: string; host: string } | null;
+  server: { id: string; name: string; host: string; vendorType: string } | null;
   _count: { executions: number };
 }
 

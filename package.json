@@ -1,5 +1,5 @@
 {
-  "name": "imperva-backup",
+  "name": "waf-tools",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,9 +12,9 @@
     "prisma:seed": "prisma db seed"
   },
   "dependencies": {
-    "@mantine/core": "8.3.16",
-    "@mantine/hooks": "8.3.16",
-    "@mantine/notifications": "8.3.16",
+    "@mantine/core": "9.0.1",
+    "@mantine/hooks": "9.0.1",
+    "@mantine/notifications": "9.0.1",
     "@monaco-editor/react": "^4.7.0",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",

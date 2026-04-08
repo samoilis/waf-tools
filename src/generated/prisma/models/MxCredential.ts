@@ -363,9 +363,9 @@ export type MxCredentialMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type MxCredentialScalarRelationFilter = {
-  is?: Prisma.MxCredentialWhereInput
-  isNot?: Prisma.MxCredentialWhereInput
+export type MxCredentialNullableScalarRelationFilter = {
+  is?: Prisma.MxCredentialWhereInput | null
+  isNot?: Prisma.MxCredentialWhereInput | null
 }
 
 export type MxCredentialCreateNestedOneWithoutBackupTasksInput = {
@@ -374,10 +374,12 @@ export type MxCredentialCreateNestedOneWithoutBackupTasksInput = {
   connect?: Prisma.MxCredentialWhereUniqueInput
 }
 
-export type MxCredentialUpdateOneRequiredWithoutBackupTasksNestedInput = {
+export type MxCredentialUpdateOneWithoutBackupTasksNestedInput = {
   create?: Prisma.XOR<Prisma.MxCredentialCreateWithoutBackupTasksInput, Prisma.MxCredentialUncheckedCreateWithoutBackupTasksInput>
   connectOrCreate?: Prisma.MxCredentialCreateOrConnectWithoutBackupTasksInput
   upsert?: Prisma.MxCredentialUpsertWithoutBackupTasksInput
+  disconnect?: Prisma.MxCredentialWhereInput | boolean
+  delete?: Prisma.MxCredentialWhereInput | boolean
   connect?: Prisma.MxCredentialWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MxCredentialUpdateToOneWithWhereWithoutBackupTasksInput, Prisma.MxCredentialUpdateWithoutBackupTasksInput>, Prisma.MxCredentialUncheckedUpdateWithoutBackupTasksInput>
 }
@@ -388,10 +390,12 @@ export type MxCredentialCreateNestedOneWithoutConfigSnapshotsInput = {
   connect?: Prisma.MxCredentialWhereUniqueInput
 }
 
-export type MxCredentialUpdateOneRequiredWithoutConfigSnapshotsNestedInput = {
+export type MxCredentialUpdateOneWithoutConfigSnapshotsNestedInput = {
   create?: Prisma.XOR<Prisma.MxCredentialCreateWithoutConfigSnapshotsInput, Prisma.MxCredentialUncheckedCreateWithoutConfigSnapshotsInput>
   connectOrCreate?: Prisma.MxCredentialCreateOrConnectWithoutConfigSnapshotsInput
   upsert?: Prisma.MxCredentialUpsertWithoutConfigSnapshotsInput
+  disconnect?: Prisma.MxCredentialWhereInput | boolean
+  delete?: Prisma.MxCredentialWhereInput | boolean
   connect?: Prisma.MxCredentialWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MxCredentialUpdateToOneWithWhereWithoutConfigSnapshotsInput, Prisma.MxCredentialUpdateWithoutConfigSnapshotsInput>, Prisma.MxCredentialUncheckedUpdateWithoutConfigSnapshotsInput>
 }

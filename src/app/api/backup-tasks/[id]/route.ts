@@ -18,14 +18,24 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const { name, mxId, scope, cronExpression, status } = body;
+  const { name, mxId, serverId, scope, cronExpression, status } = body;
 
   const existing = await prisma.backupTask.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
 
-  if (mxId) {
+  if (serverId) {
+    const server = await prisma.wafServer.findUnique({
+      where: { id: serverId },
+    });
+    if (!server) {
+      return NextResponse.json(
+        { error: "WAF server not found" },
+        { status: 404 },
+      );
+    }
+  } else if (mxId) {
     const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
     if (!mx) {
       return NextResponse.json(
@@ -37,7 +47,12 @@ export async function PUT(
 
   const data: Record<string, unknown> = {};
   if (name) data.name = name;
-  if (mxId) data.mxId = mxId;
+  if (serverId) {
+    data.serverId = serverId;
+    data.mxId = null;
+  } else if (mxId) {
+    data.mxId = mxId;
+  }
   if (scope !== undefined) data.scope = scope;
   if (cronExpression) data.cronExpression = cronExpression;
   if (status) data.status = status;
@@ -49,12 +64,22 @@ export async function PUT(
       id: true,
       name: true,
       mxId: true,
+      serverId: true,
       scope: true,
       cronExpression: true,
       status: true,
       createdAt: true,
       updatedAt: true,
       mx: { select: { id: true, name: true, host: true } },
+      server: {
+        select: {
+          id: true,
+          name: true,
+          host: true,
+          vendorType: true,
+          entityTypes: true,
+        },
+      },
     },
   });
 

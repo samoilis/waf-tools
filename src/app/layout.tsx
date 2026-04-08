@@ -10,10 +10,11 @@ import "@mantine/notifications/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Imperva Backup",
+  title: "WAF Tools",
   description: "Management tools for Imperva Web Application Firewall",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 

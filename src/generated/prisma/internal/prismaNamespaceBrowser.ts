@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Setting: 'Setting',
+  WafServer: 'WafServer',
   MxCredential: 'MxCredential',
   BackupTask: 'BackupTask',
   ExecutionLog: 'ExecutionLog',
@@ -102,6 +103,21 @@ export const SettingScalarFieldEnum = {
 export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum]
 
 
+export const WafServerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  host: 'host',
+  port: 'port',
+  vendorType: 'vendorType',
+  credentials: 'credentials',
+  entityTypes: 'entityTypes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WafServerScalarFieldEnum = (typeof WafServerScalarFieldEnum)[keyof typeof WafServerScalarFieldEnum]
+
+
 export const MxCredentialScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -119,6 +135,7 @@ export const BackupTaskScalarFieldEnum = {
   id: 'id',
   name: 'name',
   mxId: 'mxId',
+  serverId: 'serverId',
   scope: 'scope',
   cronExpression: 'cronExpression',
   status: 'status',
@@ -159,6 +176,7 @@ export const ConfigSnapshotScalarFieldEnum = {
   name: 'name',
   description: 'description',
   mxId: 'mxId',
+  serverId: 'serverId',
   basedOnExec: 'basedOnExec',
   createdById: 'createdById',
   createdAt: 'createdAt',

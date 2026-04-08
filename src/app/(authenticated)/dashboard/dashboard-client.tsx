@@ -127,8 +127,8 @@ export function DashboardClient() {
         ) : (
           <>
             <KpiCard
-              title="MX Servers"
-              value={data.kpis.mxServers}
+              title="WAF Servers"
+              value={data.kpis.wafServers}
               subtitle="Configured servers"
               icon={<Database size={22} />}
               color="blue"
@@ -271,7 +271,7 @@ export function DashboardClient() {
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Task</Table.Th>
-                  <Table.Th>MX Server</Table.Th>
+                  <Table.Th>WAF Server</Table.Th>
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Snapshots</Table.Th>
                   <Table.Th>Started</Table.Th>
@@ -281,7 +281,7 @@ export function DashboardClient() {
                 {data.recentExecutions.map((exec) => (
                   <Table.Tr key={exec.id}>
                     <Table.Td>{exec.taskName}</Table.Td>
-                    <Table.Td>{exec.mxName}</Table.Td>
+                    <Table.Td>{exec.serverName ?? exec.mxName}</Table.Td>
                     <Table.Td>
                       <StatusBadge status={exec.status} />
                     </Table.Td>

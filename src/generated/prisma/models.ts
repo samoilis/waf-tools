@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/Setting'
+export type * from './models/WafServer'
 export type * from './models/MxCredential'
 export type * from './models/BackupTask'
 export type * from './models/ExecutionLog'

@@ -15,7 +15,6 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  Shield,
   Home,
   Settings,
   Database,
@@ -36,7 +35,7 @@ const navLinks = [
   { label: "Dashboard", href: "/", icon: Home },
   { label: "Backup Explorer", href: "/backup-explorer", icon: FolderSearch, section: "Manage" },
   { label: "Config Snapshots", href: "/config-snapshots", icon: Camera, section: "Manage" },
-  { label: "MX Servers", href: "/mx-servers", icon: Database, section: "Setup" },
+  { label: "WAF Servers", href: "/waf-servers", icon: Database, section: "Setup" },
   { label: "Backup Tasks", href: "/backup-tasks", icon: FileText, section: "Setup" },
   { label: "Users", href: "/users", icon: Users, adminOnly: true, section: "Administration" },
   { label: "Settings", href: "/settings", icon: Settings, adminOnly: true, section: "Administration" },
@@ -64,8 +63,9 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
         <Group h="100%" px="md" justify="space-between">
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Shield size={28} />
-            <Title order={3}>Imperva Backup</Title>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="WAF Tools" width={32} height={32} />
+            <Title order={3}>WAF Tools</Title>
           </Group>
           <Group>
             <ThemeToggle />

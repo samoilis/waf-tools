@@ -16,14 +16,16 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const view = searchParams.get("view") ?? "servers";
   const mxId = searchParams.get("mxId");
+  const serverId = searchParams.get("serverId") ?? mxId; // support both params
 
-  // ─── List MX servers ───────────────────────────────────
+  // ─── List WAF servers ──────────────────────────────────
   if (view === "servers") {
-    const servers = await prisma.mxCredential.findMany({
+    const servers = await prisma.wafServer.findMany({
       select: {
         id: true,
         name: true,
         host: true,
+        vendorType: true,
         backupTasks: {
           select: {
             executions: {
@@ -42,21 +44,30 @@ export async function GET(request: NextRequest) {
           acc + t.executions.reduce((a, e) => a + e._count.snapshots, 0),
         0,
       );
-      return { id: s.id, name: s.name, host: s.host, totalSnapshots };
+      return {
+        id: s.id,
+        name: s.name,
+        host: s.host,
+        vendorType: s.vendorType,
+        totalSnapshots,
+      };
     });
 
     return NextResponse.json(result);
   }
 
-  if (!mxId) {
-    return NextResponse.json({ error: "mxId is required" }, { status: 400 });
+  if (!serverId) {
+    return NextResponse.json(
+      { error: "serverId is required" },
+      { status: 400 },
+    );
   }
 
-  // ─── List executions for an MX ─────────────────────────
+  // ─── List executions for a server ──────────────────────
   if (view === "executions") {
     const executions = await prisma.executionLog.findMany({
       where: {
-        task: { mxId },
+        task: { serverId },
         status: "SUCCESS",
       },
       select: {
@@ -94,7 +105,7 @@ export async function GET(request: NextRequest) {
     const snapshots = await prisma.backupSnapshot.findMany({
       where: {
         executionId,
-        execution: { task: { mxId }, status: "SUCCESS" },
+        execution: { task: { serverId }, status: "SUCCESS" },
       },
       select: {
         entityType: true,
@@ -134,7 +145,7 @@ export async function GET(request: NextRequest) {
         executionId,
         entityType,
         entityId,
-        execution: { task: { mxId }, status: "SUCCESS" },
+        execution: { task: { serverId }, status: "SUCCESS" },
       },
       select: {
         id: true,
@@ -168,7 +179,7 @@ export async function GET(request: NextRequest) {
     const snapshots = await prisma.backupSnapshot.findMany({
       where: {
         executionId,
-        execution: { task: { mxId }, status: "SUCCESS" },
+        execution: { task: { serverId }, status: "SUCCESS" },
       },
       select: {
         id: true,

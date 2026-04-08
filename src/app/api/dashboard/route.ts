@@ -19,8 +19,8 @@ export async function GET() {
     recentExecutions,
     failedExecutions,
   ] = await Promise.all([
-    // KPI: MX server count
-    prisma.mxCredential.count(),
+    // KPI: WAF server count
+    prisma.wafServer.count(),
 
     // KPI: active / paused tasks
     prisma.backupTask.count({ where: { status: "ACTIVE" } }),
@@ -65,7 +65,7 @@ export async function GET() {
       orderBy: { startedAt: "desc" },
       include: {
         task: {
-          select: { name: true, mx: { select: { name: true } } },
+          select: { name: true, server: { select: { name: true } } },
         },
         _count: { select: { snapshots: true } },
       },
@@ -87,7 +87,7 @@ export async function GET() {
 
   return NextResponse.json({
     kpis: {
-      mxServers: mxCount,
+      wafServers: mxCount,
       activeTasks: activeTaskCount,
       pausedTasks: pausedTaskCount,
       totalSnapshots: snapshotCount,
@@ -100,7 +100,8 @@ export async function GET() {
     recentExecutions: recentExecutions.map((e) => ({
       id: e.id,
       taskName: e.task.name,
-      mxName: e.task.mx.name,
+      mxName: e.task.server?.name ?? "Unknown",
+      serverName: e.task.server?.name ?? "Unknown",
       status: e.status,
       snapshotCount: e._count.snapshots,
       startedAt: e.startedAt,

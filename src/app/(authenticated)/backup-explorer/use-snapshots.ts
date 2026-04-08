@@ -6,10 +6,11 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 // ─── Types ───────────────────────────────────────────────
 
-export interface MxSummary {
+export interface ServerSummary {
   id: string;
   name: string;
   host: string;
+  vendorType: string;
   totalSnapshots: number;
 }
 
@@ -39,47 +40,50 @@ export interface EntitySnapshot {
 
 // ─── Hooks ───────────────────────────────────────────────
 
-export function useMxServers() {
-  return useSWR<MxSummary[]>("/api/snapshots?view=servers", fetcher);
+export function useWafServersForExplorer() {
+  return useSWR<ServerSummary[]>("/api/snapshots?view=servers", fetcher);
 }
 
-export function useExecutions(mxId: string | null) {
+export function useExecutions(serverId: string | null) {
   return useSWR<ExecutionSummary[]>(
-    mxId ? `/api/snapshots?view=executions&mxId=${mxId}` : null,
+    serverId ? `/api/snapshots?view=executions&serverId=${serverId}` : null,
     fetcher,
   );
 }
 
-export function useTreeData(mxId: string | null, executionId: string | null) {
+export function useTreeData(
+  serverId: string | null,
+  executionId: string | null,
+) {
   return useSWR<TreeData>(
-    mxId && executionId
-      ? `/api/snapshots?view=tree&mxId=${mxId}&executionId=${executionId}`
+    serverId && executionId
+      ? `/api/snapshots?view=tree&serverId=${serverId}&executionId=${executionId}`
       : null,
     fetcher,
   );
 }
 
 export function useEntityData(
-  mxId: string | null,
+  serverId: string | null,
   executionId: string | null,
   entityType: string | null,
   entityId: string | null,
 ) {
   return useSWR<EntitySnapshot>(
-    mxId && executionId && entityType && entityId
-      ? `/api/snapshots?view=entity&mxId=${mxId}&executionId=${executionId}&entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}`
+    serverId && executionId && entityType && entityId
+      ? `/api/snapshots?view=entity&serverId=${serverId}&executionId=${executionId}&entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}`
       : null,
     fetcher,
   );
 }
 
 export function useAllEntityData(
-  mxId: string | null,
+  serverId: string | null,
   executionId: string | null,
 ) {
   return useSWR<EntitySnapshot[]>(
-    mxId && executionId
-      ? `/api/snapshots?view=allEntities&mxId=${mxId}&executionId=${executionId}`
+    serverId && executionId
+      ? `/api/snapshots?view=allEntities&serverId=${serverId}&executionId=${executionId}`
       : null,
     fetcher,
   );
@@ -106,9 +110,9 @@ export interface ConfigSnapshotDetail {
   }[];
 }
 
-export function useConfigSnapshotsForMx(mxId: string | null) {
+export function useConfigSnapshotsForServer(serverId: string | null) {
   return useSWR<ConfigSnapshotOption[]>(
-    mxId ? `/api/config-snapshots?mxId=${mxId}` : null,
+    serverId ? `/api/config-snapshots?serverId=${serverId}` : null,
     fetcher,
   );
 }

@@ -8,11 +8,13 @@ export interface ConfigSnapshotSummary {
   id: string;
   name: string;
   description: string | null;
-  mxId: string;
+  mxId: string | null;
+  serverId: string | null;
   basedOnExec: string | null;
   createdAt: string;
   updatedAt: string;
-  mx: { name: string; host: string };
+  mx: { name: string; host: string } | null;
+  server: { name: string; host: string; vendorType: string } | null;
   createdBy: { username: string; displayName: string | null };
   _count: { items: number };
 }
@@ -21,11 +23,13 @@ export interface ConfigSnapshotDetail {
   id: string;
   name: string;
   description: string | null;
-  mxId: string;
+  mxId: string | null;
+  serverId: string | null;
   basedOnExec: string | null;
   createdAt: string;
   updatedAt: string;
-  mx: { name: string; host: string };
+  mx: { name: string; host: string } | null;
+  server: { name: string; host: string; vendorType: string } | null;
   createdBy: { username: string; displayName: string | null };
   items: {
     id: string;

@@ -41,12 +41,12 @@ import {
 } from "lucide-react";
 import { JsonEditor } from "@/components/json-editor";
 import {
-  useMxServers,
+  useWafServersForExplorer,
   useExecutions,
   useTreeData,
   useEntityData,
   useAllEntityData,
-  useConfigSnapshotsForMx,
+  useConfigSnapshotsForServer,
   useConfigSnapshotDetail,
   type TreeData,
   type ExecutionSummary,
@@ -150,7 +150,7 @@ export function BackupExplorerClient() {
   const [configSnapshotId, setConfigSnapshotId] = useState<string | null>(null);
 
   // ─── Selection state ───────────────────────────────────
-  const [mxId, setMxId] = useState<string | null>(null);
+  const [serverId, setServerId] = useState<string | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [selectedEntityType, setSelectedEntityType] = useState<string | null>(
     null,
@@ -192,26 +192,26 @@ export function BackupExplorerClient() {
   const [saving, setSaving] = useState(false);
 
   // ─── Data hooks ────────────────────────────────────────
-  const { data: mxServers, isLoading: mxLoading } = useMxServers();
-  const { data: executions, isLoading: execLoading } = useExecutions(mxId);
-  const { data: configSnapshots } = useConfigSnapshotsForMx(mxId);
+  const { data: wafServers, isLoading: serversLoading } = useWafServersForExplorer();
+  const { data: executions, isLoading: execLoading } = useExecutions(serverId);
+  const { data: configSnapshots } = useConfigSnapshotsForServer(serverId);
   const { data: configSnapshotDetail, isLoading: csDetailLoading } =
     useConfigSnapshotDetail(
       sourceMode === "snapshot" ? configSnapshotId : null,
     );
 
   const { data: treeData, isLoading: treeLoading } = useTreeData(
-    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? serverId : null,
     sourceMode === "execution" ? executionId : null,
   );
   const { data: entityData, isLoading: entityLoading } = useEntityData(
-    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? serverId : null,
     sourceMode === "execution" ? executionId : null,
     selectedEntityType,
     selectedEntityId,
   );
   const { data: allEntitiesData } = useAllEntityData(
-    sourceMode === "execution" ? mxId : null,
+    sourceMode === "execution" ? serverId : null,
     sourceMode === "execution" ? executionId : null,
   );
 
@@ -276,7 +276,7 @@ export function BackupExplorerClient() {
 
   // ─── Diff entity data (from another execution) ────────
   const { data: diffEntityData } = useEntityData(
-    mxId,
+    serverId,
     diffExecId,
     selectedEntityType,
     selectedEntityId,
@@ -303,7 +303,7 @@ export function BackupExplorerClient() {
     : "";
 
   const canUseActions = !!(
-    mxId &&
+    serverId &&
     ((sourceMode === "execution" && executionId) ||
       (sourceMode === "snapshot" && configSnapshotId))
   );
@@ -350,13 +350,13 @@ export function BackupExplorerClient() {
     [executions],
   );
 
-  const mxOptions = useMemo(
+  const serverOptions = useMemo(
     () =>
-      (mxServers ?? []).map((s) => ({
+      (wafServers ?? []).map((s) => ({
         value: s.id,
         label: `${s.name} (${s.host})`,
       })),
-    [mxServers],
+    [wafServers],
   );
 
   const diffExecOptions = useMemo(
@@ -371,8 +371,8 @@ export function BackupExplorerClient() {
   );
 
   // ─── Handlers ──────────────────────────────────────────
-  const handleMxChange = useCallback((val: string | null) => {
-    setMxId(val);
+  const handleServerChange = useCallback((val: string | null) => {
+    setServerId(val);
     setExecutionId(null);
     setConfigSnapshotId(null);
     setSelectedEntityType(null);
@@ -433,7 +433,7 @@ export function BackupExplorerClient() {
   }, []);
 
   const handleSaveSnapshot = useCallback(async () => {
-    if (!snapshotName.trim() || !mxId || !allEntities.length) return;
+    if (!snapshotName.trim() || !serverId || !allEntities.length) return;
     setSaving(true);
     try {
       const items = allEntities.map((entity) => {
@@ -455,7 +455,7 @@ export function BackupExplorerClient() {
         body: JSON.stringify({
           name: snapshotName.trim(),
           description: snapshotDesc.trim() || null,
-          mxId,
+          serverId,
           basedOnExec: sourceMode === "execution" ? executionId : null,
           items,
         }),
@@ -473,7 +473,7 @@ export function BackupExplorerClient() {
   }, [
     snapshotName,
     snapshotDesc,
-    mxId,
+    serverId,
     executionId,
     sourceMode,
     allEntities,
@@ -575,7 +575,7 @@ export function BackupExplorerClient() {
     setEditMode(false);
   }, [entityKey]);
 
-  const isLoading = mxLoading || execLoading;
+  const isLoading = serversLoading || execLoading;
 
   // ═════════════════════════════════════════════════════════
   // Render
@@ -594,16 +594,16 @@ export function BackupExplorerClient() {
       {/* ─── Toolbar ─── */}
       <Group mb="md" gap="sm" wrap="wrap">
         <Select
-          placeholder="Select MX Server"
-          data={mxOptions}
-          value={mxId}
-          onChange={handleMxChange}
+          placeholder="Select WAF Server"
+          data={serverOptions}
+          value={serverId}
+          onChange={handleServerChange}
           searchable
           clearable
           w={300}
-          disabled={mxLoading}
+          disabled={serversLoading}
         />
-        {mxId && (
+        {serverId && (
           <SegmentedControl
             size="xs"
             data={[
@@ -619,7 +619,7 @@ export function BackupExplorerClient() {
             }}
           />
         )}
-        {mxId && sourceMode === "execution" && (
+        {serverId && sourceMode === "execution" && (
           <Select
             placeholder={execLoading ? "Loading..." : "Select Execution"}
             data={executionOptions}
@@ -631,7 +631,7 @@ export function BackupExplorerClient() {
             disabled={execLoading || !executions?.length}
           />
         )}
-        {mxId && sourceMode === "snapshot" && (
+        {serverId && sourceMode === "snapshot" && (
           <Select
             placeholder="Select Snapshot"
             data={(configSnapshots ?? []).map((s) => ({
@@ -706,12 +706,12 @@ export function BackupExplorerClient() {
         </Center>
       )}
 
-      {mxId &&
+      {serverId &&
         !execLoading &&
         sourceMode === "execution" &&
         executions?.length === 0 && (
           <Alert variant="light" color="blue" icon={<AlertCircle size={16} />}>
-            No successful executions found for this MX server. Run a backup
+            No successful executions found for this server. Run a backup
             task first.
           </Alert>
         )}
@@ -815,6 +815,23 @@ export function BackupExplorerClient() {
                 </Box>
               )}
             </ScrollArea>
+            <Box
+              px="sm"
+              py="xs"
+              style={{
+                borderTop: "1px solid var(--mantine-color-default-border)",
+              }}
+            >
+              <Button
+                fullWidth
+                size="xs"
+                variant="light"
+                leftSection={<Save size={14} />}
+                onClick={() => setShowSaveModal(true)}
+              >
+                Save as Snapshot
+              </Button>
+            </Box>
           </Box>
 
           {/* ─── Right: Data Panel ─── */}
@@ -1035,24 +1052,14 @@ export function BackupExplorerClient() {
                   borderTop: "1px solid var(--mantine-color-default-border)",
                 }}
               >
-                <Group justify="space-between">
-                  <Text size="xs" c="dimmed">
-                    {activeEntityData?.entityId ?? ""}
-                    {activeEntityData &&
-                    "createdAt" in activeEntityData &&
-                    activeEntityData.createdAt
-                      ? ` — ${new Date(activeEntityData.createdAt).toLocaleString()}`
-                      : ""}
-                  </Text>
-                  <Button
-                    size="xs"
-                    variant="light"
-                    leftSection={<Save size={14} />}
-                    onClick={() => setShowSaveModal(true)}
-                  >
-                    Save as Snapshot
-                  </Button>
-                </Group>
+                <Text size="xs" c="dimmed">
+                  {activeEntityData?.entityId ?? ""}
+                  {activeEntityData &&
+                  "createdAt" in activeEntityData &&
+                  activeEntityData.createdAt
+                    ? ` — ${new Date(activeEntityData.createdAt).toLocaleString()}`
+                    : ""}
+                </Text>
               </Box>
             )}
           </Box>

@@ -132,7 +132,7 @@ export function ConfigSnapshotsClient() {
             <Table.Tr>
               <Table.Th>Name</Table.Th>
               <Table.Th>Description</Table.Th>
-              <Table.Th>MX Server</Table.Th>
+              <Table.Th>Server</Table.Th>
               <Table.Th>Items</Table.Th>
               <Table.Th>Created By</Table.Th>
               <Table.Th>Date</Table.Th>
@@ -151,7 +151,7 @@ export function ConfigSnapshotsClient() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">{s.mx.name}</Text>
+                  <Text size="sm">{s.server?.name ?? s.mx?.name ?? "—"}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Badge variant="light" color="blue">
@@ -224,8 +224,8 @@ export function ConfigSnapshotsClient() {
           <Stack gap="md">
             <Group gap="lg">
               <div>
-                <Text size="xs" c="dimmed">MX Server</Text>
-                <Text size="sm">{snapshotDetail.mx.name}</Text>
+                <Text size="xs" c="dimmed">Server</Text>
+                <Text size="sm">{snapshotDetail.server?.name ?? snapshotDetail.mx?.name ?? "—"}</Text>
               </div>
               <div>
                 <Text size="xs" c="dimmed">Created By</Text>

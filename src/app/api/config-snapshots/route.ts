@@ -11,18 +11,21 @@ export async function GET(request: NextRequest) {
   }
 
   const mxId = request.nextUrl.searchParams.get("mxId");
+  const serverId = request.nextUrl.searchParams.get("serverId") ?? mxId;
 
   const snapshots = await prisma.configSnapshot.findMany({
-    where: mxId ? { mxId } : undefined,
+    where: serverId ? { OR: [{ serverId }, { mxId: serverId }] } : undefined,
     select: {
       id: true,
       name: true,
       description: true,
       mxId: true,
+      serverId: true,
       basedOnExec: true,
       createdAt: true,
       updatedAt: true,
       mx: { select: { name: true, host: true } },
+      server: { select: { name: true, host: true, vendorType: true } },
       createdBy: { select: { username: true, displayName: true } },
       _count: { select: { items: true } },
     },
@@ -40,26 +43,48 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { name, description, mxId, basedOnExec, items } = body;
+  const { name, description, mxId, serverId, basedOnExec, items } = body;
 
-  if (!name || !mxId || !items || !Array.isArray(items) || items.length === 0) {
+  if (
+    !name ||
+    (!mxId && !serverId) ||
+    !items ||
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
     return NextResponse.json(
-      { error: "name, mxId, and items are required" },
+      { error: "name, server, and items are required" },
       { status: 400 },
     );
   }
 
-  // Validate MX exists
-  const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
-  if (!mx) {
-    return NextResponse.json({ error: "MX server not found" }, { status: 404 });
+  // Validate server exists
+  if (serverId) {
+    const server = await prisma.wafServer.findUnique({
+      where: { id: serverId },
+    });
+    if (!server) {
+      return NextResponse.json(
+        { error: "WAF server not found" },
+        { status: 404 },
+      );
+    }
+  } else if (mxId) {
+    const mx = await prisma.mxCredential.findUnique({ where: { id: mxId } });
+    if (!mx) {
+      return NextResponse.json(
+        { error: "MX server not found" },
+        { status: 404 },
+      );
+    }
   }
 
   const snapshot = await prisma.configSnapshot.create({
     data: {
       name,
       description: description || null,
-      mxId,
+      mxId: mxId || null,
+      serverId: serverId || null,
       basedOnExec: basedOnExec || null,
       createdById: session.user.id,
       items: {

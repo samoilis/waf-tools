@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type Setting = Prisma.SettingModel
 /**
+ * Model WafServer
+ * 
+ */
+export type WafServer = Prisma.WafServerModel
+/**
  * Model MxCredential
  * 
  */

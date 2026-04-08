@@ -82,16 +82,25 @@ async function tick() {
     }
 
     const tasks = await prisma.backupTask.findMany({
-      where: { status: "ACTIVE" },
+      where: { status: "ACTIVE", serverId: { not: null } },
       include: {
-        mx: {
-          select: { host: true, username: true, authorization: true },
+        server: {
+          select: {
+            id: true,
+            host: true,
+            port: true,
+            vendorType: true,
+            credentials: true,
+          },
         },
       },
     });
 
     const dueTasks = tasks.filter(
-      (t) => cronMatchesNow(t.cronExpression, now) && !runningTasks.has(t.id),
+      (t) =>
+        t.server &&
+        cronMatchesNow(t.cronExpression, now) &&
+        !runningTasks.has(t.id),
     );
 
     if (dueTasks.length > 0) {
@@ -106,7 +115,13 @@ async function tick() {
           id: task.id,
           name: task.name,
           scope: task.scope as Record<string, boolean>,
-          mx: task.mx,
+          server: {
+            id: task.server!.id,
+            host: task.server!.host,
+            port: task.server!.port,
+            vendorType: task.server!.vendorType,
+            credentials: task.server!.credentials as Record<string, unknown>,
+          },
         })
           .catch((err) => console.error(`Task ${task.name} error:`, err))
           .finally(() => runningTasks.delete(task.id));
@@ -123,7 +138,7 @@ const CHECK_INTERVAL_MS = 60_000; // 1 minute
 
 async function main() {
   console.log("═══════════════════════════════════════════");
-  console.log("  Imperva Backup – Scheduler");
+  console.log("  WAF Tools – Scheduler");
   console.log("═══════════════════════════════════════════");
   console.log(`Checking for due tasks every ${CHECK_INTERVAL_MS / 1000}s`);
   console.log(

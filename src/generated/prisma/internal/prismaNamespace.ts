@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Setting: 'Setting',
+  WafServer: 'WafServer',
   MxCredential: 'MxCredential',
   BackupTask: 'BackupTask',
   ExecutionLog: 'ExecutionLog',
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "setting" | "mxCredential" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
+    modelProps: "user" | "setting" | "wafServer" | "mxCredential" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -557,6 +558,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SettingCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SettingCountAggregateOutputType> | number
+        }
+      }
+    }
+    WafServer: {
+      payload: Prisma.$WafServerPayload<ExtArgs>
+      fields: Prisma.WafServerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WafServerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WafServerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        findFirst: {
+          args: Prisma.WafServerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WafServerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        findMany: {
+          args: Prisma.WafServerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>[]
+        }
+        create: {
+          args: Prisma.WafServerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        createMany: {
+          args: Prisma.WafServerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WafServerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>[]
+        }
+        delete: {
+          args: Prisma.WafServerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        update: {
+          args: Prisma.WafServerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        deleteMany: {
+          args: Prisma.WafServerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WafServerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WafServerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>[]
+        }
+        upsert: {
+          args: Prisma.WafServerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WafServerPayload>
+        }
+        aggregate: {
+          args: Prisma.WafServerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWafServer>
+        }
+        groupBy: {
+          args: Prisma.WafServerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WafServerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WafServerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WafServerCountAggregateOutputType> | number
         }
       }
     }
@@ -1141,6 +1216,21 @@ export const SettingScalarFieldEnum = {
 export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum]
 
 
+export const WafServerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  host: 'host',
+  port: 'port',
+  vendorType: 'vendorType',
+  credentials: 'credentials',
+  entityTypes: 'entityTypes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WafServerScalarFieldEnum = (typeof WafServerScalarFieldEnum)[keyof typeof WafServerScalarFieldEnum]
+
+
 export const MxCredentialScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1158,6 +1248,7 @@ export const BackupTaskScalarFieldEnum = {
   id: 'id',
   name: 'name',
   mxId: 'mxId',
+  serverId: 'serverId',
   scope: 'scope',
   cronExpression: 'cronExpression',
   status: 'status',
@@ -1198,6 +1289,7 @@ export const ConfigSnapshotScalarFieldEnum = {
   name: 'name',
   description: 'description',
   mxId: 'mxId',
+  serverId: 'serverId',
   basedOnExec: 'basedOnExec',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -1351,6 +1443,34 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'WafVendor'
+ */
+export type EnumWafVendorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WafVendor'>
+    
+
+
+/**
+ * Reference to a field of type 'WafVendor[]'
+ */
+export type ListEnumWafVendorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WafVendor[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1393,16 +1513,16 @@ export type ListEnumExecutionStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
- * Reference to a field of type 'Int'
+ * Reference to a field of type 'Float'
  */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
 
 
 /**
- * Reference to a field of type 'Int[]'
+ * Reference to a field of type 'Float[]'
  */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -1502,6 +1622,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   setting?: Prisma.SettingOmit
+  wafServer?: Prisma.WafServerOmit
   mxCredential?: Prisma.MxCredentialOmit
   backupTask?: Prisma.BackupTaskOmit
   executionLog?: Prisma.ExecutionLogOmit

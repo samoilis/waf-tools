@@ -18,21 +18,7 @@ import {
 } from "@mantine/core";
 import { AlertCircle } from "lucide-react";
 import type { BackupTask } from "./use-backup-tasks";
-import { useMxServers } from "../mx-servers/use-mx-servers";
-
-// ─── Entity types for Imperva Backup ─────────────────────
-const ENTITY_OPTIONS = [
-  { key: "sites", label: "Sites" },
-  { key: "server_groups", label: "Server Groups" },
-  { key: "web_services", label: "Web Services" },
-  { key: "policies", label: "Security Policies" },
-  { key: "action_sets", label: "Action Sets" },
-  { key: "ip_groups", label: "IP Groups" },
-  { key: "ssl_certificates", label: "SSL Certificates" },
-  { key: "web_profiles", label: "Web Profiles" },
-  { key: "parameter_groups", label: "Parameter Groups" },
-  { key: "assessment_policies", label: "Assessment Policies" },
-] as const;
+import { useWafServers, type WafServer } from "../waf-servers/use-waf-servers";
 
 const DAYS_OF_WEEK = [
   { value: "1", label: "Mon" },
@@ -138,16 +124,20 @@ export function TaskFormModal({
   onSuccess,
 }: TaskFormModalProps) {
   const isEditing = !!task;
-  const { servers } = useMxServers();
+  const { servers } = useWafServers();
 
   const [name, setName] = useState("");
-  const [mxId, setMxId] = useState<string | null>(null);
+  const [serverId, setServerId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("ACTIVE");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Scope checkboxes
   const [scope, setScope] = useState<Record<string, boolean>>({});
+
+  // Dynamic entity types from selected server
+  const selectedServer = (servers ?? []).find((s) => s.id === serverId) ?? null;
+  const entityOptions = selectedServer?.entityTypes ?? [];
 
   // Schedule fields
   const [frequency, setFrequency] = useState<Frequency>("daily");
@@ -161,14 +151,12 @@ export function TaskFormModal({
     if (opened) {
       if (task) {
         setName(task.name);
-        setMxId(task.mxId);
+        setServerId(task.serverId ?? task.mxId);
         setStatus(task.status);
 
         // Parse scope
         const s = task.scope as Record<string, boolean>;
-        setScope(
-          Object.fromEntries(ENTITY_OPTIONS.map((e) => [e.key, !!s[e.key]])),
-        );
+        setScope(s);
 
         // Parse cron
         const parsed = parseCron(task.cronExpression);
@@ -180,11 +168,9 @@ export function TaskFormModal({
         setDaysOfMonth(parsed.daysOfMonth);
       } else {
         setName("");
-        setMxId(null);
+        setServerId(null);
         setStatus("ACTIVE");
-        setScope(
-          Object.fromEntries(ENTITY_OPTIONS.map((e) => [e.key, false])),
-        );
+        setScope({});
         setFrequency("daily");
         setHour(2);
         setMinute(0);
@@ -196,9 +182,9 @@ export function TaskFormModal({
     }
   }, [opened, task]);
 
-  const mxOptions = (servers ?? []).map((s) => ({
+  const serverOptions = (servers ?? []).map((s) => ({
     value: s.id,
-    label: `${s.name} (${s.host})`,
+    label: `${s.name} (${s.host}) — ${s.vendorType}`,
   }));
 
   function handleScopeToggle(key: string) {
@@ -228,7 +214,7 @@ export function TaskFormModal({
 
     const body = {
       name,
-      mxId,
+      serverId,
       cronExpression,
       status,
       scope,
@@ -284,12 +270,15 @@ export function TaskFormModal({
                 />
 
                 <Select
-                  label="MX Server"
-                  value={mxId}
-                  onChange={setMxId}
-                  data={mxOptions}
+                  label="WAF Server"
+                  value={serverId}
+                  onChange={(v) => {
+                    setServerId(v);
+                    setScope({});
+                  }}
+                  data={serverOptions}
                   required
-                  placeholder="Select MX server"
+                  placeholder="Select WAF server"
                   searchable
                 />
 
@@ -310,38 +299,46 @@ export function TaskFormModal({
                   <Text fw={500} size="sm">
                     Backup Entities
                   </Text>
-                  <Checkbox
-                    label="All"
-                    size="xs"
-                    checked={ENTITY_OPTIONS.every((e) => !!scope[e.key])}
-                    indeterminate={
-                      ENTITY_OPTIONS.some((e) => !!scope[e.key]) &&
-                      !ENTITY_OPTIONS.every((e) => !!scope[e.key])
-                    }
-                    onChange={(event) => {
-                      const checked = event.currentTarget.checked;
-                      setScope((prev) => {
-                        const next = { ...prev };
-                        ENTITY_OPTIONS.forEach((e) => {
-                          next[e.key] = checked;
+                  {entityOptions.length > 0 && (
+                    <Checkbox
+                      label="All"
+                      size="xs"
+                      checked={entityOptions.every((e) => !!scope[e.key])}
+                      indeterminate={
+                        entityOptions.some((e) => !!scope[e.key]) &&
+                        !entityOptions.every((e) => !!scope[e.key])
+                      }
+                      onChange={(event) => {
+                        const checked = event.currentTarget.checked;
+                        setScope((prev) => {
+                          const next = { ...prev };
+                          entityOptions.forEach((e) => {
+                            next[e.key] = checked;
+                          });
+                          return next;
                         });
-                        return next;
-                      });
-                    }}
-                  />
+                      }}
+                    />
+                  )}
                 </Group>
 
-                <Grid gutter="xs">
-                  {ENTITY_OPTIONS.map((entity) => (
-                    <Grid.Col span={6} key={entity.key}>
-                      <Checkbox
-                        label={entity.label}
-                        checked={!!scope[entity.key]}
-                        onChange={() => handleScopeToggle(entity.key)}
-                      />
-                    </Grid.Col>
-                  ))}
-                </Grid>
+                {entityOptions.length === 0 ? (
+                  <Text size="sm" c="dimmed">
+                    {serverId ? "No entity types available" : "Select a WAF server first"}
+                  </Text>
+                ) : (
+                  <Grid gutter="xs">
+                    {entityOptions.map((entity) => (
+                      <Grid.Col span={6} key={entity.key}>
+                        <Checkbox
+                          label={entity.label}
+                          checked={!!scope[entity.key]}
+                          onChange={() => handleScopeToggle(entity.key)}
+                        />
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                )}
               </Stack>
             </Grid.Col>
 

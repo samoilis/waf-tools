@@ -6,7 +6,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export interface DashboardData {
   kpis: {
-    mxServers: number;
+    wafServers: number;
     activeTasks: number;
     pausedTasks: number;
     totalSnapshots: number;
@@ -20,6 +20,7 @@ export interface DashboardData {
     id: string;
     taskName: string;
     mxName: string;
+    serverName: string;
     status: string;
     snapshotCount: number;
     startedAt: string;

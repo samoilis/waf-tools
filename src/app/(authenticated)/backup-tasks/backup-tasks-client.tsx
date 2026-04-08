@@ -178,7 +178,7 @@ export function BackupTasksPageClient() {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Name</Table.Th>
-              <Table.Th>MX Server</Table.Th>
+              <Table.Th>WAF Server</Table.Th>
               <Table.Th>Schedule</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Executions</Table.Th>
@@ -193,9 +193,9 @@ export function BackupTasksPageClient() {
                   <Text fw={500}>{task.name}</Text>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">{task.mx.name}</Text>
+                  <Text size="sm">{task.server?.name ?? task.mx?.name ?? "—"}</Text>
                   <Text size="xs" c="dimmed" ff="monospace">
-                    {task.mx.host}
+                    {task.server?.host ?? task.mx?.host ?? "—"}
                   </Text>
                 </Table.Td>
                 <Table.Td>

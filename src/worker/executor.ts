@@ -1,22 +1,25 @@
 /**
  * Backup executor – runs a single backup task:
  * 1. Creates ExecutionLog (RUNNING)
- * 2. Logs into the MX server
- * 3. For each entity in scope, exports from MX and saves a BackupSnapshot
- * 4. Updates ExecutionLog (SUCCESS / FAILED)
+ * 2. Resolves the WAF adapter for the server's vendor type
+ * 3. Logs into the WAF server via adapter
+ * 4. For each entity in scope, exports and saves a BackupSnapshot
+ * 5. Updates ExecutionLog (SUCCESS / FAILED)
  */
 
-import type { PrismaClient } from "@/generated/prisma/client";
-import { mxLogin, mxLogout, mxExportEntities } from "./mx-api";
+import type { PrismaClient, WafVendor } from "@/generated/prisma/client";
+import { getAdapter } from "./adapters";
 
 interface TaskToRun {
   id: string;
   name: string;
   scope: Record<string, boolean>;
-  mx: {
+  server: {
+    id: string;
     host: string;
-    username: string;
-    authorization: string;
+    port: number;
+    vendorType: WafVendor;
+    credentials: Record<string, unknown>;
   };
 }
 
@@ -24,7 +27,9 @@ export async function executeBackupTask(
   prisma: PrismaClient,
   task: TaskToRun,
 ): Promise<void> {
-  console.log(`▶ Executing task "${task.name}" (${task.id})`);
+  console.log(
+    `▶ Executing task "${task.name}" (${task.id}) [${task.server.vendorType}]`,
+  );
 
   // 1. Create execution log
   const execution = await prisma.executionLog.create({
@@ -34,11 +39,19 @@ export async function executeBackupTask(
   let snapshotCount = 0;
 
   try {
-    // 2. Login to MX
-    const session = await mxLogin(task.mx.host, task.mx.authorization);
+    // 2. Resolve adapter
+    const adapter = getAdapter(task.server.vendorType);
+
+    // 3. Login
+    const session = await adapter.login({
+      id: task.server.id,
+      host: task.server.host,
+      port: task.server.port,
+      credentials: task.server.credentials,
+    });
 
     try {
-      // 3. Export each entity type that is enabled in scope
+      // 4. Export each entity type that is enabled in scope
       const enabledEntities = Object.entries(task.scope)
         .filter(([, enabled]) => enabled)
         .map(([key]) => key);
@@ -47,7 +60,7 @@ export async function executeBackupTask(
         console.log(`  ↳ Exporting ${entityType}...`);
 
         try {
-          const entities = await mxExportEntities(session, entityType);
+          const entities = await adapter.exportEntities(session, entityType);
 
           // Save snapshots in batch
           if (entities.length > 0) {
@@ -71,10 +84,10 @@ export async function executeBackupTask(
       }
     } finally {
       // Always logout
-      await mxLogout(session);
+      await adapter.logout(session);
     }
 
-    // 4. Mark success
+    // 5. Mark success
     await prisma.executionLog.update({
       where: { id: execution.id },
       data: { status: "SUCCESS", finishedAt: new Date() },
