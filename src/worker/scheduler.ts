@@ -14,6 +14,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CronExpressionParser } from "cron-parser";
 import { executeBackupTask } from "./executor";
+import { executeComplianceSchedule } from "./compliance-executor";
 import { getLicenseStatus } from "@/lib/license";
 
 // ─── Prisma setup (standalone, not shared with Next.js) ──
@@ -54,6 +55,7 @@ function cronMatchesNow(cronExpression: string, now: Date): boolean {
 // ─── Tick: check and run due tasks ───────────────────────
 
 const runningTasks = new Set<string>();
+const runningSchedules = new Set<string>();
 let lastLicenseWarning = 0;
 
 async function tick() {
@@ -125,6 +127,38 @@ async function tick() {
         })
           .catch((err) => console.error(`Task ${task.name} error:`, err))
           .finally(() => runningTasks.delete(task.id));
+      }
+    }
+
+    // ── Compliance schedules ───────────────────────────
+    const complianceSchedules = await prisma.complianceSchedule.findMany({
+      where: { status: "ACTIVE" },
+    });
+
+    const dueSchedules = complianceSchedules.filter(
+      (s) =>
+        cronMatchesNow(s.cronExpression, now) && !runningSchedules.has(s.id),
+    );
+
+    if (dueSchedules.length > 0) {
+      console.log(
+        `[${timestamp}] ${dueSchedules.length} compliance schedule(s) due: ${dueSchedules.map((s) => s.name).join(", ")}`,
+      );
+
+      for (const schedule of dueSchedules) {
+        runningSchedules.add(schedule.id);
+
+        executeComplianceSchedule(prisma, {
+          id: schedule.id,
+          name: schedule.name,
+          frameworks: schedule.frameworks,
+          serverIds: schedule.serverIds,
+          dateRangeType: schedule.dateRangeType,
+        })
+          .catch((err) =>
+            console.error(`Compliance schedule ${schedule.name} error:`, err),
+          )
+          .finally(() => runningSchedules.delete(schedule.id));
       }
     }
   } catch (err) {

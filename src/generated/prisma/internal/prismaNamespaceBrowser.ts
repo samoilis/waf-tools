@@ -59,7 +59,9 @@ export const ModelName = {
   BackupSnapshot: 'BackupSnapshot',
   ConfigSnapshot: 'ConfigSnapshot',
   ConfigSnapshotItem: 'ConfigSnapshotItem',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ComplianceSchedule: 'ComplianceSchedule',
+  ComplianceRun: 'ComplianceRun'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -194,6 +196,35 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const ComplianceScheduleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  frameworks: 'frameworks',
+  serverIds: 'serverIds',
+  cronExpression: 'cronExpression',
+  dateRangeType: 'dateRangeType',
+  notificationEmails: 'notificationEmails',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ComplianceScheduleScalarFieldEnum = (typeof ComplianceScheduleScalarFieldEnum)[keyof typeof ComplianceScheduleScalarFieldEnum]
+
+
+export const ComplianceRunScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  status: 'status',
+  reportData: 'reportData',
+  errorMessage: 'errorMessage',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type ComplianceRunScalarFieldEnum = (typeof ComplianceRunScalarFieldEnum)[keyof typeof ComplianceRunScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -62,3 +62,13 @@ export type ConfigSnapshotItem = Prisma.ConfigSnapshotItemModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model ComplianceSchedule
+ * 
+ */
+export type ComplianceSchedule = Prisma.ComplianceScheduleModel
+/**
+ * Model ComplianceRun
+ * 
+ */
+export type ComplianceRun = Prisma.ComplianceRunModel

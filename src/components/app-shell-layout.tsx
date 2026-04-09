@@ -24,8 +24,10 @@ import {
   Users,
   ScrollText,
   ClipboardList,
+  FileBarChart,
   LogOut,
   ChevronDown,
+  FlaskConical,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -36,6 +38,8 @@ const navLinks = [
   { label: "Dashboard", href: "/", icon: Home },
   { label: "Backup Explorer", href: "/backup-explorer", icon: FolderSearch, section: "Manage" },
   { label: "Config Snapshots", href: "/config-snapshots", icon: Camera, section: "Manage" },
+  { label: "Compliance Reports", href: "/compliance-reports", icon: FileBarChart, section: "Reporting" },
+  { label: "Ad-Hoc Report", href: "/ad-hoc-report", icon: FlaskConical, section: "Reporting" },
   { label: "WAF Servers", href: "/waf-servers", icon: Database, section: "Setup" },
   { label: "Backup Tasks", href: "/backup-tasks", icon: FileText, section: "Setup" },
   { label: "Users", href: "/users", icon: Users, adminOnly: true, section: "Administration" },

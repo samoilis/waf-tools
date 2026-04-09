@@ -54,3 +54,20 @@ export const ExecutionStatus = {
 } as const
 
 export type ExecutionStatus = (typeof ExecutionStatus)[keyof typeof ExecutionStatus]
+
+
+export const ComplianceScheduleStatus = {
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED'
+} as const
+
+export type ComplianceScheduleStatus = (typeof ComplianceScheduleStatus)[keyof typeof ComplianceScheduleStatus]
+
+
+export const ComplianceRunStatus = {
+  RUNNING: 'RUNNING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED'
+} as const
+
+export type ComplianceRunStatus = (typeof ComplianceRunStatus)[keyof typeof ComplianceRunStatus]

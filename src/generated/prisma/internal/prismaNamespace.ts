@@ -392,7 +392,9 @@ export const ModelName = {
   BackupSnapshot: 'BackupSnapshot',
   ConfigSnapshot: 'ConfigSnapshot',
   ConfigSnapshotItem: 'ConfigSnapshotItem',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ComplianceSchedule: 'ComplianceSchedule',
+  ComplianceRun: 'ComplianceRun'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "setting" | "wafServer" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog"
+    modelProps: "user" | "setting" | "wafServer" | "backupTask" | "executionLog" | "backupSnapshot" | "configSnapshot" | "configSnapshotItem" | "auditLog" | "complianceSchedule" | "complianceRun"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1080,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ComplianceSchedule: {
+      payload: Prisma.$ComplianceSchedulePayload<ExtArgs>
+      fields: Prisma.ComplianceScheduleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ComplianceScheduleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ComplianceScheduleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        findFirst: {
+          args: Prisma.ComplianceScheduleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ComplianceScheduleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        findMany: {
+          args: Prisma.ComplianceScheduleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>[]
+        }
+        create: {
+          args: Prisma.ComplianceScheduleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        createMany: {
+          args: Prisma.ComplianceScheduleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ComplianceScheduleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>[]
+        }
+        delete: {
+          args: Prisma.ComplianceScheduleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        update: {
+          args: Prisma.ComplianceScheduleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        deleteMany: {
+          args: Prisma.ComplianceScheduleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ComplianceScheduleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ComplianceScheduleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>[]
+        }
+        upsert: {
+          args: Prisma.ComplianceScheduleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceSchedulePayload>
+        }
+        aggregate: {
+          args: Prisma.ComplianceScheduleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateComplianceSchedule>
+        }
+        groupBy: {
+          args: Prisma.ComplianceScheduleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ComplianceScheduleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ComplianceScheduleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ComplianceScheduleCountAggregateOutputType> | number
+        }
+      }
+    }
+    ComplianceRun: {
+      payload: Prisma.$ComplianceRunPayload<ExtArgs>
+      fields: Prisma.ComplianceRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ComplianceRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ComplianceRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        findFirst: {
+          args: Prisma.ComplianceRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ComplianceRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        findMany: {
+          args: Prisma.ComplianceRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>[]
+        }
+        create: {
+          args: Prisma.ComplianceRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        createMany: {
+          args: Prisma.ComplianceRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ComplianceRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>[]
+        }
+        delete: {
+          args: Prisma.ComplianceRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        update: {
+          args: Prisma.ComplianceRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.ComplianceRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ComplianceRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ComplianceRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.ComplianceRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ComplianceRunPayload>
+        }
+        aggregate: {
+          args: Prisma.ComplianceRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateComplianceRun>
+        }
+        groupBy: {
+          args: Prisma.ComplianceRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ComplianceRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ComplianceRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ComplianceRunCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1233,6 +1383,35 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const ComplianceScheduleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  frameworks: 'frameworks',
+  serverIds: 'serverIds',
+  cronExpression: 'cronExpression',
+  dateRangeType: 'dateRangeType',
+  notificationEmails: 'notificationEmails',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ComplianceScheduleScalarFieldEnum = (typeof ComplianceScheduleScalarFieldEnum)[keyof typeof ComplianceScheduleScalarFieldEnum]
+
+
+export const ComplianceRunScalarFieldEnum = {
+  id: 'id',
+  scheduleId: 'scheduleId',
+  status: 'status',
+  reportData: 'reportData',
+  errorMessage: 'errorMessage',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type ComplianceRunScalarFieldEnum = (typeof ComplianceRunScalarFieldEnum)[keyof typeof ComplianceRunScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1423,6 +1602,34 @@ export type ListEnumExecutionStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'ComplianceScheduleStatus'
+ */
+export type EnumComplianceScheduleStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComplianceScheduleStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ComplianceScheduleStatus[]'
+ */
+export type ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComplianceScheduleStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ComplianceRunStatus'
+ */
+export type EnumComplianceRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComplianceRunStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ComplianceRunStatus[]'
+ */
+export type ListEnumComplianceRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComplianceRunStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1539,6 +1746,8 @@ export type GlobalOmitConfig = {
   configSnapshot?: Prisma.ConfigSnapshotOmit
   configSnapshotItem?: Prisma.ConfigSnapshotItemOmit
   auditLog?: Prisma.AuditLogOmit
+  complianceSchedule?: Prisma.ComplianceScheduleOmit
+  complianceRun?: Prisma.ComplianceRunOmit
 }
 
 /* Types for Logging */

@@ -362,6 +362,40 @@ export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonNullableFilter<$PrismaModel>
 }
 
+export type EnumComplianceScheduleStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceScheduleStatus | Prisma.EnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel> | $Enums.ComplianceScheduleStatus
+}
+
+export type EnumComplianceScheduleStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceScheduleStatus | Prisma.EnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceScheduleStatusWithAggregatesFilter<$PrismaModel> | $Enums.ComplianceScheduleStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel>
+}
+
+export type EnumComplianceRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceRunStatus | Prisma.EnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel> | $Enums.ComplianceRunStatus
+}
+
+export type EnumComplianceRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceRunStatus | Prisma.EnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.ComplianceRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -667,6 +701,40 @@ export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumComplianceScheduleStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceScheduleStatus | Prisma.EnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel> | $Enums.ComplianceScheduleStatus
+}
+
+export type NestedEnumComplianceScheduleStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceScheduleStatus | Prisma.EnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceScheduleStatus[] | Prisma.ListEnumComplianceScheduleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceScheduleStatusWithAggregatesFilter<$PrismaModel> | $Enums.ComplianceScheduleStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumComplianceScheduleStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumComplianceRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceRunStatus | Prisma.EnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel> | $Enums.ComplianceRunStatus
+}
+
+export type NestedEnumComplianceRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ComplianceRunStatus | Prisma.EnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ComplianceRunStatus[] | Prisma.ListEnumComplianceRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumComplianceRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.ComplianceRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumComplianceRunStatusFilter<$PrismaModel>
 }
 
 

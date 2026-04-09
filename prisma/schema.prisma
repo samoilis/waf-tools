@@ -187,3 +187,48 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// ─── Compliance Schedule ────────────────────────────────
+
+enum ComplianceScheduleStatus {
+  ACTIVE
+  PAUSED
+}
+
+model ComplianceSchedule {
+  id                 String                   @id @default(cuid())
+  name               String
+  frameworks         Json                     // string[] — e.g. ["PCI_DSS","HIPAA"]
+  serverIds          Json                     // string[] — WAF server IDs to scope
+  cronExpression     String                   @default("0 2 * * *")
+  dateRangeType      String                   @default("LAST_30_DAYS") // LAST_7_DAYS | LAST_30_DAYS | LAST_90_DAYS | LAST_365_DAYS
+  notificationEmails Json                     @default("[]") // string[] — email addresses for notifications
+  status             ComplianceScheduleStatus @default(ACTIVE)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  runs ComplianceRun[]
+}
+
+// ─── Compliance Run ─────────────────────────────────────
+
+enum ComplianceRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model ComplianceRun {
+  id           String              @id @default(cuid())
+  scheduleId   String
+  status       ComplianceRunStatus @default(RUNNING)
+  reportData   Json?               // full ComplianceReport stored as JSONB
+  errorMessage String?
+  startedAt    DateTime            @default(now())
+  finishedAt   DateTime?
+
+  schedule ComplianceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+  @@index([startedAt])
+}
