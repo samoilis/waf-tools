@@ -11,7 +11,6 @@ import {
   Alert,
   Stack,
   ScrollArea,
-  Code,
   Box,
   TextInput,
   Button,
@@ -21,7 +20,6 @@ import {
   ActionIcon,
   NavLink,
   Badge,
-  Table,
   SegmentedControl,
   Checkbox,
 } from "@mantine/core";
@@ -38,8 +36,11 @@ import {
   Pencil,
   Eye,
   Undo2,
+  History,
+  Copy,
+  Upload,
 } from "lucide-react";
-import { JsonEditor } from "@/components/json-editor";
+import { JsonEditor, JsonDiffEditor } from "@/components/json-editor";
 import {
   useWafServersForExplorer,
   useExecutions,
@@ -48,8 +49,10 @@ import {
   useAllEntityData,
   useConfigSnapshotsForServer,
   useConfigSnapshotDetail,
+  useEntityHistory,
   type TreeData,
   type ExecutionSummary,
+  type EntityVersion,
 } from "./use-snapshots";
 
 // ─── Entity type labels ──────────────────────────────────
@@ -68,21 +71,6 @@ const ENTITY_LABELS: Record<string, string> = {
 
 function entityLabel(type: string): string {
   return ENTITY_LABELS[type] || type;
-}
-
-// ─── JSON diff utility ───────────────────────────────────
-function computeDiff(
-  a: Record<string, unknown>,
-  b: Record<string, unknown>,
-): { key: string; oldVal: unknown; newVal: unknown }[] {
-  const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  const diffs: { key: string; oldVal: unknown; newVal: unknown }[] = [];
-  for (const key of allKeys) {
-    if (JSON.stringify(a[key]) !== JSON.stringify(b[key])) {
-      diffs.push({ key, oldVal: a[key], newVal: b[key] });
-    }
-  }
-  return diffs;
 }
 
 // ─── Highlight search matches in text ────────────────────
@@ -185,6 +173,23 @@ export function BackupExplorerClient() {
   const [diffExecId, setDiffExecId] = useState<string | null>(null);
   const [showDiffModal, setShowDiffModal] = useState(false);
 
+  // ─── History panel ─────────────────────────────────────
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+
+  // ─── Clone state ───────────────────────────────────────
+  const [showCloneModal, setShowCloneModal] = useState(false);
+  const [cloneMode, setCloneMode] = useState(false);
+  const [selectedForClone, setSelectedForClone] = useState<Set<string>>(new Set());
+  const [cloneTargetServerId, setCloneTargetServerId] = useState<string | null>(null);
+  const [clonePushing, setClonePushing] = useState(false);
+  const [cloneResults, setCloneResults] = useState<{ entityName: string; success: boolean; message: string }[] | null>(null);
+
+  // ─── Restore state ─────────────────────────────────────
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreData, setRestoreData] = useState<{ entityType: string; entityName: string; data: Record<string, unknown> } | null>(null);
+  const [restorePushing, setRestorePushing] = useState(false);
+
   // ─── Save snapshot modal ───────────────────────────────
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [snapshotName, setSnapshotName] = useState("");
@@ -214,6 +219,20 @@ export function BackupExplorerClient() {
     sourceMode === "execution" ? serverId : null,
     sourceMode === "execution" ? executionId : null,
   );
+
+  // ─── Entity version history (for history panel) ───────
+  const { data: historyVersions } = useEntityHistory(
+    showHistory ? serverId : null,
+    showHistory ? selectedEntityType : null,
+    showHistory ? selectedEntityId : null,
+  );
+
+  // ─── Server vendor info ────────────────────────────────
+  const currentServer = useMemo(
+    () => wafServers?.find((s) => s.id === serverId) ?? null,
+    [wafServers, serverId],
+  );
+  const isImperva = currentServer?.vendorType === "IMPERVA";
 
   // ─── Config snapshot tree + entity (snapshot mode) ─────
   const csTreeData: TreeData | undefined = useMemo(() => {
@@ -485,18 +504,20 @@ export function BackupExplorerClient() {
     setExecutionId(latestExecId);
   }
 
-  // ─── Diff result ───────────────────────────────────────
-  const diffResult = useMemo(() => {
-    if (!showDiffModal || !diffEntityData || !activeEntityData) return null;
+  // ─── Diff JSON strings ─────────────────────────────────
+  const diffOriginalJson = useMemo(() => {
+    if (!diffEntityData) return "";
+    return JSON.stringify(diffEntityData.data, null, 2);
+  }, [diffEntityData]);
+
+  const diffModifiedJson = useMemo(() => {
+    if (!activeEntityData) return "";
     const currentData =
       entityKey && modifiedEntities[entityKey]
         ? modifiedEntities[entityKey]
         : (activeEntityData.data as Record<string, unknown>);
-    return computeDiff(
-      diffEntityData.data as Record<string, unknown>,
-      currentData,
-    );
-  }, [showDiffModal, diffEntityData, activeEntityData, modifiedEntities, entityKey]);
+    return JSON.stringify(currentData, null, 2);
+  }, [activeEntityData, modifiedEntities, entityKey]);
 
   // ─── Scope toggle helpers ─────────────────────────────
   const toggleScope = useCallback((key: string) => {
@@ -539,6 +560,7 @@ export function BackupExplorerClient() {
   useEffect(() => {
     setEditMode(false);
     setEditError(null);
+    setSelectedVersionId(null);
   }, [selectedEntityType, selectedEntityId]);
 
   const handleEditChange = useCallback(
@@ -574,6 +596,94 @@ export function BackupExplorerClient() {
     });
     setEditMode(false);
   }, [entityKey]);
+
+  // ─── History: selected version data ─────────────────────
+  const selectedVersion = useMemo(
+    () => historyVersions?.find((v) => v.id === selectedVersionId) ?? null,
+    [historyVersions, selectedVersionId],
+  );
+
+  const historyOriginalJson = useMemo(() => {
+    if (!selectedVersion) return "";
+    return JSON.stringify(selectedVersion.data, null, 2);
+  }, [selectedVersion]);
+
+  const historyModifiedJson = useMemo(() => {
+    if (!displayData) return "";
+    return JSON.stringify(displayData, null, 2);
+  }, [displayData]);
+
+  // ─── Clone handler ─────────────────────────────────────
+  const handleClone = useCallback(async () => {
+    if (!cloneTargetServerId) return;
+    setClonePushing(true);
+    setCloneResults(null);
+    try {
+      const entities: { entityType: string; entityName: string; data: Record<string, unknown> }[] = [];
+      if (cloneMode && selectedForClone.size > 0) {
+        for (const key of selectedForClone) {
+          const [eType, eId] = key.split("::");
+          const entity = allEntities.find((e) => e.entityType === eType && e.entityId === eId);
+          if (entity) {
+            const data = modifiedEntities[key] ?? (entity.data as Record<string, unknown>);
+            entities.push({ entityType: eType, entityName: entity.entityName, data });
+          }
+        }
+      } else if (selectedEntityType && selectedEntityId && displayData) {
+        entities.push({
+          entityType: selectedEntityType,
+          entityName: activeEntityData?.entityName ?? selectedEntityId,
+          data: displayData,
+        });
+      }
+      if (entities.length === 0) return;
+
+      const res = await fetch(`/api/waf-servers/${cloneTargetServerId}/push`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entities }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error ?? "Clone failed");
+      setCloneResults(result.results);
+    } catch (err) {
+      setCloneResults([{ entityName: "Error", success: false, message: (err as Error).message }]);
+    } finally {
+      setClonePushing(false);
+    }
+  }, [cloneTargetServerId, cloneMode, selectedForClone, allEntities, modifiedEntities, selectedEntityType, selectedEntityId, displayData, activeEntityData]);
+
+  // ─── Restore handler ───────────────────────────────────
+  const handleRestore = useCallback(async () => {
+    if (!serverId || !restoreData) return;
+    setRestorePushing(true);
+    try {
+      const res = await fetch(`/api/waf-servers/${serverId}/push`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entities: [restoreData],
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error ?? "Restore failed");
+      setShowRestoreModal(false);
+      setRestoreData(null);
+    } catch {
+      // Error will be visible via the modal remaining open
+    } finally {
+      setRestorePushing(false);
+    }
+  }, [serverId, restoreData]);
+
+  // ─── Clone target server options ───────────────────────
+  const cloneTargetOptions = useMemo(
+    () =>
+      (wafServers ?? [])
+        .filter((s) => s.id !== serverId && s.vendorType === currentServer?.vendorType)
+        .map((s) => ({ value: s.id, label: `${s.name} (${s.host})` })),
+    [wafServers, serverId, currentServer],
+  );
 
   const isLoading = serversLoading || execLoading;
 
@@ -691,6 +801,88 @@ export function BackupExplorerClient() {
               <GitCompare size={18} />
             </ActionIcon>
           </Tooltip>
+          <Tooltip label="Version History">
+            <ActionIcon
+              variant={showHistory ? "filled" : "subtle"}
+              color={showHistory ? "blue" : "gray"}
+              size="md"
+              disabled={
+                !canUseActions || !selectedEntityType || !selectedEntityId
+              }
+              onClick={() => {
+                setShowHistory((prev) => !prev);
+                setSelectedVersionId(null);
+              }}
+            >
+              <History size={18} />
+            </ActionIcon>
+          </Tooltip>
+
+          <Box
+            style={{ width: 1, height: 20, background: "var(--mantine-color-default-border)" }}
+            mx={4}
+          />
+
+          <Tooltip label={!isImperva ? "Restore is only available for Imperva servers" : "Restore to server"}>
+            <ActionIcon
+              variant="subtle"
+              size="md"
+              disabled={
+                !canUseActions || !selectedEntityType || !selectedEntityId || !isImperva
+              }
+              onClick={() => {
+                if (displayData && selectedEntityType && activeEntityData) {
+                  setRestoreData({
+                    entityType: selectedEntityType,
+                    entityName: activeEntityData.entityName,
+                    data: displayData,
+                  });
+                  setShowRestoreModal(true);
+                }
+              }}
+            >
+              <Upload size={18} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={!isImperva ? "Clone is only available for Imperva servers" : "Clone to another server"}>
+            <ActionIcon
+              variant="subtle"
+              size="md"
+              disabled={
+                !canUseActions || !isImperva || (
+                  !cloneMode && (!selectedEntityType || !selectedEntityId)
+                )
+              }
+              onClick={() => {
+                setCloneResults(null);
+                setCloneTargetServerId(null);
+                setShowCloneModal(true);
+              }}
+            >
+              <Copy size={18} />
+            </ActionIcon>
+          </Tooltip>
+          {canUseActions && isImperva && (
+            <Tooltip label={cloneMode ? "Exit multi-select" : "Multi-select for clone"}>
+              <ActionIcon
+                variant={cloneMode ? "filled" : "subtle"}
+                color={cloneMode ? "grape" : "gray"}
+                size="md"
+                onClick={() => {
+                  setCloneMode((prev) => !prev);
+                  setSelectedForClone(new Set());
+                }}
+              >
+                <Checkbox
+                  size="xs"
+                  checked={cloneMode}
+                  onChange={() => {}}
+                  styles={{ input: { cursor: "pointer" } }}
+                  tabIndex={-1}
+                />
+              </ActionIcon>
+            </Tooltip>
+          )}
         </Group>
 
         {hasModifications && (
@@ -721,7 +913,9 @@ export function BackupExplorerClient() {
         <Box
           style={{
             display: "grid",
-            gridTemplateColumns: "300px 1fr",
+            gridTemplateColumns: showHistory
+              ? "300px 1fr 380px"
+              : "300px 1fr",
             gap: "var(--mantine-spacing-md)",
             height: "calc(100vh - 220px)",
             minHeight: 400,
@@ -744,9 +938,44 @@ export function BackupExplorerClient() {
                 borderBottom: "1px solid var(--mantine-color-default-border)",
               }}
             >
-              <Text size="sm" fw={600}>
-                Entities
-              </Text>
+              <Group justify="space-between">
+                <Text size="sm" fw={600}>
+                  Entities
+                </Text>
+                {cloneMode && (
+                  <Group gap={4}>
+                    <Badge size="xs" color="grape" variant="filled">
+                      {selectedForClone.size} selected
+                    </Badge>
+                    <ActionIcon
+                      variant="subtle"
+                      size="xs"
+                      onClick={() => {
+                        if (!activeTreeData) return;
+                        const allKeys = new Set<string>();
+                        for (const [type, entities] of Object.entries(activeTreeData)) {
+                          for (const e of entities) allKeys.add(`${type}::${e.entityId}`);
+                        }
+                        setSelectedForClone((prev) =>
+                          prev.size === allKeys.size ? new Set() : allKeys,
+                        );
+                      }}
+                    >
+                      <Checkbox
+                        size="xs"
+                        checked={
+                          activeTreeData
+                            ? selectedForClone.size ===
+                              Object.values(activeTreeData).reduce((s, e) => s + e.length, 0)
+                            : false
+                        }
+                        onChange={() => {}}
+                        tabIndex={-1}
+                      />
+                    </ActionIcon>
+                  </Group>
+                )}
+              </Group>
             </Box>
             <ScrollArea style={{ flex: 1 }}>
               {activeTreeLoading ? (
@@ -778,17 +1007,33 @@ export function BackupExplorerClient() {
                         childrenOffset={20}
                         defaultOpened={type === selectedEntityType}
                       >
-                        {entities.map((entity) => (
+                        {entities.map((entity) => {
+                          const ek = `${type}::${entity.entityId}`;
+                          return (
                           <NavLink
                             key={entity.entityId}
                             label={
                               <Group gap={4}>
+                                {cloneMode && (
+                                  <Checkbox
+                                    size="xs"
+                                    checked={selectedForClone.has(ek)}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedForClone((prev) => {
+                                        const next = new Set(prev);
+                                        if (next.has(ek)) next.delete(ek);
+                                        else next.add(ek);
+                                        return next;
+                                      });
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                )}
                                 <Text size="sm" truncate>
                                   {entity.entityName}
                                 </Text>
-                                {modifiedEntities[
-                                  `${type}::${entity.entityId}`
-                                ] && (
+                                {modifiedEntities[ek] && (
                                   <Badge
                                     size="xs"
                                     color="yellow"
@@ -808,7 +1053,8 @@ export function BackupExplorerClient() {
                               handleEntitySelect(type, entity.entityId)
                             }
                           />
-                        ))}
+                          );
+                        })}
                       </NavLink>
                     ),
                   )}
@@ -1063,6 +1309,132 @@ export function BackupExplorerClient() {
               </Box>
             )}
           </Box>
+
+          {/* ─── Right: History Panel ─── */}
+          {showHistory && (
+            <Box
+              style={{
+                border: "1px solid var(--mantine-color-default-border)",
+                borderRadius: "var(--mantine-radius-md)",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                px="sm"
+                py="xs"
+                style={{
+                  borderBottom: "1px solid var(--mantine-color-default-border)",
+                }}
+              >
+                <Group justify="space-between">
+                  <Group gap="xs">
+                    <History size={16} />
+                    <Text size="sm" fw={600}>
+                      Version History
+                    </Text>
+                  </Group>
+                  <ActionIcon
+                    variant="subtle"
+                    size="xs"
+                    onClick={() => {
+                      setShowHistory(false);
+                      setSelectedVersionId(null);
+                    }}
+                  >
+                    <X size={14} />
+                  </ActionIcon>
+                </Group>
+              </Box>
+
+              {/* Version list */}
+              <ScrollArea h={200} style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+                {!historyVersions ? (
+                  <Center h={80}>
+                    <Loader size="sm" />
+                  </Center>
+                ) : historyVersions.length === 0 ? (
+                  <Text size="sm" c="dimmed" p="sm">
+                    No version history available.
+                  </Text>
+                ) : (
+                  <Stack gap={0} p={4}>
+                    {historyVersions.map((v) => (
+                      <NavLink
+                        key={v.id}
+                        active={selectedVersionId === v.id}
+                        onClick={() =>
+                          setSelectedVersionId(
+                            selectedVersionId === v.id ? null : v.id,
+                          )
+                        }
+                        label={
+                          <Group gap={4}>
+                            <Text size="xs" fw={500} truncate>
+                              {v.execution.task.name}
+                            </Text>
+                            {executionId && v.execution.id === executionId && (
+                              <Badge size="xs" variant="light" color="blue">
+                                current
+                              </Badge>
+                            )}
+                          </Group>
+                        }
+                        description={new Date(v.execution.startedAt).toLocaleString()}
+                        rightSection={
+                          isImperva ? (
+                            <Tooltip label="Restore this version">
+                              <ActionIcon
+                                variant="subtle"
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRestoreData({
+                                    entityType: selectedEntityType!,
+                                    entityName: v.entityName,
+                                    data: v.data,
+                                  });
+                                  setShowRestoreModal(true);
+                                }}
+                              >
+                                <Upload size={12} />
+                              </ActionIcon>
+                            </Tooltip>
+                          ) : undefined
+                        }
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </ScrollArea>
+
+              {/* Diff viewer */}
+              <Box style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+                {selectedVersion ? (
+                  historyOriginalJson === historyModifiedJson ? (
+                    <Center h="100%">
+                      <Alert color="green" variant="light" style={{ margin: 12 }}>
+                        No differences — this version is identical to the current data.
+                      </Alert>
+                    </Center>
+                  ) : (
+                    <JsonDiffEditor
+                      original={historyOriginalJson}
+                      modified={historyModifiedJson}
+                      height="100%"
+                    />
+                  )
+                ) : (
+                  <Center h="100%">
+                    <Text size="sm" c="dimmed">
+                      Select a version to compare
+                    </Text>
+                  </Center>
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
       )}
 
@@ -1266,9 +1638,10 @@ export function BackupExplorerClient() {
           setDiffExecId(null);
         }}
         title="Compare with another execution"
-        size="xl"
+        size="95vw"
+        styles={{ body: { height: "75vh" } }}
       >
-        <Stack gap="md">
+        <Stack gap="md" h="100%">
           <Select
             label="Compare with"
             placeholder="Select execution to compare against"
@@ -1277,55 +1650,20 @@ export function BackupExplorerClient() {
             onChange={setDiffExecId}
             searchable
           />
-          {diffExecId && diffResult && (
+          {diffExecId && diffEntityData && (
             <>
-              {diffResult.length === 0 ? (
+              {diffOriginalJson === diffModifiedJson ? (
                 <Alert color="green" variant="light">
                   No differences found — the entity data is identical.
                 </Alert>
               ) : (
-                <ScrollArea h={400}>
-                  <Table striped withTableBorder>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>Property</Table.Th>
-                        <Table.Th>Other Execution</Table.Th>
-                        <Table.Th>Current</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {diffResult.map((d) => (
-                        <Table.Tr key={d.key}>
-                          <Table.Td>
-                            <Text size="sm" fw={500} ff="monospace">
-                              {d.key}
-                            </Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Code
-                              style={{ fontSize: 12 }}
-                              color="red"
-                              block
-                            >
-                              {JSON.stringify(d.oldVal, null, 2) ??
-                                "undefined"}
-                            </Code>
-                          </Table.Td>
-                          <Table.Td>
-                            <Code
-                              style={{ fontSize: 12 }}
-                              color="green"
-                              block
-                            >
-                              {JSON.stringify(d.newVal, null, 2) ??
-                                "undefined"}
-                            </Code>
-                          </Table.Td>
-                        </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </ScrollArea>
+                <Box style={{ flex: 1, minHeight: 0 }}>
+                  <JsonDiffEditor
+                    original={diffOriginalJson}
+                    modified={diffModifiedJson}
+                    height="100%"
+                  />
+                </Box>
               )}
             </>
           )}
@@ -1379,6 +1717,162 @@ export function BackupExplorerClient() {
               disabled={!snapshotName.trim()}
             >
               Save Snapshot
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* ─── Clone Modal ─── */}
+      <Modal
+        opened={showCloneModal}
+        onClose={() => {
+          setShowCloneModal(false);
+          setCloneResults(null);
+          setCloneTargetServerId(null);
+        }}
+        title="Clone to Server"
+        size="lg"
+      >
+        <Stack gap="md">
+          <Select
+            label="Target Server"
+            placeholder="Select target server"
+            data={cloneTargetOptions}
+            value={cloneTargetServerId}
+            onChange={setCloneTargetServerId}
+            searchable
+          />
+          {cloneTargetOptions.length === 0 && (
+            <Alert color="yellow" variant="light">
+              No other servers with the same vendor type available.
+            </Alert>
+          )}
+          <Text size="sm" fw={600}>
+            Entities to clone ({cloneMode && selectedForClone.size > 0
+              ? selectedForClone.size
+              : displayData ? 1 : 0})
+          </Text>
+          <ScrollArea h={200}>
+            <Stack gap={4}>
+              {cloneMode && selectedForClone.size > 0 ? (
+                Array.from(selectedForClone).map((key) => {
+                  const [eType, eId] = key.split("::");
+                  const entity = allEntities.find(
+                    (e) => e.entityType === eType && e.entityId === eId,
+                  );
+                  return (
+                    <Group key={key} gap="xs">
+                      <FileText size={14} />
+                      <Text size="sm">{entity?.entityName ?? eId}</Text>
+                      <Badge size="xs" variant="light">
+                        {entityLabel(eType)}
+                      </Badge>
+                    </Group>
+                  );
+                })
+              ) : selectedEntityType && activeEntityData ? (
+                <Group gap="xs">
+                  <FileText size={14} />
+                  <Text size="sm">{activeEntityData.entityName}</Text>
+                  <Badge size="xs" variant="light">
+                    {entityLabel(selectedEntityType)}
+                  </Badge>
+                </Group>
+              ) : (
+                <Text size="sm" c="dimmed">No entities selected.</Text>
+              )}
+            </Stack>
+          </ScrollArea>
+
+          {cloneResults && (
+            <Stack gap={4}>
+              <Text size="sm" fw={600}>Results</Text>
+              {cloneResults.map((r, i) => (
+                <Group key={i} gap="xs">
+                  <Badge
+                    size="xs"
+                    color={r.success ? "green" : "red"}
+                    variant="filled"
+                  >
+                    {r.success ? "OK" : "FAIL"}
+                  </Badge>
+                  <Text size="sm">{r.entityName}</Text>
+                  {!r.success && (
+                    <Text size="xs" c="red">
+                      {r.message}
+                    </Text>
+                  )}
+                </Group>
+              ))}
+            </Stack>
+          )}
+
+          <Group justify="flex-end">
+            <Button
+              variant="subtle"
+              onClick={() => {
+                setShowCloneModal(false);
+                setCloneResults(null);
+              }}
+            >
+              {cloneResults ? "Close" : "Cancel"}
+            </Button>
+            {!cloneResults && (
+              <Button
+                leftSection={<Copy size={14} />}
+                onClick={handleClone}
+                loading={clonePushing}
+                disabled={!cloneTargetServerId}
+              >
+                Clone
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* ─── Restore Confirmation Modal ─── */}
+      <Modal
+        opened={showRestoreModal}
+        onClose={() => {
+          setShowRestoreModal(false);
+          setRestoreData(null);
+        }}
+        title="Restore to Server"
+        size="lg"
+      >
+        <Stack gap="md">
+          <Alert color="orange" variant="light" icon={<AlertCircle size={16} />}>
+            This will overwrite the live configuration on{" "}
+            <strong>{currentServer?.name ?? "the server"}</strong>. Make sure
+            you have a current backup before proceeding.
+          </Alert>
+          {restoreData && (
+            <Group gap="xs">
+              <Text size="sm" fw={500}>Entity:</Text>
+              <Text size="sm">{restoreData.entityName}</Text>
+              <Badge size="xs" variant="light">
+                {entityLabel(restoreData.entityType)}
+              </Badge>
+            </Group>
+          )}
+          <Group justify="flex-end">
+            <Button
+              variant="subtle"
+              onClick={() => {
+                setShowRestoreModal(false);
+                setRestoreData(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="orange"
+              leftSection={<Upload size={14} />}
+              onClick={handleRestore}
+              loading={restorePushing}
+            >
+              Restore
             </Button>
           </Group>
         </Stack>

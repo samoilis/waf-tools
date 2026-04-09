@@ -51,6 +51,9 @@ export interface WafAdapter {
   /** Default port for this vendor (used as placeholder in UI). */
   getDefaultPort(): number;
 
+  /** Whether this adapter supports importing (push/restore) entities. */
+  supportsImport(): boolean;
+
   /** Authenticate with the WAF server. */
   login(server: WafServerInfo): Promise<WafSession>;
 
@@ -62,6 +65,14 @@ export interface WafAdapter {
     session: WafSession,
     entityType: string,
   ): Promise<ExportedEntity[]>;
+
+  /** Import (push) a single entity to the WAF server. */
+  importEntity(
+    session: WafSession,
+    entityType: string,
+    entityName: string,
+    data: Record<string, unknown>,
+  ): Promise<{ success: boolean; message: string }>;
 
   /** Test connectivity (returns success/message). */
   testConnection(

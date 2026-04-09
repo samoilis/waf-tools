@@ -20,7 +20,7 @@ const ENTITY_API_MAP: Record<string, string> = {
 
 // ─── MX session management ───────────────────────────────
 
-interface MxSession {
+export interface MxSession {
   host: string;
   sessionId: string;
 }
@@ -125,4 +125,61 @@ export async function mxExportEntities(
   }
 
   return entities;
+}
+
+// ─── Entity import (push) ────────────────────────────────
+
+export async function mxImportEntity(
+  session: MxSession,
+  entityType: string,
+  entityName: string,
+  data: Record<string, unknown>,
+): Promise<{ success: boolean; message: string }> {
+  const apiPath = ENTITY_API_MAP[entityType];
+  if (!apiPath) {
+    return { success: false, message: `Unknown entity type: ${entityType}` };
+  }
+
+  const baseUrl = `https://${session.host}:8083/SecureSphere/api/v1`;
+  const url = `${baseUrl}${apiPath}/${encodeURIComponent(entityName)}`;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Cookie: `session-id=${session.sessionId}`,
+  };
+
+  // Try PUT (update existing entity) first
+  const putRes = await fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  if (putRes.ok) {
+    return { success: true, message: "Entity updated successfully" };
+  }
+
+  // If 404, entity doesn't exist — try POST to create
+  if (putRes.status === 404) {
+    const postRes = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+    });
+
+    if (postRes.ok) {
+      return { success: true, message: "Entity created successfully" };
+    }
+
+    const postText = await postRes.text().catch(() => "");
+    return {
+      success: false,
+      message: `Failed to create entity (${postRes.status}): ${postText || postRes.statusText}`,
+    };
+  }
+
+  const putText = await putRes.text().catch(() => "");
+  return {
+    success: false,
+    message: `Failed to update entity (${putRes.status}): ${putText || putRes.statusText}`,
+  };
 }

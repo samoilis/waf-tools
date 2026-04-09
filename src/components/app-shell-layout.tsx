@@ -41,7 +41,7 @@ const navLinks = [
   { label: "Users", href: "/users", icon: Users, adminOnly: true, section: "Administration" },
   { label: "Settings", href: "/settings", icon: Settings, adminOnly: true, section: "Administration" },
   { label: "Audit Logs", href: "/audit-logs", icon: ScrollText, adminOnly: true, section: "Administration" },
-  { label: "Backup Logs", href: "/backup-logs", icon: ClipboardList, section: "Administration" },
+  { label: "Backup Logs", href: "/backup-logs", icon: ClipboardList, adminOnly: true, section: "Administration" },
 ];
 
 export function AppShellLayout({ children }: { children: React.ReactNode }) {

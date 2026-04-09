@@ -12,6 +12,7 @@ import type {
   ExportedEntity,
   EntityTypeDefinition,
 } from "./types";
+import { mxImportEntity, type MxSession } from "../mx-api";
 
 // ─── Entity type → API path mapping ──────────────────────
 
@@ -71,6 +72,10 @@ export const impervaAdapter: WafAdapter = {
 
   getDefaultPort(): number {
     return 8083;
+  },
+
+  supportsImport(): boolean {
+    return true;
   },
 
   async login(server: WafServerInfo): Promise<WafSession> {
@@ -168,6 +173,16 @@ export const impervaAdapter: WafAdapter = {
     }
 
     return entities;
+  },
+
+  async importEntity(
+    session: WafSession,
+    entityType: string,
+    entityName: string,
+    data: Record<string, unknown>,
+  ): Promise<{ success: boolean; message: string }> {
+    const { host, sessionId } = session.vendorData as ImpervaSessionData;
+    return mxImportEntity({ host, sessionId }, entityType, entityName, data);
   },
 
   async testConnection(

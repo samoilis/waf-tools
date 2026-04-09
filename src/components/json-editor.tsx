@@ -1,7 +1,7 @@
 "use client";
 
 import { useComputedColorScheme } from "@mantine/core";
-import Editor, { type OnMount, loader } from "@monaco-editor/react";
+import Editor, { DiffEditor, type OnMount, loader } from "@monaco-editor/react";
 import { useRef, useCallback, useEffect, useState } from "react";
 
 // ─── Win11-inspired custom themes ───────────────────────
@@ -226,6 +226,93 @@ export function JsonEditor({
           }}
         >
           Loading editor...
+        </div>
+      }
+    />
+  );
+}
+
+// ─── Side-by-side JSON Diff Editor ───────────────────────
+
+interface JsonDiffEditorProps {
+  original: string;
+  modified: string;
+  height?: string | number;
+}
+
+export function JsonDiffEditor({
+  original,
+  modified,
+  height = "100%",
+}: JsonDiffEditorProps) {
+  const colorScheme = useComputedColorScheme("light", {
+    getInitialValueInEffect: true,
+  });
+  const [ready, setReady] = useState(themesRegistered);
+
+  useEffect(() => {
+    if (!themesRegistered) {
+      loader.init().then((monaco) => {
+        registerThemes(monaco);
+        setReady(true);
+      });
+    }
+  }, []);
+
+  const themeName =
+    colorScheme === "dark" ? "win11-dark-readonly" : "win11-light-readonly";
+
+  if (!ready) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: typeof height === "number" ? `${height}px` : height,
+          opacity: 0.5,
+        }}
+      >
+        Loading diff editor...
+      </div>
+    );
+  }
+
+  return (
+    <DiffEditor
+      height={height}
+      language="json"
+      theme={themeName}
+      original={original}
+      modified={modified}
+      options={{
+        readOnly: true,
+        minimap: { enabled: false },
+        lineNumbers: "on",
+        scrollBeyondLastLine: false,
+        wordWrap: "on",
+        fontSize: 13,
+        automaticLayout: true,
+        folding: true,
+        renderSideBySide: true,
+        overviewRulerBorder: false,
+        hideCursorInOverviewRuler: true,
+        scrollbar: {
+          verticalScrollbarSize: 8,
+          horizontalScrollbarSize: 8,
+        },
+      }}
+      loading={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            opacity: 0.5,
+          }}
+        >
+          Loading diff editor...
         </div>
       }
     />

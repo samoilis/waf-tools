@@ -123,3 +123,30 @@ export function useConfigSnapshotDetail(id: string | null) {
     fetcher,
   );
 }
+
+// ─── Entity version history ─────────────────────────────
+
+export interface EntityVersion {
+  id: string;
+  entityName: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+  execution: {
+    id: string;
+    startedAt: string;
+    task: { name: string };
+  };
+}
+
+export function useEntityHistory(
+  serverId: string | null,
+  entityType: string | null,
+  entityId: string | null,
+) {
+  return useSWR<EntityVersion[]>(
+    serverId && entityType && entityId
+      ? `/api/snapshots/${encodeURIComponent(entityId)}?serverId=${serverId}&entityType=${encodeURIComponent(entityType)}`
+      : null,
+    fetcher,
+  );
+}
