@@ -20,6 +20,7 @@ import {
 import { ReportOutput } from "../compliance-reports/report-output";
 import { generateCompliancePdf } from "@/lib/compliance/generate-pdf";
 import { FRAMEWORK_OPTIONS } from "@/lib/compliance/types";
+import { useCompanyInfo } from "@/app/(authenticated)/settings/use-settings";
 
 function getDefaultDateRange(): { from: string; to: string } {
   const to = new Date();
@@ -48,6 +49,7 @@ export function AdHocReportClient() {
     error,
   } = useComplianceReport();
   const reportRef = useRef<HTMLDivElement>(null);
+  const companyInfo = useCompanyInfo();
 
   const handleGenerate = () => {
     trigger({ framework, from: dateFrom, to: dateTo });
@@ -74,7 +76,7 @@ export function AdHocReportClient() {
 
   const handleExportPdf = () => {
     if (!report) return;
-    generateCompliancePdf(report);
+    generateCompliancePdf(report, companyInfo ?? undefined);
   };
 
   return (
@@ -169,6 +171,7 @@ export function AdHocReportClient() {
         <div ref={reportRef}>
           <ReportOutput
             report={report}
+            companyInfo={companyInfo}
             onPrint={handlePrint}
             onExportJson={handleExportJson}
             onExportPdf={handleExportPdf}

@@ -38,6 +38,7 @@ import { FRAMEWORK_LABELS } from "@/lib/compliance/types";
 import type { ComplianceReport } from "@/lib/compliance/types";
 import { ReportOutput } from "./report-output";
 import { generateCompliancePdf } from "@/lib/compliance/generate-pdf";
+import { useCompanyInfo } from "@/app/(authenticated)/settings/use-settings";
 
 // ─── Helpers ─────────────────────────────────────────────
 
@@ -78,6 +79,7 @@ export function ScheduleDetailModal({
   scheduleId,
   onClose,
 }: ScheduleDetailModalProps) {
+  const companyInfo = useCompanyInfo();
   const { schedule, isLoading, mutate } =
     useComplianceScheduleDetail(scheduleId);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
@@ -173,7 +175,7 @@ export function ScheduleDetailModal({
 
   const handleExportPdf = () => {
     if (!runReport) return;
-    generateCompliancePdf(runReport);
+    generateCompliancePdf(runReport, companyInfo ?? undefined);
   };
 
   return (
@@ -316,6 +318,7 @@ export function ScheduleDetailModal({
               {runReport && !loadingRun && (
                 <ReportOutput
                   report={runReport}
+                  companyInfo={companyInfo}
                   onPrint={handlePrint}
                   onExportJson={handleExportJson}
                   onExportPdf={handleExportPdf}

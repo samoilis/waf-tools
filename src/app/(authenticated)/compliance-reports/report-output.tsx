@@ -16,6 +16,7 @@ import {
   ActionIcon,
   SimpleGrid,
   RingProgress,
+  Image,
 } from "@mantine/core";
 import {
   CheckCircle2,
@@ -33,6 +34,7 @@ import {
 } from "lucide-react";
 import type { ComplianceReport, ComplianceCheck } from "@/lib/compliance/types";
 import { FRAMEWORK_LABELS } from "@/lib/compliance/types";
+import type { CompanyInfo } from "@/app/(authenticated)/settings/use-settings";
 
 // ─── Helpers ─────────────────────────────────────────────
 
@@ -81,6 +83,7 @@ function frameworkTitle(report: ComplianceReport): string {
 
 interface ReportOutputProps {
   report: ComplianceReport;
+  companyInfo?: CompanyInfo;
   onPrint?: () => void;
   onExportJson?: () => void;
   onExportPdf?: () => void;
@@ -89,6 +92,7 @@ interface ReportOutputProps {
 
 export function ReportOutput({
   report,
+  companyInfo,
   onPrint,
   onExportJson,
   onExportPdf,
@@ -104,10 +108,24 @@ export function ReportOutput({
     <Stack gap="lg">
       {/* ── Report header ─────────────────────────────── */}
       <Card withBorder>
-        <Group justify="space-between" wrap="wrap">
-          <Group>
-            <Shield size={24} />
-            <div>
+        <Group justify="space-between" wrap="wrap" align="flex-start">
+          <Group align="flex-start" gap="lg">
+            {companyInfo?.logo && (
+              <Image
+                src={companyInfo.logo}
+                alt={companyInfo.name || "Company logo"}
+                fit="contain"
+                maw={120}
+                mah={50}
+                mt={4}
+              />
+            )}
+            <Stack gap={2}>
+              {companyInfo?.name && (
+                <Text fw={600} size="sm">
+                  {companyInfo.name}
+                </Text>
+              )}
               <Title order={3}>
                 {frameworkTitle(report)} Compliance Report
               </Title>
@@ -115,7 +133,26 @@ export function ReportOutput({
                 Period: {report.period.from} — {report.period.to} | Generated:{" "}
                 {formatDate(report.generatedAt)} by {report.generatedBy}
               </Text>
-            </div>
+              {companyInfo &&
+                (companyInfo.address || companyInfo.phone || companyInfo.email || companyInfo.website) && (
+                  <Stack gap={0}>
+                    {companyInfo.address && (
+                      <Text size="xs" c="dimmed">{companyInfo.address}</Text>
+                    )}
+                    {(companyInfo.phone || companyInfo.email) && (
+                      <Text size="xs" c="dimmed">
+                        {[
+                          companyInfo.phone ? `Phone: ${companyInfo.phone}` : "",
+                          companyInfo.email ? `Email: ${companyInfo.email}` : "",
+                        ].filter(Boolean).join(", ")}
+                      </Text>
+                    )}
+                    {companyInfo.website && (
+                      <Text size="xs" c="dimmed">Web: {companyInfo.website}</Text>
+                    )}
+                  </Stack>
+                )}
+            </Stack>
           </Group>
           {!hideActions && (
             <Group className="no-print">

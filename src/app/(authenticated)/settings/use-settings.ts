@@ -4,6 +4,15 @@ import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+export interface CompanyInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  logo: string | null;
+}
+
 export function useSettings() {
   const { data, error, isLoading, mutate } = useSWR<Record<string, string>>(
     "/api/settings",
@@ -24,4 +33,17 @@ export function useSettings() {
   }
 
   return { settings: data, error, isLoading, saveSettings, mutate };
+}
+
+export function useCompanyInfo(): CompanyInfo | undefined {
+  const { settings } = useSettings();
+  if (!settings) return undefined;
+  return {
+    name: settings["company.name"] || "",
+    address: settings["company.address"] || "",
+    phone: settings["company.phone"] || "",
+    email: settings["company.email"] || "",
+    website: settings["company.website"] || "",
+    logo: settings["company.logo"] || null,
+  };
 }

@@ -2,6 +2,16 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { ComplianceReport } from "./types";
 import { FRAMEWORK_LABELS } from "./types";
+import { DEJAVU_SANS_REGULAR, DEJAVU_SANS_BOLD } from "./dejavu-sans";
+
+export interface PdfCompanyInfo {
+  name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logo?: string | null; // data URI
+}
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleString();
@@ -15,20 +25,101 @@ function frameworkTitle(report: ComplianceReport): string {
   return `${labels.join(" + ")} Compliance Report`;
 }
 
-export function generateCompliancePdf(report: ComplianceReport) {
+export function generateCompliancePdf(
+  report: ComplianceReport,
+  companyInfo?: PdfCompanyInfo,
+) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
   let y = margin;
 
+  // ─── Register DejaVu Sans (Latin + Greek) ────────────
+  doc.addFileToVFS("DejaVuSans-normal.ttf", DEJAVU_SANS_REGULAR);
+  doc.addFont("DejaVuSans-normal.ttf", "DejaVuSans", "normal");
+  doc.addFileToVFS("DejaVuSans-bold.ttf", DEJAVU_SANS_BOLD);
+  doc.addFont("DejaVuSans-bold.ttf", "DejaVuSans", "bold");
+  doc.setFont("DejaVuSans", "normal");
+
+  // ─── Company branding header ─────────────────────────
+  if (companyInfo?.logo) {
+    try {
+      // Compute aspect-ratio-correct dimensions from actual image
+      const maxW = 40;
+      const maxH = 16;
+      const imgProps = doc.getImageProperties(companyInfo.logo);
+      const ratio = Math.min(maxW / imgProps.width, maxH / imgProps.height);
+      const logoW = imgProps.width * ratio;
+      const logoH = imgProps.height * ratio;
+      doc.addImage(companyInfo.logo, "PNG", margin, y, logoW, logoH);
+      const textX = margin + logoW + 4;
+      let lineY = y + 5;
+      if (companyInfo.name) {
+        doc.setFontSize(12);
+        doc.setFont("DejaVuSans", "bold");
+        doc.text(companyInfo.name, textX, lineY);
+        lineY += 5;
+      }
+      doc.setFontSize(8);
+      doc.setFont("DejaVuSans", "normal");
+      doc.setTextColor(100);
+      if (companyInfo.address) {
+        doc.text(companyInfo.address, textX, lineY);
+        lineY += 4;
+      }
+      const contactParts = [
+        companyInfo.phone ? `Phone: ${companyInfo.phone}` : "",
+        companyInfo.email ? `Email: ${companyInfo.email}` : "",
+      ].filter(Boolean).join(", ");
+      if (contactParts) {
+        doc.text(contactParts, textX, lineY);
+        lineY += 4;
+      }
+      if (companyInfo.website) {
+        doc.text(`Web: ${companyInfo.website}`, textX, lineY);
+        lineY += 4;
+      }
+      doc.setTextColor(0);
+      y = Math.max(y + logoH, lineY) + 6;
+    } catch {
+      // If logo fails to load, continue without it
+    }
+  } else if (companyInfo?.name) {
+    doc.setFontSize(12);
+    doc.setFont("DejaVuSans", "bold");
+    doc.text(companyInfo.name, margin, y);
+    y += 5;
+    doc.setFontSize(8);
+    doc.setFont("DejaVuSans", "normal");
+    doc.setTextColor(100);
+    if (companyInfo.address) {
+      doc.text(companyInfo.address, margin, y);
+      y += 4;
+    }
+    const contactParts = [
+      companyInfo.phone ? `Phone: ${companyInfo.phone}` : "",
+      companyInfo.email ? `Email: ${companyInfo.email}` : "",
+    ].filter(Boolean).join(", ");
+    if (contactParts) {
+      doc.text(contactParts, margin, y);
+      y += 4;
+    }
+    if (companyInfo.website) {
+      doc.text(`Web: ${companyInfo.website}`, margin, y);
+      y += 4;
+    }
+    doc.setTextColor(0);
+    y += 6;
+  }
+
   // ─── Title ───────────────────────────────────────────
   doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("DejaVuSans", "bold");
   doc.text(frameworkTitle(report), margin, y);
   y += 8;
 
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("DejaVuSans", "normal");
   doc.setTextColor(100);
   doc.text(
     `Period: ${report.period.from} — ${report.period.to}  |  Generated: ${fmtDate(report.generatedAt)} by ${report.generatedBy}`,
@@ -44,11 +135,11 @@ export function generateCompliancePdf(report: ComplianceReport) {
   const warnCount = report.checks.filter((c) => c.status === "WARNING").length;
 
   doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("DejaVuSans", "bold");
   doc.text(`Overall Score: ${report.overallScore}%`, margin, y);
   y += 6;
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("DejaVuSans", "normal");
   doc.text(
     `${passCount} passed  ·  ${failCount} failed  ·  ${warnCount} warnings`,
     margin,
@@ -58,7 +149,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
 
   // ─── Summary ─────────────────────────────────────────
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("DejaVuSans", "bold");
   doc.text("Executive Summary", margin, y);
   y += 6;
 
@@ -67,7 +158,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
     startY: y,
     margin: { left: margin, right: margin },
     theme: "grid",
-    headStyles: { fillColor: [41, 128, 185] },
+    headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+    styles: { font: "DejaVuSans" },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 70 } },
     head: [["Metric", "Value"]],
     body: [
@@ -92,7 +184,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   // ─── Compliance Checks ───────────────────────────────
   ensureSpace(doc, y, 20);
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("DejaVuSans", "bold");
   doc.text("Compliance Checks", margin, y);
   y += 6;
 
@@ -100,7 +192,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
     startY: y,
     margin: { left: margin, right: margin },
     theme: "grid",
-    headStyles: { fillColor: [41, 128, 185] },
+    headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+    styles: { font: "DejaVuSans" },
     columnStyles: {
       0: { cellWidth: 18 },
       1: { cellWidth: 50 },
@@ -129,7 +222,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   if (report.auditLogsByAction.length > 0) {
     ensureSpace(doc, y, 20);
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("DejaVuSans", "bold");
     doc.text("Audit Events by Action", margin, y);
     y += 6;
 
@@ -137,7 +230,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] },
+      headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+    styles: { font: "DejaVuSans" },
       head: [["Action", "Count"]],
       body: report.auditLogsByAction.map((a) => [a.action, String(a.count)]),
     });
@@ -150,7 +244,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   if (report.configChanges.length > 0) {
     ensureSpace(doc, y, 20);
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("DejaVuSans", "bold");
     doc.text("Configuration Changes", margin, y);
     y += 6;
 
@@ -158,8 +252,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] },
-      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+      styles: { font: "DejaVuSans", fontSize: 8 },
       head: [["Date", "User", "Action", "Target", "IP"]],
       body: report.configChanges.map((c) => [
         fmtDate(c.createdAt),
@@ -178,7 +272,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   if (report.executionLogs.length > 0) {
     ensureSpace(doc, y, 20);
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("DejaVuSans", "bold");
     doc.text("Backup Execution History", margin, y);
     y += 6;
 
@@ -186,8 +280,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] },
-      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+      styles: { font: "DejaVuSans", fontSize: 8 },
       head: [["Started", "Task", "Server", "Status", "Error"]],
       body: report.executionLogs.map((e) => [
         fmtDate(e.startedAt),
@@ -213,7 +307,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   if (report.wafServers.length > 0) {
     ensureSpace(doc, y, 20);
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("DejaVuSans", "bold");
     doc.text("WAF Server Inventory", margin, y);
     y += 6;
 
@@ -221,7 +315,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] },
+      headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+    styles: { font: "DejaVuSans" },
       head: [["Name", "Host", "Vendor", "Registered"]],
       body: report.wafServers.map((sv) => [
         sv.name,
@@ -239,7 +334,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
   if (report.users.length > 0) {
     ensureSpace(doc, y, 20);
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("DejaVuSans", "bold");
     doc.text("User Accounts", margin, y);
     y += 6;
 
@@ -247,7 +342,8 @@ export function generateCompliancePdf(report: ComplianceReport) {
       startY: y,
       margin: { left: margin, right: margin },
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] },
+      headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
+    styles: { font: "DejaVuSans" },
       head: [["Username", "Display Name", "Role", "Auth Provider", "Created"]],
       body: report.users.map((u) => [
         u.username,
@@ -268,7 +364,7 @@ export function generateCompliancePdf(report: ComplianceReport) {
     doc.setPage(i);
     const pageHeight = doc.internal.pageSize.getHeight();
     doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
+    doc.setFont("DejaVuSans", "normal");
     doc.setTextColor(150);
     doc.text(
       `WAF Tools — Compliance Report — Page ${i} of ${totalPages}`,
