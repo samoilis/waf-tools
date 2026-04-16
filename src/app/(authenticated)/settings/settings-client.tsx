@@ -1,12 +1,13 @@
 "use client";
 
 import { Tabs, Title, Group, LoadingOverlay, Box } from "@mantine/core";
-import { Bell, ShieldCheck, KeyRound, Server, Building2, Settings } from "lucide-react";
+import { Bell, ShieldCheck, KeyRound, Server, Building2, Settings, DatabaseBackup } from "lucide-react";
 import { useSettings } from "./use-settings";
 import { GeneralTab } from "./company-tab";
 import { NotificationsTab } from "./general-tab";
 import { SmtpSyslogTab } from "./smtp-syslog-tab";
 import { AuthenticationTab } from "./authentication-tab";
+import { DbBackupTab } from "./db-backup-tab";
 import { RegistrationTab } from "./registration-tab";
 
 export function SettingsPageClient() {
@@ -48,6 +49,9 @@ export function SettingsPageClient() {
             <Tabs.Tab value="authentication" leftSection={<ShieldCheck size={16} />}>
               Authentication
             </Tabs.Tab>
+            <Tabs.Tab value="db-backup" leftSection={<DatabaseBackup size={16} />}>
+              Database Backup
+            </Tabs.Tab>
             <Tabs.Tab value="registration" leftSection={<KeyRound size={16} />}>
               Registration
             </Tabs.Tab>
@@ -67,6 +71,10 @@ export function SettingsPageClient() {
 
           <Tabs.Panel value="authentication">
             <AuthenticationTab settings={settings} onSave={saveSettings} />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="db-backup">
+            <DbBackupTab settings={settings} onSave={saveSettings} />
           </Tabs.Panel>
 
           <Tabs.Panel value="registration">

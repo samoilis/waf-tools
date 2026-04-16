@@ -22,6 +22,7 @@ RUN pnpm build
 
 # ─── Stage 3: Web (Next.js) ──────────────────────────────
 FROM node:22-alpine AS web
+RUN apk add --no-cache postgresql17-client
 WORKDIR /app
 
 ENV NODE_ENV=production

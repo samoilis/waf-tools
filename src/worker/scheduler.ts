@@ -15,6 +15,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { CronExpressionParser } from "cron-parser";
 import { executeBackupTask } from "./executor";
 import { executeComplianceSchedule } from "./compliance-executor";
+import { executeDbBackup } from "./db-backup-executor";
 import { getLicenseStatus } from "@/lib/license";
 
 // ─── Prisma setup (standalone, not shared with Next.js) ──
@@ -57,6 +58,7 @@ function cronMatchesNow(cronExpression: string, now: Date): boolean {
 const runningTasks = new Set<string>();
 const runningSchedules = new Set<string>();
 let lastLicenseWarning = 0;
+let dbBackupRunning = false;
 
 async function tick() {
   const now = new Date();
@@ -159,6 +161,36 @@ async function tick() {
             console.error(`Compliance schedule ${schedule.name} error:`, err),
           )
           .finally(() => runningSchedules.delete(schedule.id));
+      }
+    }
+
+    // ── Scheduled database backup ──────────────────────
+    if (!dbBackupRunning) {
+      const scheduleRows = await prisma.setting.findMany({
+        where: { key: { in: ["s3.schedule.enabled", "s3.schedule.cron"] } },
+      });
+      const scheduleMap: Record<string, string> = {};
+      for (const r of scheduleRows) scheduleMap[r.key] = r.value;
+
+      const scheduleEnabled = scheduleMap["s3.schedule.enabled"] === "true";
+      const scheduleCron = scheduleMap["s3.schedule.cron"] || "0 2 * * *";
+
+      if (scheduleEnabled && cronMatchesNow(scheduleCron, now)) {
+        console.log(`[${timestamp}] Database backup schedule triggered`);
+        dbBackupRunning = true;
+
+        executeDbBackup(prisma)
+          .then(() =>
+            console.log(
+              `[${timestamp}] Database backup completed successfully`,
+            ),
+          )
+          .catch((err) =>
+            console.error(`[${timestamp}] Database backup failed:`, err),
+          )
+          .finally(() => {
+            dbBackupRunning = false;
+          });
       }
     }
   } catch (err) {
