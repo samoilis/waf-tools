@@ -70,7 +70,9 @@ export function generateCompliancePdf(
       const contactParts = [
         companyInfo.phone ? `Phone: ${companyInfo.phone}` : "",
         companyInfo.email ? `Email: ${companyInfo.email}` : "",
-      ].filter(Boolean).join(", ");
+      ]
+        .filter(Boolean)
+        .join(", ");
       if (contactParts) {
         doc.text(contactParts, textX, lineY);
         lineY += 4;
@@ -99,7 +101,9 @@ export function generateCompliancePdf(
     const contactParts = [
       companyInfo.phone ? `Phone: ${companyInfo.phone}` : "",
       companyInfo.email ? `Email: ${companyInfo.email}` : "",
-    ].filter(Boolean).join(", ");
+    ]
+      .filter(Boolean)
+      .join(", ");
     if (contactParts) {
       doc.text(contactParts, margin, y);
       y += 4;
@@ -231,7 +235,7 @@ export function generateCompliancePdf(
       margin: { left: margin, right: margin },
       theme: "grid",
       headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
-    styles: { font: "DejaVuSans" },
+      styles: { font: "DejaVuSans" },
       head: [["Action", "Count"]],
       body: report.auditLogsByAction.map((a) => [a.action, String(a.count)]),
     });
@@ -316,7 +320,7 @@ export function generateCompliancePdf(
       margin: { left: margin, right: margin },
       theme: "grid",
       headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
-    styles: { font: "DejaVuSans" },
+      styles: { font: "DejaVuSans" },
       head: [["Name", "Host", "Vendor", "Registered"]],
       body: report.wafServers.map((sv) => [
         sv.name,
@@ -343,7 +347,7 @@ export function generateCompliancePdf(
       margin: { left: margin, right: margin },
       theme: "grid",
       headStyles: { fillColor: [41, 128, 185], font: "DejaVuSans" },
-    styles: { font: "DejaVuSans" },
+      styles: { font: "DejaVuSans" },
       head: [["Username", "Display Name", "Role", "Auth Provider", "Created"]],
       body: report.users.map((u) => [
         u.username,

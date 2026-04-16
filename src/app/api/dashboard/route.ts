@@ -18,6 +18,7 @@ export async function GET() {
     snapshotsByType,
     recentExecutions,
     failedExecutions,
+    latestComplianceRun,
   ] = await Promise.all([
     // KPI: WAF server count
     prisma.wafServer.count(),
@@ -83,6 +84,13 @@ export async function GET() {
         task: { select: { name: true } },
       },
     }),
+
+    // Compliance: latest completed run
+    prisma.complianceRun.findFirst({
+      where: { status: "SUCCESS" },
+      orderBy: { finishedAt: "desc" },
+      select: { reportData: true, finishedAt: true },
+    }),
   ]);
 
   return NextResponse.json({
@@ -116,5 +124,11 @@ export async function GET() {
         startedAt: e.startedAt,
       })),
     },
+    compliance: latestComplianceRun
+      ? {
+          score: (latestComplianceRun.reportData as Record<string, unknown>)?.overallScore as number | undefined,
+          date: latestComplianceRun.finishedAt?.toISOString() ?? null,
+        }
+      : null,
   });
 }

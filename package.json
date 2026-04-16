@@ -15,6 +15,7 @@
     "@aws-sdk/client-sts": "^3.1027.0",
     "@aws-sdk/client-wafv2": "^3.1027.0",
     "@mantine/core": "9.0.1",
+    "@mantine/form": "^9.0.2",
     "@mantine/hooks": "9.0.1",
     "@mantine/notifications": "9.0.1",
     "@monaco-editor/react": "^4.7.0",

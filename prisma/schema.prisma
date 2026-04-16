@@ -26,6 +26,7 @@ model User {
   username     String       @unique
   password     String?      // bcrypt hash — null for external auth users
   displayName  String?
+  avatar       String?      // URL or data-URI for user avatar
   role         UserRole     @default(VIEWER)
   authProvider AuthProvider @default(LOCAL)
   isSystem     Boolean      @default(false) // true = cannot be deleted (default admin)

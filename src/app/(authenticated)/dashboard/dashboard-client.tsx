@@ -12,6 +12,7 @@ import {
   Skeleton,
   Alert,
   ThemeIcon,
+  RingProgress,
   rem,
 } from "@mantine/core";
 import {
@@ -20,6 +21,7 @@ import {
   Activity,
   Archive,
   AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 import {
   BarChart,
@@ -159,7 +161,7 @@ export function DashboardClient() {
       </SimpleGrid>
 
       {/* Charts Row */}
-      <SimpleGrid cols={{ base: 1, md: 2 }}>
+      <SimpleGrid cols={{ base: 1, md: 3 }}>
         {/* Execution History Bar Chart */}
         <Card withBorder shadow="sm" radius="md" p="lg">
           <Text fw={600} mb="md">
@@ -243,6 +245,58 @@ export function DashboardClient() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+          )}
+        </Card>
+
+        {/* Compliance Score */}
+        <Card withBorder shadow="sm" radius="md" p="lg">
+          <Text fw={600} mb="md">
+            Compliance Score
+          </Text>
+          {isLoading || !data ? (
+            <Skeleton height={280} />
+          ) : (
+            <Stack align="center" justify="center" h={280} gap="md">
+              {data.compliance?.score != null ? (
+                <>
+                  <RingProgress
+                    size={180}
+                    thickness={14}
+                    roundCaps
+                    sections={[
+                      {
+                        value: data.compliance.score,
+                        color:
+                          data.compliance.score >= 80
+                            ? "green"
+                            : data.compliance.score >= 50
+                              ? "yellow"
+                              : "red",
+                      },
+                    ]}
+                    label={
+                      <Text ta="center" size={rem(28)} fw={700}>
+                        {data.compliance.score}%
+                      </Text>
+                    }
+                  />
+                  <Text size="sm" c="dimmed">
+                    {data.compliance.date
+                      ? `Last generated report: ${new Date(data.compliance.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+                      : "No reports yet"}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text size={rem(28)} fw={700} c="dimmed">
+                    —
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    No reports yet
+                  </Text>
+                </>
+              )}
+            </Stack>
           )}
         </Card>
       </SimpleGrid>

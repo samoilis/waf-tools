@@ -18,7 +18,11 @@
 			"headers": {
 				"Authorization": "Bearer ${input:neon-api-key}"
 			}
-  	}
+  	},
+		"chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--headless", "true"]
+    }
 	},
 	"inputs": [
 		{

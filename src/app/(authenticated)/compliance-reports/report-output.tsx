@@ -118,6 +118,9 @@ export function ReportOutput({
                 maw={120}
                 mah={50}
                 mt={4}
+                p={6}
+                bg="gray.1"
+                style={{ borderRadius: 6 }}
               />
             )}
             <Stack gap={2}>

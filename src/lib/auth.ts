@@ -87,7 +87,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 userId: user.id,
                 username,
                 action: "LOGIN_FAILED",
-                details: { reason: "LDAP error", error: err instanceof Error ? err.message : String(err) },
+                details: {
+                  reason: "LDAP error",
+                  error: err instanceof Error ? err.message : String(err),
+                },
               });
               return null;
             }
@@ -102,7 +105,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 userId: user.id,
                 username,
                 action: "LOGIN_FAILED",
-                details: { reason: "RADIUS error", error: err instanceof Error ? err.message : String(err) },
+                details: {
+                  reason: "RADIUS error",
+                  error: err instanceof Error ? err.message : String(err),
+                },
               });
               return null;
             }
@@ -117,7 +123,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 userId: user.id,
                 username,
                 action: "LOGIN_FAILED",
-                details: { reason: "TACACS+ error", error: err instanceof Error ? err.message : String(err) },
+                details: {
+                  reason: "TACACS+ error",
+                  error: err instanceof Error ? err.message : String(err),
+                },
               });
               return null;
             }
@@ -130,7 +139,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             userId: user.id,
             username: user.username,
             action: "LOGIN_FAILED",
-            details: { reason: "Invalid credentials", provider: user.authProvider },
+            details: {
+              reason: "Invalid credentials",
+              provider: user.authProvider,
+            },
           });
           return null;
         }

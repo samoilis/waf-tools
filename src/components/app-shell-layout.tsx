@@ -12,6 +12,13 @@ import {
   Text,
   Avatar,
   Divider,
+  Badge,
+  ActionIcon,
+  useMantineColorScheme,
+  useComputedColorScheme,
+  useMantineTheme,
+  MantineProvider,
+  DEFAULT_THEME,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -26,13 +33,23 @@ import {
   ClipboardList,
   FileBarChart,
   LogOut,
-  ChevronDown,
   FlaskConical,
+  EllipsisVertical,
+  Sun,
+  Moon,
+  Palette,
+  UserRound,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
+
+const MANTINE_COLORS = [
+  "red", "pink", "grape", "violet", "indigo", "blue",
+  "cyan", "teal", "green", "lime", "yellow", "orange",
+  "navy",
+] as const;
 
 const navLinks = [
   { label: "Dashboard", href: "/", icon: Home },
@@ -51,9 +68,26 @@ const navLinks = [
 export function AppShellLayout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme("light", {
+    getInitialValueInEffect: true,
+  });
+  const mantineTheme = useMantineTheme();
 
   const isAdmin = session?.user?.role === "ADMIN";
+
+  // Fetch profile data (avatar, displayName) via React Query so sidebar updates without refresh
+  const { data: userProfile } = useQuery<{ avatar: string | null; displayName: string | null }>({
+    queryKey: ["user-profile"],
+    queryFn: async () => {
+      const res = await fetch("/api/user-profile");
+      if (!res.ok) throw new Error("Failed to fetch profile");
+      return res.json();
+    },
+    enabled: !!session?.user,
+  });
 
   const visibleLinks = navLinks.filter(
     (link) => !link.adminOnly || isAdmin,
@@ -63,56 +97,43 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const toggleColorScheme = () => {
+    setColorScheme(computedColorScheme === "dark" ? "light" : "dark");
+  };
+
+  const displayName = userProfile?.displayName || session?.user?.displayName || session?.user?.username || "";
+
   return (
     <AppShell
-      header={{ height: 60 }}
       navbar={{ width: 260, breakpoint: "sm", collapsed: { mobile: !opened } }}
       padding="md"
     >
-      <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+      <AppShell.Navbar
+        p="xs"
+        bg={
+          computedColorScheme === "dark"
+            ? `var(--mantine-color-${mantineTheme.primaryColor}-9)`
+            : `var(--mantine-color-${mantineTheme.primaryColor}-0)`
+        }
+      >
+        {/* Mobile burger */}
+        <AppShell.Section hiddenFrom="sm">
+          <Group px="xs" py="xs">
+            <Burger opened={opened} onClick={toggle} size="sm" />
+          </Group>
+        </AppShell.Section>
+
+        {/* Logo & app name at top of sidebar */}
+        <AppShell.Section>
+          <Group px="xs" py="md" gap="sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="WAF Tools" width={32} height={32} />
             <Title order={3}>WAF Tools</Title>
           </Group>
-          <Group>
-            <ThemeToggle />
-            {session?.user && (
-              <Menu shadow="md" width={200} position="bottom-end">
-                <Menu.Target>
-                  <UnstyledButton>
-                    <Group gap="xs">
-                      <Avatar size="md" radius="xl">
-                        {session.user.username[0].toUpperCase()}
-                      </Avatar>
-                      <ChevronDown size={14} />
-                    </Group>
-                  </UnstyledButton>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>
-                    {session.user.displayName
-                      ? `${session.user.displayName} (${session.user.username})`
-                      : session.user.username}{" "}
-                    — {session.user.role}
-                  </Menu.Label>
-                  <Divider />
-                  <Menu.Item
-                    leftSection={<LogOut size={14} />}
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                  >
-                    Sign Out
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            )}
-          </Group>
-        </Group>
-      </AppShell.Header>
+          <Divider mb="xs" />
+        </AppShell.Section>
 
-      <AppShell.Navbar p="xs">
+        {/* Navigation links */}
         <AppShell.Section grow component={ScrollArea}>
           {visibleLinks.map((link, index) => {
             const prevLink = visibleLinks[index - 1];
@@ -134,7 +155,110 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </AppShell.Section>
+
+        {/* User section at bottom */}
         <AppShell.Section>
+          <Divider my="xs" />
+          {session?.user && (
+            <Group px="xs" py="xs" justify="space-between" wrap="nowrap">
+              <Group gap="sm" wrap="nowrap" style={{ overflow: "hidden", flex: 1 }}>
+                <Avatar size="md" radius="xl" variant="transparent" src={userProfile?.avatar} />
+                <div style={{ overflow: "hidden" }}>
+                  <Text size="sm" fw={500} truncate>
+                    {displayName}
+                  </Text>
+                  <Badge size="xs" variant="light">
+                    {session.user.role}
+                  </Badge>
+                </div>
+              </Group>
+
+              <Menu shadow="md" width={220} position="top-end">
+                <Menu.Target>
+                  <ActionIcon variant="subtle" color="gray" size="md">
+                    <EllipsisVertical size={18} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={
+                      computedColorScheme === "dark" ? (
+                        <Sun size={14} />
+                      ) : (
+                        <Moon size={14} />
+                      )
+                    }
+                    onClick={toggleColorScheme}
+                  >
+                    {computedColorScheme === "dark" ? "Light Theme" : "Dark Theme"}
+                  </Menu.Item>
+
+                  <Menu
+                    trigger="hover"
+                    position="right-start"
+                    shadow="md"
+                    width={200}
+                  >
+                    <Menu.Target>
+                      <Menu.Item leftSection={<Palette size={14} />}>
+                        Base Color
+                      </Menu.Item>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      {MANTINE_COLORS.map((color) => {
+                        const swatch =
+                          color === "navy"
+                            ? mantineTheme.colors.navy[5]
+                            : DEFAULT_THEME.colors[color][5];
+                        return (
+                          <Menu.Item
+                            key={color}
+                            leftSection={
+                              <div
+                                style={{
+                                  width: 14,
+                                  height: 14,
+                                  borderRadius: "50%",
+                                  backgroundColor: swatch,
+                                }}
+                              />
+                            }
+                            onClick={() => {
+                              // Store color preference
+                              localStorage.setItem("waf-primary-color", color);
+                              window.location.reload();
+                            }}
+                            fw={mantineTheme.primaryColor === color ? 700 : 400}
+                          >
+                            {color.charAt(0).toUpperCase() + color.slice(1)}
+                          </Menu.Item>
+                        );
+                      })}
+                    </Menu.Dropdown>
+                  </Menu>
+
+                  <Menu.Divider />
+
+                  <Menu.Item
+                    leftSection={<UserRound size={14} />}
+                    onClick={() => router.push("/user-profile")}
+                  >
+                    Profile
+                  </Menu.Item>
+
+                  <Menu.Divider />
+
+                  <Menu.Item
+                    leftSection={<LogOut size={14} />}
+                    color="red"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                  >
+                    Sign Out
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </Group>
+          )}
           <Divider my="xs" />
           <Text size="xs" c="dimmed" ta="center" py="xs">
             &copy; 2026 Odyssey Consultants SA

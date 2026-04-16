@@ -13,7 +13,12 @@ import {
   Alert,
   Center,
   Box,
+  Text,
+  Anchor,
+  Modal,
+  ScrollArea,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { AlertCircle } from "lucide-react";
 
 /* ─── Particle Network Background ─────────────────────── */
@@ -168,6 +173,11 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const [termsOpened, { open: openTerms, close: closeTerms }] =
+    useDisclosure(false);
+  const [privacyOpened, { open: openPrivacy, close: closePrivacy }] =
+    useDisclosure(false);
+
   return (
     <Center
       mih="100vh"
@@ -178,7 +188,18 @@ export default function LoginPage() {
       }}
     >
       <ParticleBackground />
-      <Box w={400} mx="auto" style={{ position: "relative", zIndex: 1 }}>
+      <Box
+        w={400}
+        mx="auto"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          marginTop: "-6vh",
+        }}
+      >
         <Stack align="center" mb="lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="WAF Tools" width={64} height={64} />
@@ -186,10 +207,211 @@ export default function LoginPage() {
             WAF Tools
           </Title>
         </Stack>
-        <Suspense>
-          <LoginForm />
-        </Suspense>
+        <Box w="100%">
+          <Suspense>
+            <LoginForm />
+          </Suspense>
+        </Box>
+        <Stack align="center" mt="xl" gap={4}>
+          <Text size="xs" c="dimmed">
+            &copy; {new Date().getFullYear()} WAF Tools. All rights reserved.
+          </Text>
+          <Box style={{ display: "flex", gap: 12 }}>
+            <Anchor size="xs" c="dimmed" component="button" onClick={openTerms}>
+              Terms of Use
+            </Anchor>
+            <Text size="xs" c="dimmed">
+              |
+            </Text>
+            <Anchor
+              size="xs"
+              c="dimmed"
+              component="button"
+              onClick={openPrivacy}
+            >
+              Privacy Policy
+            </Anchor>
+          </Box>
+        </Stack>
       </Box>
+
+      {/* Terms of Use Modal */}
+      <Modal
+        opened={termsOpened}
+        onClose={closeTerms}
+        title="Terms of Use"
+        size="lg"
+        centered
+      >
+        <ScrollArea h={400}>
+          <Stack gap="sm">
+            <Text size="sm" fw={600}>
+              1. Acceptance of Terms
+            </Text>
+            <Text size="sm">
+              By accessing and using WAF Tools (&quot;the Software&quot;), you
+              agree to be bound by these Terms of Use. If you do not agree with
+              any part of these terms, you must not use the Software.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              2. License &amp; Permitted Use
+            </Text>
+            <Text size="sm">
+              WAF Tools is licensed, not sold. You are granted a limited,
+              non-exclusive, non-transferable license to use the Software solely
+              for managing and monitoring Web Application Firewall
+              configurations within your organization.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              3. User Accounts
+            </Text>
+            <Text size="sm">
+              You are responsible for maintaining the confidentiality of your
+              account credentials and for all activities that occur under your
+              account. Notify your administrator immediately of any unauthorized
+              use.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              4. Restrictions
+            </Text>
+            <Text size="sm">
+              You may not: (a) reverse-engineer, decompile, or disassemble the
+              Software; (b) rent, lease, or lend the Software to third parties;
+              (c) use the Software for any unlawful purpose; (d) remove or alter
+              any proprietary notices or labels.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              5. Data &amp; Security
+            </Text>
+            <Text size="sm">
+              All WAF configuration data, backup snapshots, and audit logs
+              managed through the Software remain your property. You are
+              responsible for ensuring that your use of the Software complies
+              with your organization&apos;s security policies.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              6. Disclaimer of Warranties
+            </Text>
+            <Text size="sm">
+              The Software is provided &quot;as is&quot; without warranties of
+              any kind, either express or implied, including but not limited to
+              implied warranties of merchantability, fitness for a particular
+              purpose, and non-infringement.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              7. Limitation of Liability
+            </Text>
+            <Text size="sm">
+              In no event shall the authors or copyright holders be liable for
+              any claim, damages, or other liability arising from the use of the
+              Software.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              8. Changes to Terms
+            </Text>
+            <Text size="sm">
+              We reserve the right to modify these terms at any time. Continued
+              use of the Software after changes constitutes acceptance of the
+              updated terms.
+            </Text>
+          </Stack>
+        </ScrollArea>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal
+        opened={privacyOpened}
+        onClose={closePrivacy}
+        title="Privacy Policy"
+        size="lg"
+        centered
+      >
+        <ScrollArea h={400}>
+          <Stack gap="sm">
+            <Text size="sm" fw={600}>
+              1. Information We Collect
+            </Text>
+            <Text size="sm">
+              WAF Tools collects the following information: (a) account
+              credentials (username and hashed password); (b) audit logs of user
+              actions within the application; (c) WAF server connection details
+              you provide for management purposes.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              2. How We Use Your Information
+            </Text>
+            <Text size="sm">
+              Your information is used exclusively for: (a) authenticating and
+              authorizing access to the Software; (b) maintaining audit trails
+              for security and compliance purposes; (c) executing WAF management
+              operations you initiate.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              3. Data Storage &amp; Retention
+            </Text>
+            <Text size="sm">
+              All data is stored locally within your self-hosted deployment. No
+              data is transmitted to external servers. You retain full control
+              over your data and its retention policies through your database
+              administration.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              4. Data Sharing
+            </Text>
+            <Text size="sm">
+              We do not sell, trade, or share your data with any third parties.
+              Your WAF configuration data and credentials remain entirely within
+              your infrastructure.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              5. Security Measures
+            </Text>
+            <Text size="sm">
+              We implement industry-standard security measures including:
+              password hashing with bcrypt, CSRF protection, session-based
+              authentication, and role-based access control to protect your data.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              6. Your Rights
+            </Text>
+            <Text size="sm">
+              As the data is self-hosted, you have full control to access,
+              modify, export, or delete any of your data at any time through the
+              application&apos;s administration interface or directly via the
+              database.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              7. Cookies &amp; Sessions
+            </Text>
+            <Text size="sm">
+              WAF Tools uses session cookies solely for authentication purposes.
+              No tracking cookies or analytics are employed.
+            </Text>
+
+            <Text size="sm" fw={600}>
+              8. Changes to This Policy
+            </Text>
+            <Text size="sm">
+              We reserve the right to update this Privacy Policy. Any changes
+              will be reflected within the application. Continued use of the
+              Software constitutes acceptance of the updated policy.
+            </Text>
+          </Stack>
+        </ScrollArea>
+      </Modal>
     </Center>
   );
 }

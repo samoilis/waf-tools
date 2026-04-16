@@ -35,6 +35,10 @@ export interface DashboardData {
       startedAt: string;
     }[];
   };
+  compliance: {
+    score: number | undefined;
+    date: string | null;
+  } | null;
 }
 
 export function useDashboard() {

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import { ColorSchemeScript } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
-import { theme } from "@/theme";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -29,12 +29,12 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body suppressHydrationWarning>
-        <MantineProvider theme={theme} defaultColorScheme="auto">
+        <ThemeProvider>
           <Notifications />
           <AuthProvider>
             <QueryProvider>{children}</QueryProvider>
           </AuthProvider>
-        </MantineProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
