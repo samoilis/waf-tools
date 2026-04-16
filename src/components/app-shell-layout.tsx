@@ -44,6 +44,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { usePrimaryColor } from "@/providers/theme-provider";
 
 const MANTINE_COLORS = [
   "red", "pink", "grape", "violet", "indigo", "blue",
@@ -75,6 +76,7 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
     getInitialValueInEffect: true,
   });
   const mantineTheme = useMantineTheme();
+  const setPrimaryColor = usePrimaryColor();
 
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -126,8 +128,20 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
         {/* Logo & app name at top of sidebar */}
         <AppShell.Section>
           <Group px="xs" py="md" gap="sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="WAF Tools" width={32} height={32} />
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                WebkitMaskImage: "url(/logo.png)",
+                WebkitMaskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                maskImage: "url(/logo.png)",
+                maskSize: "contain",
+                maskRepeat: "no-repeat",
+                backgroundColor: `var(--mantine-color-${mantineTheme.primaryColor}-5)`,
+              }}
+              aria-hidden
+            />
             <Title order={3}>WAF Tools</Title>
           </Group>
           <Divider mb="xs" />
@@ -224,9 +238,7 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
                               />
                             }
                             onClick={() => {
-                              // Store color preference
-                              localStorage.setItem("waf-primary-color", color);
-                              window.location.reload();
+                              setPrimaryColor(color);
                             }}
                             fw={mantineTheme.primaryColor === color ? 700 : 400}
                           >

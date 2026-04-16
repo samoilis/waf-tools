@@ -17,6 +17,7 @@ import {
   Anchor,
   Modal,
   ScrollArea,
+  Group,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AlertCircle } from "lucide-react";
@@ -201,8 +202,20 @@ export default function LoginPage() {
         }}
       >
         <Stack align="center" mb="lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="WAF Tools" width={64} height={64} />
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              WebkitMaskImage: "url(/logo.png)",
+              WebkitMaskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              maskImage: "url(/logo.png)",
+              maskSize: "contain",
+              maskRepeat: "no-repeat",
+              backgroundColor: "white",
+            }}
+            aria-hidden
+          />
           <Title order={2} c="white">
             WAF Tools
           </Title>
@@ -323,6 +336,9 @@ export default function LoginPage() {
             </Text>
           </Stack>
         </ScrollArea>
+        <Group justify="flex-end" mt="md">
+          <Button onClick={closeTerms}>OK</Button>
+        </Group>
       </Modal>
 
       {/* Privacy Policy Modal */}
@@ -411,6 +427,9 @@ export default function LoginPage() {
             </Text>
           </Stack>
         </ScrollArea>
+        <Group justify="flex-end" mt="md">
+          <Button onClick={closePrivacy}>OK</Button>
+        </Group>
       </Modal>
     </Center>
   );

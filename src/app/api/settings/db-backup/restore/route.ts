@@ -192,7 +192,10 @@ export async function POST(request: NextRequest) {
           : "";
       // pg_restore often exits with 1 for "warnings" (e.g. "role does not exist")
       // Only fail on actual errors
-      if (stderr.toLowerCase().includes("fatal") || stderr.toLowerCase().includes("could not connect")) {
+      if (
+        stderr.toLowerCase().includes("fatal") ||
+        stderr.toLowerCase().includes("could not connect")
+      ) {
         throw new Error(`pg_restore failed: ${stderr}`);
       }
       // Otherwise treat as success with warnings
