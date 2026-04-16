@@ -381,17 +381,17 @@ docker compose restart proxy
 
 ## Environment Variables Reference
 
-| Variable                        | Required | Default | Description                                    |
-| ------------------------------- | -------- | ------- | ---------------------------------------------- |
-| `AUTH_SECRET`                   | Yes      | —       | Secret for signing session tokens              |
-| `AUTH_TRUST_HOST`               | Yes      | `false` | Must be `true` — auto-detects URL from headers |
-| `POSTGRES_PASSWORD`             | Yes      | —       | PostgreSQL password                            |
-| `DATABASE_URL`                  | No       | auto    | Overridden in docker-compose.yml by default    |
-| `WAF_HTTPS_PORT`                | No       | `8443`  | HTTPS port exposed on the host                 |
-| `WAF_HTTP_PORT`                 | No       | `8008`  | HTTP port (redirects to HTTPS)                 |
-| `WAF_VERSION`                   | No       | `latest`| Docker image tag                               |
-| `LICENSE_KEY`                   | No       | —       | License key (can also be set via UI)           |
-| `NODE_TLS_REJECT_UNAUTHORIZED`  | No       | `0`     | Set in worker for WAF servers with self-signed certs |
+| Variable                       | Required | Default  | Description                                          |
+| ------------------------------ | -------- | -------- | ---------------------------------------------------- |
+| `AUTH_SECRET`                  | Yes      | —        | Secret for signing session tokens                    |
+| `AUTH_TRUST_HOST`              | Yes      | `false`  | Must be `true` — auto-detects URL from headers       |
+| `POSTGRES_PASSWORD`            | Yes      | —        | PostgreSQL password                                  |
+| `DATABASE_URL`                 | No       | auto     | Overridden in docker-compose.yml by default          |
+| `WAF_HTTPS_PORT`               | No       | `8443`   | HTTPS port exposed on the host                       |
+| `WAF_HTTP_PORT`                | No       | `8008`   | HTTP port (redirects to HTTPS)                       |
+| `WAF_VERSION`                  | No       | `latest` | Docker image tag                                     |
+| `LICENSE_KEY`                  | No       | —        | License key (can also be set via UI)                 |
+| `NODE_TLS_REJECT_UNAUTHORIZED` | No       | `0`      | Set in worker for WAF servers with self-signed certs |
 
 ---
 
@@ -448,7 +448,15 @@ The `db` service includes a built-in health check. To add one for the proxy serv
 ```yaml
 proxy:
   healthcheck:
-    test: ["CMD", "wget", "--spider", "--no-check-certificate", "-q", "https://localhost:443/api/auth/csrf"]
+    test:
+      [
+        "CMD",
+        "wget",
+        "--spider",
+        "--no-check-certificate",
+        "-q",
+        "https://localhost:443/api/auth/csrf",
+      ]
     interval: 30s
     timeout: 5s
     retries: 3
