@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -H 0.0.0.0 --turbopack ",
+    "dev:bg": "tmux new-session -d -s myapp 'pnpm dev' && echo 'Started in tmux! Attach with: tmux attach -t myapp'",
+    "attach": "tmux attach -t myapp",
+    "stop": "tmux kill-session -t myapp",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
