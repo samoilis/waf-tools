@@ -42,3 +42,6 @@ nginx/certs/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MCP server config (contains secrets)
+.mcp.json

@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 --turbopack ",
-    "dev:bg": "tmux new-session -d -s myapp 'pnpm dev' && echo 'Started in tmux! Attach with: tmux attach -t myapp'",
-    "attach": "tmux attach -t myapp",
-    "stop": "tmux kill-session -t myapp",
+    "predev": "pnpm dlx kill-port 3000; pkill -f '[n]ext-server' 2>/dev/null; rm -f .next/dev/lock; true",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
