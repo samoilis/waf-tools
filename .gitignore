@@ -56,3 +56,6 @@ next-env.d.ts
 licensing.html
 nohup.out
 
+
+# remove for public exposed
+docs/
