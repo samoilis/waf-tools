@@ -83,7 +83,14 @@ function parseCron(cron: string): {
       daysOfMonth: [],
     };
   }
-  return { frequency: "daily", minute, hour, everyNHours: 2, daysOfWeek: [], daysOfMonth: [] };
+  return {
+    frequency: "daily",
+    minute,
+    hour,
+    everyNHours: 2,
+    daysOfWeek: [],
+    daysOfMonth: [],
+  };
 }
 
 function composeCron(
@@ -256,7 +263,7 @@ export function TaskFormModal({
             </Alert>
           )}
 
-          <Grid gutter="xl">
+          <Grid gap="xl">
             {/* ── Left column: basics + entities ── */}
             <Grid.Col span={6}>
               <Stack gap="md">
@@ -324,10 +331,12 @@ export function TaskFormModal({
 
                 {entityOptions.length === 0 ? (
                   <Text size="sm" c="dimmed">
-                    {serverId ? "No entity types available" : "Select a WAF server first"}
+                    {serverId
+                      ? "No entity types available"
+                      : "Select a WAF server first"}
                   </Text>
                 ) : (
-                  <Grid gutter="xs">
+                  <Grid gap="xs">
                     {entityOptions.map((entity) => (
                       <Grid.Col span={6} key={entity.key}>
                         <Checkbox
@@ -366,7 +375,9 @@ export function TaskFormModal({
                   <NumberInput
                     label="Every (hours)"
                     value={everyNHours}
-                    onChange={(v) => setEveryNHours(typeof v === "number" ? v : 2)}
+                    onChange={(v) =>
+                      setEveryNHours(typeof v === "number" ? v : 2)
+                    }
                     min={1}
                     max={12}
                     clampBehavior="strict"
@@ -375,7 +386,9 @@ export function TaskFormModal({
 
                 <Group grow>
                   <NumberInput
-                    label={frequency === "every_n_hours" ? "Start Hour" : "Hour"}
+                    label={
+                      frequency === "every_n_hours" ? "Start Hour" : "Hour"
+                    }
                     value={hour}
                     onChange={(v) => setHour(typeof v === "number" ? v : 0)}
                     min={0}

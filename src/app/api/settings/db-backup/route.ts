@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  type S3ClientConfig,
+} from "@aws-sdk/client-s3";
 import { execSync } from "child_process";
 import { createCipheriv, randomBytes } from "crypto";
 import { readFileSync } from "fs";
@@ -97,7 +101,7 @@ export async function POST() {
     }
 
     // Upload to S3
-    const clientConfig: Record<string, unknown> = {
+    const clientConfig: S3ClientConfig = {
       region,
       credentials: {
         accessKeyId: accessKey,
@@ -109,9 +113,7 @@ export async function POST() {
       clientConfig.forcePathStyle = true;
     }
 
-    const client = new S3Client(
-      clientConfig as ConstructorParameters<typeof S3Client>[0],
-    );
+    const client = new S3Client(clientConfig);
     const prefix = s3["s3.prefix"] || "";
     const key = prefix ? `${prefix.replace(/\/+$/, "")}/${fileName}` : fileName;
 

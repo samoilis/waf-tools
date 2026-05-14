@@ -4,6 +4,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  type S3ClientConfig,
 } from "@aws-sdk/client-s3";
 
 export async function POST(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const clientConfig: Record<string, unknown> = {
+    const clientConfig: S3ClientConfig = {
       region: region || "us-east-1",
       credentials: {
         accessKeyId: accessKey,
@@ -35,9 +36,7 @@ export async function POST(request: NextRequest) {
       clientConfig.forcePathStyle = true;
     }
 
-    const client = new S3Client(
-      clientConfig as ConstructorParameters<typeof S3Client>[0],
-    );
+    const client = new S3Client(clientConfig);
 
     // Write a small test object
     const testKey = prefix

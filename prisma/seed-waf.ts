@@ -1,4 +1,8 @@
-import { PrismaClient } from "../src/generated/prisma/client";
+import {
+  PrismaClient,
+  Prisma,
+  type WafServer,
+} from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -1195,7 +1199,7 @@ async function main() {
 
   // Create WAF servers
   console.log("🏗️  Creating WAF servers...");
-  const createdServers = [];
+  const createdServers: WafServer[] = [];
   for (const srv of WAF_SERVERS) {
     const created = await prisma.wafServer.create({ data: srv });
     createdServers.push(created);
@@ -1287,7 +1291,12 @@ async function main() {
                 entityType: et.key,
                 entityId: `${et.key}-${i + 1}`,
                 entityName,
-                data: getSnapshotData(server.vendorType, et.key, i, e),
+                data: getSnapshotData(
+                  server.vendorType,
+                  et.key,
+                  i,
+                  e,
+                ) as Prisma.InputJsonValue,
                 createdAt: finishedAt,
               },
             });

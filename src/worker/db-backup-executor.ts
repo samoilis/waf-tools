@@ -6,7 +6,11 @@
  */
 
 import { PrismaClient } from "@/generated/prisma/client";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  type S3ClientConfig,
+} from "@aws-sdk/client-s3";
 import { execSync } from "child_process";
 import { createCipheriv, randomBytes } from "crypto";
 import { readFileSync } from "fs";
@@ -68,7 +72,7 @@ export async function executeDbBackup(prisma: PrismaClient): Promise<void> {
   }
 
   // Upload to S3
-  const clientConfig: Record<string, unknown> = {
+  const clientConfig: S3ClientConfig = {
     region,
     credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
   };
@@ -77,9 +81,7 @@ export async function executeDbBackup(prisma: PrismaClient): Promise<void> {
     clientConfig.forcePathStyle = true;
   }
 
-  const client = new S3Client(
-    clientConfig as ConstructorParameters<typeof S3Client>[0],
-  );
+  const client = new S3Client(clientConfig);
   const s3Key = prefix ? `${prefix.replace(/\/+$/, "")}/${fileName}` : fileName;
 
   await client.send(

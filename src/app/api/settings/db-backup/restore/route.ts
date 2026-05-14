@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  type S3ClientConfig,
+} from "@aws-sdk/client-s3";
 import { execSync } from "child_process";
 import { createDecipheriv } from "crypto";
 import { writeFileSync, unlinkSync } from "fs";
@@ -126,7 +130,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Download from S3
-    const clientConfig: Record<string, unknown> = {
+    const clientConfig: S3ClientConfig = {
       region,
       credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
     };
@@ -135,9 +139,7 @@ export async function POST(request: NextRequest) {
       clientConfig.forcePathStyle = true;
     }
 
-    const client = new S3Client(
-      clientConfig as ConstructorParameters<typeof S3Client>[0],
-    );
+    const client = new S3Client(clientConfig);
 
     const response = await client.send(
       new GetObjectCommand({ Bucket: bucket, Key: s3Key }),

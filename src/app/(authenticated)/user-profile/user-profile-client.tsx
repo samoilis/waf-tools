@@ -37,7 +37,8 @@ interface UserProfile {
 export function UserProfileClient() {
   const queryClient = useQueryClient();
   const resetRef = useRef<() => void>(null);
-  const [pwModalOpened, { open: openPwModal, close: closePwModal }] = useDisclosure(false);
+  const [pwModalOpened, { open: openPwModal, close: closePwModal }] =
+    useDisclosure(false);
 
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ["user-profile"],
@@ -200,7 +201,7 @@ export function UserProfileClient() {
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Paper withBorder p="xl" radius="md">
-          <Grid gutter="xl">
+          <Grid gap="xl">
             {/* Left column — Avatar */}
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <Stack align="center" gap="md">
