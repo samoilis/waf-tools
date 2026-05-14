@@ -21,14 +21,14 @@ Everything is stored **exclusively in PostgreSQL** — no file-based snapshots, 
 
 ## Supported WAF Vendors
 
-| Vendor                | Capabilities                                        |
-| --------------------- | --------------------------------------------------- |
-| **Imperva MX**        | Sites, Server Groups, IP Dictionaries, Web Profiles |
-| **Imperva Cloud WAF** | Cloud WAF config export                             |
-| **Cloudflare**        | WAF rules, zones, firewall policies                 |
-| **AWS WAF**           | Web ACLs, rule groups, IP sets                      |
-| **Akamai**            | Security configurations, match targets              |
-| **FortiWeb**          | Policies, server policies, IP lists                 |
+| Vendor                | Adapter                                                                        | Capabilities                                        |
+| --------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| **Imperva MX**        | [`src/worker/adapters/imperva.ts`](src/worker/adapters/imperva.ts)             | Sites, Server Groups, IP Dictionaries, Web Profiles |
+| **Imperva Cloud WAF** | [`src/worker/adapters/imperva-cloud.ts`](src/worker/adapters/imperva-cloud.ts) | Cloud WAF config export                             |
+| **Cloudflare**        | [`src/worker/adapters/cloudflare.ts`](src/worker/adapters/cloudflare.ts)       | WAF rules, zones, firewall policies                 |
+| **AWS WAF**           | [`src/worker/adapters/aws-waf.ts`](src/worker/adapters/aws-waf.ts)             | Web ACLs, rule groups, IP sets                      |
+| **Akamai**            | [`src/worker/adapters/akamai.ts`](src/worker/adapters/akamai.ts)               | Security configurations, match targets              |
+| **FortiWeb**          | [`src/worker/adapters/fortiweb.ts`](src/worker/adapters/fortiweb.ts)           | Policies, server policies, IP lists                 |
 
 All adapters implement a common interface defined in [`src/worker/adapters/types.ts`](src/worker/adapters/types.ts). Adding a new vendor means implementing a single adapter file.
 

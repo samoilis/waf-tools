@@ -59,4 +59,3 @@ nohup.out
 
 # remove for public exposed
 docs/
-src/worker/
